@@ -40,7 +40,7 @@
   },
   {
    "fieldname": "details",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Details"
   },
   {
@@ -84,7 +84,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-23 22:02:38.020728",
+ "modified": "2025-02-24 00:53:01.966923",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Note",
