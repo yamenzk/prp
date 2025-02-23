@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "autoname": "format:{building}-{unit_id}",
+ "creation": "2025-02-23 18:01:26.453088",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "building",
+  "unit_id",
+  "project",
+  "developer",
+  "project_name",
+  "column_break_gjae",
+  "availability",
+  "status",
+  "enable_secondhand_selling",
+  "enable_secondhand_renting"
+ ],
+ "fields": [
+  {
+   "fieldname": "unit_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Unit ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gjae",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "developer",
+   "fieldtype": "Link",
+   "label": "Developer",
+   "options": "PRP Developer"
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "label": "Project Name"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "PRP Project"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Building",
+   "options": "PRP Building",
+   "reqd": 1
+  },
+  {
+   "fieldname": "availability",
+   "fieldtype": "Select",
+   "label": "Availability",
+   "options": "\nSold\nAvailable\nAvailable for Secondhand"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Handover Status",
+   "options": "\nOff-plan\nDue for Handover\nHandover Completed"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_secondhand_selling",
+   "fieldtype": "Check",
+   "label": "Enable Secondhand Selling"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_secondhand_renting",
+   "fieldtype": "Check",
+   "label": "Enable Secondhand Renting"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 21:38:02.947241",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Listing",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2025-02-23 21:43:40.442923",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "contact_name",
+  "rel_doctype",
+  "rel_docname",
+  "is_primary",
+  "naming_series",
+  "column_break_ugao",
+  "phonebook",
+  "primary_mobile",
+  "primary_email"
+ ],
+ "fields": [
+  {
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "label": "Contact Name"
+  },
+  {
+   "fieldname": "rel_doctype",
+   "fieldtype": "Link",
+   "label": "Rel Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "rel_docname",
+   "fieldtype": "Dynamic Link",
+   "label": "Rel Docname",
+   "options": "rel_doctype"
+  },
+  {
+   "fieldname": "column_break_ugao",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phonebook",
+   "fieldtype": "Table",
+   "label": "Phonebook",
+   "options": "PRP Phonebook"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_primary",
+   "fieldtype": "Check",
+   "label": "Is Primary"
+  },
+  {
+   "fieldname": "primary_mobile",
+   "fieldtype": "Data",
+   "label": "Primary Mobile",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "primary_email",
+   "fieldtype": "Data",
+   "label": "Primary Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "DY-C-"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 21:55:24.241082",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Contact",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

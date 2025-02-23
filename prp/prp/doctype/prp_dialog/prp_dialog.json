@@ -1,0 +1,134 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-02-23 22:40:03.812579",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "props_received",
+  "placeholder",
+  "include_map",
+  "map",
+  "column_break_cxrz",
+  "dialog_icon",
+  "dialog_title",
+  "dialog_message",
+  "dialog_header_color",
+  "column_break_ylqg",
+  "props_sent",
+  "primary_action",
+  "secondary_action",
+  "column_break_euyp",
+  "confirmation_type",
+  "confirmation_validation"
+ ],
+ "fields": [
+  {
+   "fieldname": "placeholder",
+   "fieldtype": "Select",
+   "label": "Dialog Type",
+   "options": "\nCreate Dialog\nRead Dialog\nUpdate Dialog\nDelete Dialog\nConfirmation Dialog"
+  },
+  {
+   "fieldname": "props_received",
+   "fieldtype": "Data",
+   "label": "Props Received"
+  },
+  {
+   "fieldname": "column_break_cxrz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dialog_icon",
+   "fieldtype": "Data",
+   "label": "Dialog Icon"
+  },
+  {
+   "fieldname": "dialog_title",
+   "fieldtype": "Data",
+   "label": "Dialog Title"
+  },
+  {
+   "fieldname": "dialog_message",
+   "fieldtype": "Data",
+   "label": "Dialog Message"
+  },
+  {
+   "fieldname": "dialog_header_color",
+   "fieldtype": "Data",
+   "label": "Dialog Header Color"
+  },
+  {
+   "fieldname": "column_break_ylqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "props_sent",
+   "fieldtype": "Data",
+   "label": "Props Sent"
+  },
+  {
+   "fieldname": "primary_action",
+   "fieldtype": "Link",
+   "label": "Primary Action",
+   "options": "PRP Action"
+  },
+  {
+   "fieldname": "secondary_action",
+   "fieldtype": "Link",
+   "label": "Secondary Action",
+   "options": "PRP Action"
+  },
+  {
+   "fieldname": "column_break_euyp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "confirmation_type",
+   "fieldtype": "Select",
+   "label": "Confirmation Type",
+   "options": "\nSimple\nMath\nType Fieldname\nType Sentence\nType Random"
+  },
+  {
+   "fieldname": "confirmation_validation",
+   "fieldtype": "Data",
+   "label": "Confirmation Validation"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_map",
+   "fieldtype": "Check",
+   "label": "Include Map"
+  },
+  {
+   "fieldname": "map",
+   "fieldtype": "Link",
+   "label": "Map",
+   "options": "PRP Map"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-24 00:50:05.342427",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Dialog",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

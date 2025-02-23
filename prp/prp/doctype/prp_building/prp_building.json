@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "autoname": "format:{project}-{building_name}",
+ "creation": "2025-02-23 20:05:00.285126",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "project",
+  "building_name",
+  "building_configuration",
+  "column_break_vjdv",
+  "lat",
+  "lng",
+  "status",
+  "availability"
+ ],
+ "fields": [
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Project",
+   "options": "PRP Project",
+   "reqd": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "building_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Building Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_vjdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lat",
+   "fieldtype": "Data",
+   "label": "Lat"
+  },
+  {
+   "fieldname": "lng",
+   "fieldtype": "Data",
+   "label": "Lng"
+  },
+  {
+   "fieldname": "building_configuration",
+   "fieldtype": "Data",
+   "label": "Building Configuration"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Handover Status",
+   "options": "\nOff-plan\nDue for Handover\nHandover Completed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "availability",
+   "fieldtype": "Select",
+   "label": "Availability",
+   "options": "\nSold\nAvailable\nAvailable for Secondhand",
+   "read_only": 1
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 21:38:28.778215",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Building",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

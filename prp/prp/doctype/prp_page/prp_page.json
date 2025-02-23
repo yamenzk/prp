@@ -1,0 +1,112 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-02-23 22:17:27.716584",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "icon",
+  "page_title",
+  "slug",
+  "is_parent",
+  "is_child",
+  "show_in_navigation",
+  "column_break_lrbz",
+  "layout",
+  "resizable_pane",
+  "column_break_nvdi",
+  "main",
+  "pane"
+ ],
+ "fields": [
+  {
+   "fieldname": "page_title",
+   "fieldtype": "Data",
+   "label": "Page Title"
+  },
+  {
+   "fieldname": "slug",
+   "fieldtype": "Data",
+   "label": "Slug"
+  },
+  {
+   "fieldname": "column_break_lrbz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "layout",
+   "fieldtype": "Select",
+   "label": "Layout",
+   "options": "\nFull Width\nPane View"
+  },
+  {
+   "default": "0",
+   "fieldname": "resizable_pane",
+   "fieldtype": "Check",
+   "label": "Resizable Pane"
+  },
+  {
+   "fieldname": "pane",
+   "fieldtype": "Link",
+   "label": "Pane",
+   "options": "PRP Pane"
+  },
+  {
+   "fieldname": "main",
+   "fieldtype": "Link",
+   "label": "Main",
+   "options": "PRP View"
+  },
+  {
+   "fieldname": "column_break_nvdi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "icon",
+   "fieldtype": "Data",
+   "label": "Icon"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_parent",
+   "fieldtype": "Check",
+   "label": "Is Parent"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_child",
+   "fieldtype": "Check",
+   "label": "Is Child"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_in_navigation",
+   "fieldtype": "Check",
+   "label": "Show In Navigation"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 23:49:27.877041",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Page",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

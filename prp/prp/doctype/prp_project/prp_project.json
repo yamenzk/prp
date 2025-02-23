@@ -1,0 +1,105 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-02-23 19:54:41.825893",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "territory",
+  "developer",
+  "project_amenities",
+  "project_name",
+  "column_break_fxwi",
+  "handover_quarter",
+  "handover_year",
+  "status",
+  "availability"
+ ],
+ "fields": [
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Territory",
+   "options": "PRP Territory",
+   "reqd": 1
+  },
+  {
+   "fieldname": "developer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Developer",
+   "options": "PRP Developer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "project_amenities",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Project Amenities",
+   "options": "PRP Preference",
+   "reqd": 1
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Project Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_fxwi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "availability",
+   "fieldtype": "Select",
+   "label": "Availability",
+   "options": "\nSold\nAvailable\nAvailable for Secondhand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Handover Status",
+   "options": "\nOff-plan\nDue for Handover\nHandover Completed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "handover_quarter",
+   "fieldtype": "Int",
+   "label": "Handover Quarter",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "handover_year",
+   "fieldtype": "Int",
+   "label": "Handover Year",
+   "non_negative": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 21:39:06.950910",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Project",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

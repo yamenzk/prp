@@ -1,0 +1,358 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-02-23 13:32:12.370941",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "territory",
+  "column_break_mgmu",
+  "bedrooms",
+  "master_bedrooms",
+  "bathrooms",
+  "column_break_nawt",
+  "min_sqft",
+  "max_sqft",
+  "min_sqm",
+  "max_sqm",
+  "column_break_siji",
+  "is_listing",
+  "is_project",
+  "naming_series",
+  "section_break_pahn",
+  "gated_community",
+  "pet_friendly",
+  "walkable",
+  "column_break_ilth",
+  "gym",
+  "pool",
+  "sauna",
+  "park",
+  "column_break_ozkf",
+  "security",
+  "conceirge",
+  "covered_parking",
+  "ev_stations",
+  "column_break_jvmg",
+  "central_ac",
+  "chiller_free",
+  "service_provider",
+  "section_break_obxq",
+  "smart_home",
+  "furnished",
+  "pets_allowed",
+  "column_break_dhxr",
+  "balcony",
+  "walkin_closet",
+  "column_break_cldg",
+  "open_kitchen",
+  "kitchen_appliances",
+  "column_break_ertn",
+  "city_view",
+  "sea_view",
+  "garden_view",
+  "column_break_yvfc",
+  "sqft",
+  "sqm"
+ ],
+ "fields": [
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nFlat\nTownhouse\nVilla\nPenthouse"
+  },
+  {
+   "fieldname": "column_break_mgmu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_siji",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "DY-PRF-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "DY-PRF-"
+  },
+  {
+   "fieldname": "bedrooms",
+   "fieldtype": "Select",
+   "label": "Bedrooms",
+   "options": "\nStudio\n1-BR\n2-BR\n3-BR\n4-BR\n5-BR\n6-BR\n7-BR\n7+"
+  },
+  {
+   "fieldname": "master_bedrooms",
+   "fieldtype": "Int",
+   "label": "Master Bedrooms"
+  },
+  {
+   "fieldname": "bathrooms",
+   "fieldtype": "Int",
+   "label": "Bathrooms"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_listing",
+   "fieldtype": "Check",
+   "label": "Is Listing"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_project",
+   "fieldtype": "Check",
+   "label": "Is Project"
+  },
+  {
+   "fieldname": "section_break_pahn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "gated_community",
+   "fieldtype": "Check",
+   "label": "Gated Community"
+  },
+  {
+   "default": "0",
+   "fieldname": "pet_friendly",
+   "fieldtype": "Check",
+   "label": "Pet Friendly"
+  },
+  {
+   "default": "0",
+   "fieldname": "walkable",
+   "fieldtype": "Check",
+   "label": "Walkable"
+  },
+  {
+   "fieldname": "column_break_ilth",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "gym",
+   "fieldtype": "Check",
+   "label": "Gym"
+  },
+  {
+   "default": "0",
+   "fieldname": "pool",
+   "fieldtype": "Check",
+   "label": "Pool"
+  },
+  {
+   "default": "0",
+   "fieldname": "sauna",
+   "fieldtype": "Check",
+   "label": "Sauna"
+  },
+  {
+   "default": "0",
+   "fieldname": "park",
+   "fieldtype": "Check",
+   "label": "Park"
+  },
+  {
+   "fieldname": "column_break_ozkf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "security",
+   "fieldtype": "Check",
+   "label": "Security"
+  },
+  {
+   "default": "0",
+   "fieldname": "conceirge",
+   "fieldtype": "Check",
+   "label": "Conceirge"
+  },
+  {
+   "default": "0",
+   "fieldname": "covered_parking",
+   "fieldtype": "Check",
+   "label": "Covered Parking"
+  },
+  {
+   "default": "0",
+   "fieldname": "ev_stations",
+   "fieldtype": "Check",
+   "label": "EV Stations"
+  },
+  {
+   "fieldname": "section_break_obxq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "smart_home",
+   "fieldtype": "Check",
+   "label": "Smart Home"
+  },
+  {
+   "default": "0",
+   "fieldname": "furnished",
+   "fieldtype": "Check",
+   "label": "Furnished"
+  },
+  {
+   "fieldname": "column_break_dhxr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "pets_allowed",
+   "fieldtype": "Check",
+   "label": "Pets Allowed"
+  },
+  {
+   "default": "0",
+   "fieldname": "balcony",
+   "fieldtype": "Check",
+   "label": "Balcony"
+  },
+  {
+   "fieldname": "column_break_cldg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "open_kitchen",
+   "fieldtype": "Check",
+   "label": "Open Kitchen"
+  },
+  {
+   "default": "0",
+   "fieldname": "kitchen_appliances",
+   "fieldtype": "Check",
+   "label": "Kitchen Appliances"
+  },
+  {
+   "fieldname": "column_break_ertn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "city_view",
+   "fieldtype": "Check",
+   "label": "City View"
+  },
+  {
+   "default": "0",
+   "fieldname": "sea_view",
+   "fieldtype": "Check",
+   "label": "Sea View"
+  },
+  {
+   "default": "0",
+   "fieldname": "garden_view",
+   "fieldtype": "Check",
+   "label": "Garden View"
+  },
+  {
+   "default": "0",
+   "fieldname": "walkin_closet",
+   "fieldtype": "Check",
+   "label": "Walkin Closet"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "PRP Territory"
+  },
+  {
+   "fieldname": "column_break_jvmg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "central_ac",
+   "fieldtype": "Check",
+   "label": "Central AC"
+  },
+  {
+   "default": "0",
+   "fieldname": "chiller_free",
+   "fieldtype": "Check",
+   "label": "Chiller Free"
+  },
+  {
+   "fieldname": "service_provider",
+   "fieldtype": "Select",
+   "label": "Service Provider",
+   "options": "\nEmpower\nDEWA\nSEWA\nADWEA\nEtihadWE"
+  },
+  {
+   "fieldname": "column_break_nawt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "min_sqft",
+   "fieldtype": "Float",
+   "label": "Min SQFT"
+  },
+  {
+   "fieldname": "max_sqft",
+   "fieldtype": "Float",
+   "label": "Max SQFT"
+  },
+  {
+   "fieldname": "min_sqm",
+   "fieldtype": "Float",
+   "label": "Min SQM"
+  },
+  {
+   "fieldname": "max_sqm",
+   "fieldtype": "Float",
+   "label": "Max SQM"
+  },
+  {
+   "fieldname": "column_break_yvfc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sqft",
+   "fieldtype": "Float",
+   "label": "SQFT"
+  },
+  {
+   "fieldname": "sqm",
+   "fieldtype": "Float",
+   "label": "SQM"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 21:57:44.717261",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Preference",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

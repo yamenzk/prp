@@ -1,0 +1,140 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-02-23 13:26:32.475817",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "lead_name",
+  "first_name",
+  "last_name",
+  "column_break_lnsg",
+  "company",
+  "position",
+  "salary",
+  "column_break_khww",
+  "lead_owner",
+  "lead_source",
+  "is_deal",
+  "deal_owner",
+  "section_break_kqig",
+  "column_break_milo",
+  "naming_series",
+  "column_break_ciui",
+  "phonebook"
+ ],
+ "fields": [
+  {
+   "fieldname": "lead_name",
+   "fieldtype": "Data",
+   "label": "Lead Name"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "column_break_lnsg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phonebook",
+   "fieldtype": "Table",
+   "label": "Phonebook",
+   "options": "PRP Phonebook"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "position",
+   "fieldtype": "Data",
+   "label": "Position"
+  },
+  {
+   "fieldname": "salary",
+   "fieldtype": "Data",
+   "label": "Salary"
+  },
+  {
+   "fieldname": "column_break_khww",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_kqig",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_milo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ciui",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lead_owner",
+   "fieldtype": "Link",
+   "label": "Lead Owner",
+   "options": "User"
+  },
+  {
+   "fieldname": "lead_source",
+   "fieldtype": "Link",
+   "label": "Lead Source",
+   "options": "PRP Lead Source"
+  },
+  {
+   "fieldname": "deal_owner",
+   "fieldtype": "Link",
+   "label": "Deal Owner",
+   "options": "User"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_deal",
+   "fieldtype": "Check",
+   "label": "Is Deal"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "DY-LEAD-"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 21:57:22.552907",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Lead",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

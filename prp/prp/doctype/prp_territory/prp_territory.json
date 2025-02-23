@@ -1,0 +1,214 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "autoname": "field:osm_id",
+ "creation": "2025-02-23 13:47:28.936809",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "osm_id",
+  "territory_name",
+  "parent_territory",
+  "name_en",
+  "is_project",
+  "is_custom",
+  "column_break_idnh",
+  "name_ar",
+  "wikidata",
+  "landuse",
+  "residential",
+  "column_break_drfd",
+  "admin_level",
+  "border_type",
+  "boundary",
+  "place",
+  "section_break_mdze",
+  "geo",
+  "spatial_index_cell",
+  "column_break_kfqp",
+  "cell_bounds",
+  "quadtree_level",
+  "column_break_uzup",
+  "max_lng",
+  "min_lng",
+  "lng",
+  "min_lat",
+  "max_lat",
+  "lat"
+ ],
+ "fields": [
+  {
+   "fieldname": "territory_name",
+   "fieldtype": "Data",
+   "label": "Territory Name"
+  },
+  {
+   "fieldname": "column_break_idnh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_project",
+   "fieldtype": "Check",
+   "label": "Is Project"
+  },
+  {
+   "fieldname": "column_break_drfd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "admin_level",
+   "fieldtype": "Data",
+   "label": "Admin Level"
+  },
+  {
+   "fieldname": "section_break_mdze",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "boundary",
+   "fieldtype": "Data",
+   "label": "Boundary"
+  },
+  {
+   "fieldname": "column_break_kfqp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "border_type",
+   "fieldtype": "Data",
+   "label": "Border Type"
+  },
+  {
+   "fieldname": "name_en",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "name_ar",
+   "fieldtype": "Data",
+   "label": "Arabic Name"
+  },
+  {
+   "fieldname": "wikidata",
+   "fieldtype": "Data",
+   "label": "Wikidata"
+  },
+  {
+   "fieldname": "geo",
+   "fieldtype": "JSON",
+   "label": "Geo"
+  },
+  {
+   "fieldname": "lat",
+   "fieldtype": "Data",
+   "label": "Lat"
+  },
+  {
+   "fieldname": "lng",
+   "fieldtype": "Data",
+   "label": "Lng"
+  },
+  {
+   "fieldname": "osm_id",
+   "fieldtype": "Data",
+   "label": "OSM ID",
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "place",
+   "fieldtype": "Data",
+   "label": "Place"
+  },
+  {
+   "fieldname": "landuse",
+   "fieldtype": "Data",
+   "label": "Landuse"
+  },
+  {
+   "fieldname": "residential",
+   "fieldtype": "Data",
+   "label": "Residential"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_custom",
+   "fieldtype": "Check",
+   "label": "Is Custom"
+  },
+  {
+   "fieldname": "min_lng",
+   "fieldtype": "Data",
+   "label": "Min Lng"
+  },
+  {
+   "fieldname": "max_lng",
+   "fieldtype": "Data",
+   "label": "Max Lng"
+  },
+  {
+   "fieldname": "min_lat",
+   "fieldtype": "Data",
+   "label": "Min Lat"
+  },
+  {
+   "fieldname": "max_lat",
+   "fieldtype": "Data",
+   "label": "Max Lat"
+  },
+  {
+   "fieldname": "parent_territory",
+   "fieldtype": "Link",
+   "label": "Parent",
+   "options": "PRP Territory"
+  },
+  {
+   "fieldname": "spatial_index_cell",
+   "fieldtype": "Data",
+   "label": "Spatial Index Cell"
+  },
+  {
+   "fieldname": "cell_bounds",
+   "fieldtype": "JSON",
+   "label": "Cell Bounds"
+  },
+  {
+   "fieldname": "quadtree_level",
+   "fieldtype": "Int",
+   "label": "Quadtree Level"
+  },
+  {
+   "fieldname": "column_break_uzup",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 19:54:22.265929",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Territory",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "name_en"
+}

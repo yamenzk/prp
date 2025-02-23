@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "autoname": "field:developer_name",
+ "creation": "2025-02-23 19:50:43.997405",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "developer_name",
+  "developer_name_arabic",
+  "logo",
+  "column_break_gqxy",
+  "website",
+  "email"
+ ],
+ "fields": [
+  {
+   "fieldname": "developer_name",
+   "fieldtype": "Data",
+   "label": "Developer Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "logo",
+   "fieldtype": "Attach Image",
+   "label": "Logo"
+  },
+  {
+   "fieldname": "column_break_gqxy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "developer_name_arabic",
+   "fieldtype": "Data",
+   "label": "Developer Name Arabic",
+   "unique": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-23 21:55:55.416129",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Developer",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
