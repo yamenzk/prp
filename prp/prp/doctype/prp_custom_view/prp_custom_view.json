@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "autoname": "autoincrement",
+ "creation": "2025-02-28 20:27:10.774823",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "for_doctype",
+  "for_view",
+  "column_break_smnp",
+  "default",
+  "custom",
+  "for_user",
+  "pinned",
+  "column_break_nobn",
+  "label",
+  "icon",
+  "section_break_vvmh",
+  "json"
+ ],
+ "fields": [
+  {
+   "fieldname": "for_doctype",
+   "fieldtype": "Link",
+   "label": "For Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "for_view",
+   "fieldtype": "Data",
+   "label": "For View"
+  },
+  {
+   "fieldname": "column_break_smnp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "default",
+   "fieldtype": "Check",
+   "label": "Default"
+  },
+  {
+   "default": "0",
+   "fieldname": "custom",
+   "fieldtype": "Check",
+   "label": "Custom"
+  },
+  {
+   "fieldname": "for_user",
+   "fieldtype": "Link",
+   "label": "For User",
+   "options": "User"
+  },
+  {
+   "default": "0",
+   "fieldname": "pinned",
+   "fieldtype": "Check",
+   "label": "Pinned"
+  },
+  {
+   "fieldname": "column_break_nobn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "label": "Label"
+  },
+  {
+   "fieldname": "icon",
+   "fieldtype": "Data",
+   "label": "Icon"
+  },
+  {
+   "fieldname": "section_break_vvmh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "json",
+   "fieldtype": "JSON",
+   "label": "JSON"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-28 20:30:01.670788",
+ "modified_by": "Administrator",
+ "module": "PRP",
+ "name": "PRP Custom View",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
