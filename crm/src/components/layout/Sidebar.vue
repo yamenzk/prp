@@ -196,7 +196,7 @@
 					v-if="!isCollapsed && !isMobile"
 					class="text-xs text-gray-500 dark:text-dark-text-secondary text-center mt-4"
 				>
-					&copy; Daraj Al Yasamin Group
+					&copy; Daraj Al Yasamins Group
 				</div>
 			</div>
 		</div>
