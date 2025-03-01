@@ -12,18 +12,18 @@ EXTRA_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
-class UnitTestPRPCustomView(UnitTestCase):
+class UnitTestPRPView(UnitTestCase):
 	"""
-	Unit tests for PRPCustomView.
+	Unit tests for PRPView.
 	Use this class for testing individual functions and methods.
 	"""
 
 	pass
 
 
-class IntegrationTestPRPCustomView(IntegrationTestCase):
+class IntegrationTestPRPView(IntegrationTestCase):
 	"""
-	Integration tests for PRPCustomView.
+	Integration tests for PRPView.
 	Use this class for testing interactions between multiple components.
 	"""
 

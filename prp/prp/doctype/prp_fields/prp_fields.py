@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class PRPCustomView(Document):
+class PRPFields(Document):
 	pass
