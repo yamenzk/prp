@@ -1,11 +1,17 @@
 import './index.css'
 
 import { createApp } from 'vue'
-import PrimeVue from 'primevue/config'
 import router from './router'
-import { definePreset } from '@primeuix/themes'
 import App from './App.vue'
+import PrimeVue from 'primevue/config'
+import { definePreset } from '@primeuix/themes'
 import Aura from '@primeuix/themes/aura'
+import { setConfig, frappeRequest, resourcesPlugin, FeatherIcon } from 'frappe-ui'
+
+let app = createApp(App)
+setConfig('resourceFetcher', frappeRequest)
+app.use(router)
+app.use(resourcesPlugin)
 
 
 const Noir = definePreset(Aura, {
@@ -57,28 +63,19 @@ const Noir = definePreset(Aura, {
 })
 
 
-
-import {
-  setConfig,
-  frappeRequest,
-  resourcesPlugin,
-} from 'frappe-ui'
-
-let app = createApp(App)
 app.use(PrimeVue, {
 	theme: {
 		preset: Noir,
-	},
-	options: {
-		prefix: 'p',
-		darkModeSelector: 'system',
-		cssLayer: false,
+		options: {
+			darkModeSelector: '.dark',
+		},
 	},
 })
 
+import Button from 'primevue/button'
+
+app.component('Button', Button)
+app.component('FeatherIcon', FeatherIcon)
 
 
-setConfig('resourceFetcher', frappeRequest)
-app.use(router)
-app.use(resourcesPlugin)
 app.mount('#app')

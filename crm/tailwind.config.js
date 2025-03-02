@@ -1,12 +1,9 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  presets: [require('frappe-ui/src/utils/tailwind.config')],
-  content: [
-    './index.html',
-    './src/**/*.{vue,js,ts,jsx,tsx}',
-    './node_modules/frappe-ui/src/components/**/*.{vue,js,ts,jsx,tsx}',
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
+	content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+	darkMode: 'class', // This makes Tailwind use the .dark class for dark mode
+	theme: {
+		extend: {},
+	},
+	plugins: [],
 }

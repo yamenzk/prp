@@ -1,2 +1,25 @@
 @import './assets/Inter/inter.css';
 @import 'frappe-ui/src/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add a smooth transition for theme changes */
+:root {
+	transition:
+		background-color 0.3s ease,
+		color 0.3s ease;
+}
+
+/* Optional: Add other global styles here */
+html,
+body {
+	@apply h-full;
+}
+
+/* This ensures the dark mode affects the entire app */
+html.dark {
+	@apply bg-zinc-900;
+	color-scheme: dark;
+}
