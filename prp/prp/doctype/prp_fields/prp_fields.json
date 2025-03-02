@@ -13,7 +13,14 @@
   "list_view",
   "width",
   "kanban_view",
-  "is_kanban_group"
+  "is_kanban_group",
+  "in_kanban_view",
+  "fieldtype",
+  "read_only",
+  "mandatory",
+  "placeholder",
+  "default",
+  "allow_edit"
  ],
  "fields": [
   {
@@ -68,13 +75,53 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Label"
+  },
+  {
+   "fieldname": "fieldtype",
+   "fieldtype": "Data",
+   "label": "Fieldtype"
+  },
+  {
+   "default": "0",
+   "fieldname": "read_only",
+   "fieldtype": "Check",
+   "label": "Read Only"
+  },
+  {
+   "default": "0",
+   "fieldname": "mandatory",
+   "fieldtype": "Check",
+   "label": "Mandatory"
+  },
+  {
+   "fieldname": "placeholder",
+   "fieldtype": "Data",
+   "label": "Placeholder"
+  },
+  {
+   "fieldname": "default",
+   "fieldtype": "Data",
+   "label": "Default"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_edit",
+   "fieldtype": "Check",
+   "label": "Allow Edit"
+  },
+  {
+   "default": "0",
+   "fieldname": "in_kanban_view",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "In Kanban View"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-01 20:17:50.177241",
+ "modified": "2025-03-02 01:38:02.320797",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Fields",

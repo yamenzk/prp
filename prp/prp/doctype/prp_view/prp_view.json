@@ -28,7 +28,7 @@
    "fieldname": "view_type",
    "fieldtype": "Select",
    "label": "View Type",
-   "options": "\nList\nKanban"
+   "options": "\nList\nKanban\nDetails\nCreate Dialog"
   },
   {
    "fieldname": "label",
@@ -119,7 +119,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-01 18:58:34.995828",
+ "modified": "2025-03-02 01:37:54.866704",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP View",
