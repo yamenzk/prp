@@ -7,12 +7,28 @@ import PrimeVue from 'primevue/config'
 import { definePreset } from '@primeuix/themes'
 import Aura from '@primeuix/themes/aura'
 import { setConfig, frappeRequest, resourcesPlugin, FeatherIcon } from 'frappe-ui'
+import { createPinia } from 'pinia'
+
+// Import PrimeVue components
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
+import Dropdown from 'primevue/dropdown'
+import Checkbox from 'primevue/checkbox'
+import Avatar from 'primevue/avatar'
+import TabView from 'primevue/tabview'
+import TabPanel from 'primevue/tabpanel'
+import Tag from 'primevue/tag'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
+
+// Initialize Pinia
+const pinia = createPinia()
+app.use(pinia)
+
 app.use(router)
 app.use(resourcesPlugin)
-
 
 const Noir = definePreset(Aura, {
 	semantic: {
@@ -62,7 +78,6 @@ const Noir = definePreset(Aura, {
 	},
 })
 
-
 app.use(PrimeVue, {
 	theme: {
 		preset: Noir,
@@ -72,10 +87,16 @@ app.use(PrimeVue, {
 	},
 })
 
-import Button from 'primevue/button'
-
+// Register PrimeVue components
 app.component('Button', Button)
+app.component('Dialog', Dialog)
+app.component('InputText', InputText)
+app.component('Dropdown', Dropdown)
+app.component('Checkbox', Checkbox)
+app.component('Avatar', Avatar)
+app.component('TabView', TabView)
+app.component('TabPanel', TabPanel)
+app.component('Tag', Tag)
 app.component('FeatherIcon', FeatherIcon)
-
 
 app.mount('#app')
