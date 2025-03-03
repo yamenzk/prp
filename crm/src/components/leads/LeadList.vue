@@ -1,5 +1,6 @@
 <template>
-        <DataTable v-model:filters="filters" :value="filteredLeads" paginator  :rows="10"  dataKey="name"
+        <DataTable v-model:filters="filters" :value="filteredLeads" dataKey="name"
+                v-model:selection="selectedLead" 
                 filterDisplay="menu" scrollable scrollHeight="flex" :loading="isLoading" :globalFilterFields="['lead_name', 'lead_owner', 'status']">
             <template #header>
                 <div class="flex justify-between">
@@ -27,7 +28,7 @@
                 </template>
             </Column>
             
-            <Column field="lead_owner" header="Owner" style="min-width: 12rem">
+            <Column field="lead_owner" header="Owner" style="min-width: 12rem; ">
                 <template #filter="{ filterModel }">
                     <InputText v-model="filterModel.value" type="text" placeholder="Search by owner" />
                 </template>
@@ -65,7 +66,7 @@
 
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useLeadStore } from '../../stores'
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
 import { getStatusConfig, LEAD_STATUSES } from '../../utils/statusConfig'
@@ -75,6 +76,7 @@ const leadStore = useLeadStore()
 
 // Selected lead tracking
 const selectedLeadId = ref(null)
+const selectedLead = ref(null)
 
 // Define emitted events
 const emit = defineEmits(['lead-selected'])
@@ -91,6 +93,16 @@ const hasMoreLeads = computed(() => leadStore.hasMoreLeads)
 const statusOptions = computed(() => 
     LEAD_STATUSES.map(status => ({ label: status, value: status }))
 )
+
+// Watch for changes in selectedLead and update selectedLeadId
+watch(selectedLead, (newValue) => {
+    if (newValue) {
+        selectedLeadId.value = newValue.name
+        emit('lead-selected', newValue.name)
+    } else {
+        selectedLeadId.value = null
+    }
+})
 
 // Filter setup
 const filters = ref({
@@ -129,6 +141,7 @@ const resetFilters = () => {
 
 // Component methods
 const selectLead = (lead) => {
+    selectedLead.value = lead
     selectedLeadId.value = lead.name
     emit('lead-selected', lead.name)
 }

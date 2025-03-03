@@ -32,7 +32,12 @@ import Row from 'primevue/row'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import Select from 'primevue/select'
+import Panel from 'primevue/panel'
 import 'primeicons/primeicons.css'
+import Fieldset from 'primevue/fieldset'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
+import FloatLabel from 'primevue/floatlabel'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -125,4 +130,9 @@ app.component('Row', Row)
 app.component('IconField', IconField)
 app.component('InputIcon', InputIcon)
 app.component('Select', Select)
+app.component('Panel', Panel)
+app.component('Fieldset', Fieldset)
+app.component('InputGroup', InputGroup)
+app.component('InputGroupAddon', InputGroupAddon)
+app.component('FloatLabel', FloatLabel)
 app.mount('#app')
