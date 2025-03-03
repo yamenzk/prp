@@ -1,21 +1,13 @@
 <template>
-	<div class="leads-page">
-		<ResizablePane>
-			<template #left>
-				<LeadList @lead-selected="handleLeadSelected" />
-			</template>
-			<template #right>
-				<LeadPane :leadId="selectedLeadId" />
-			</template>
-		</ResizablePane>
-	</div>
+<Splitter class="h-full">
+    <SplitterPanel class="flex"><LeadList></LeadList></SplitterPanel>
+    <SplitterPanel class="flex items-center justify-center"> Panel 2 </SplitterPanel>
+</Splitter>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import LeadList from '../components/leads/LeadList.vue'
-import LeadPane from '../components/leads/LeadPane.vue'
-import ResizablePane from '../components/common/ResizablePane.vue'
 
 // Selected lead state
 const selectedLeadId = ref(null)
@@ -25,10 +17,8 @@ const handleLeadSelected = (leadId) => {
 	selectedLeadId.value = leadId
 }
 </script>
-
 <style scoped>
-.leads-page {
-	height: 100%;
-	min-height: calc(100vh - 60px); /* Adjust based on your app's header size */
+.p-splitter{
+    border-color: transparent;
 }
 </style>

@@ -27,39 +27,44 @@ export const DEAL_STATUSES = [
 export const STATUS_CONFIG = {
 	// Lead statuses
 	New: {
-		icon: 'plus-circle',
+		icon: 'pi pi-plus-circle',
 		color: '#4F46E5', // Indigo
 		bgColor: '#EEF2FF',
 		darkBgColor: 'rgba(79, 70, 229, 0.2)',
 		textColor: '#4F46E5',
 		darkTextColor: '#818CF8',
+		severity: 'contrast'
+
 	},
 	Contacted: {
-		icon: 'phone',
+		icon: 'pi pi-phone',
 		color: '#0891B2', // Cyan
 		bgColor: '#ECFEFF',
 		darkBgColor: 'rgba(8, 145, 178, 0.2)',
 		textColor: '#0891B2',
 		darkTextColor: '#22D3EE',
+		severity: 'info'
 	},
 	Interested: {
-		icon: 'thumbs-up',
+		icon: 'pi pi-thumbs-up',
 		color: '#059669', // Green
 		bgColor: '#ECFDF5',
 		darkBgColor: 'rgba(5, 150, 105, 0.2)',
 		textColor: '#059669',
 		darkTextColor: '#34D399',
+		severity: 'success'
 	},
 	'Needs Follow-up': {
-		icon: 'clock',
+		icon: 'pi pi-clock',
 		color: '#D97706', // Amber
 		bgColor: '#FFFBEB',
 		darkBgColor: 'rgba(217, 119, 6, 0.2)',
 		textColor: '#D97706',
 		darkTextColor: '#FBBF24',
+		severity: 'warn'
 	},
 	Cold: {
-		icon: 'thermometer',
+		icon: 'pi pi-thermometer',
 		color: '#4B5563', // Gray
 		bgColor: '#F3F4F6',
 		darkBgColor: 'rgba(75, 85, 99, 0.2)',
@@ -67,17 +72,18 @@ export const STATUS_CONFIG = {
 		darkTextColor: '#9CA3AF',
 	},
 	'Not Interested': {
-		icon: 'x-circle',
+		icon: 'pi pi-x-circle',
 		color: '#DC2626', // Red
 		bgColor: '#FEF2F2',
 		darkBgColor: 'rgba(220, 38, 38, 0.2)',
 		textColor: '#DC2626',
 		darkTextColor: '#F87171',
+		severity: 'danger'
 	},
 
 	// Deal statuses
 	'Site Visit Scheduled': {
-		icon: 'calendar',
+		icon: 'pi pi-calendar',
 		color: '#8B5CF6', // Purple
 		bgColor: '#F5F3FF',
 		darkBgColor: 'rgba(139, 92, 246, 0.2)',
@@ -85,7 +91,7 @@ export const STATUS_CONFIG = {
 		darkTextColor: '#A78BFA',
 	},
 	'Site Visit Completed': {
-		icon: 'check-square',
+		icon: 'pi pi-check-square',
 		color: '#7C3AED', // Violet
 		bgColor: '#F5F3FF',
 		darkBgColor: 'rgba(124, 58, 237, 0.2)',
@@ -93,7 +99,7 @@ export const STATUS_CONFIG = {
 		darkTextColor: '#A78BFA',
 	},
 	Negotiation: {
-		icon: 'message-square',
+		icon: 'pi pi-message-square',
 		color: '#0369A1', // Blue
 		bgColor: '#EFF6FF',
 		darkBgColor: 'rgba(3, 105, 161, 0.2)',
@@ -101,7 +107,7 @@ export const STATUS_CONFIG = {
 		darkTextColor: '#60A5FA',
 	},
 	'Offer Made': {
-		icon: 'file-text',
+		icon: 'pi pi-file-text',
 		color: '#0E7490', // Teal
 		bgColor: '#ECFEFF',
 		darkBgColor: 'rgba(14, 116, 144, 0.2)',
@@ -109,7 +115,7 @@ export const STATUS_CONFIG = {
 		darkTextColor: '#22D3EE',
 	},
 	'Under Review': {
-		icon: 'search',
+		icon: 'pi pi-search',
 		color: '#A16207', // Yellow
 		bgColor: '#FEFCE8',
 		darkBgColor: 'rgba(161, 98, 7, 0.2)',
@@ -117,7 +123,7 @@ export const STATUS_CONFIG = {
 		darkTextColor: '#FDE68A',
 	},
 	'Under Contract': {
-		icon: 'file-plus',
+		icon: 'pi pi-file-plus',
 		color: '#D97706', // Amber
 		bgColor: '#FFFBEB',
 		darkBgColor: 'rgba(217, 119, 6, 0.2)',
@@ -125,7 +131,7 @@ export const STATUS_CONFIG = {
 		darkTextColor: '#FBBF24',
 	},
 	'Closed - Won': {
-		icon: 'award',
+		icon: 'pi pi-award',
 		color: '#15803D', // Green
 		bgColor: '#F0FDF4',
 		darkBgColor: 'rgba(21, 128, 61, 0.2)',
@@ -133,7 +139,7 @@ export const STATUS_CONFIG = {
 		darkTextColor: '#4ADE80',
 	},
 	'Closed - Lost': {
-		icon: 'slash',
+		icon: 'pi pi-slash',
 		color: '#B91C1C', // Red
 		bgColor: '#FEF2F2',
 		darkBgColor: 'rgba(185, 28, 28, 0.2)',
@@ -150,7 +156,7 @@ export const STATUS_CONFIG = {
  */
 export function getStatusConfig(status, isDarkMode = false) {
 	const config = STATUS_CONFIG[status] || {
-		icon: 'help-circle',
+		icon: 'pi pi-help-circle',
 		color: '#6B7280',
 		bgColor: '#F3F4F6',
 		darkBgColor: 'rgba(107, 114, 128, 0.2)',

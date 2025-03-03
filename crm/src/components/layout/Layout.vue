@@ -29,7 +29,7 @@
 				</header>
 
 				<!-- Page Content -->
-				<main class="flex-1 p-6 overflow-auto">
+				<main class="flex-1 overflow-auto">
 					<router-view />
 				</main>
 			</div>

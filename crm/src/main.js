@@ -17,9 +17,22 @@ import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
 import Checkbox from 'primevue/checkbox'
 import Avatar from 'primevue/avatar'
-import TabView from 'primevue/tabview'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import Tag from 'primevue/tag'
+import Splitter from 'primevue/splitter'
+import SplitterPanel from 'primevue/splitterpanel'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import ColumnGroup from 'primevue/columngroup' 
+import Row from 'primevue/row'   
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
+import Select from 'primevue/select'
+import 'primeicons/primeicons.css'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -96,9 +109,20 @@ app.component('Dropdown', Dropdown)
 app.component('Checkbox', Checkbox)
 app.component('Avatar', Avatar)
 app.component('Card', Card)
-app.component('TabView', TabView)
 app.component('TabPanel', TabPanel)
+app.component('TabPanels', TabPanels)
+app.component('TabList', TabList)
+app.component('Tab', Tab)
+app.component('Tabs', Tabs)
 app.component('Tag', Tag)
+app.component('Splitter', Splitter)
+app.component('SplitterPanel', SplitterPanel)
 app.component('FeatherIcon', FeatherIcon)
-
+app.component('DataTable', DataTable)
+app.component('Column', Column)
+app.component('ColumnGroup', ColumnGroup)
+app.component('Row', Row)
+app.component('IconField', IconField)
+app.component('InputIcon', InputIcon)
+app.component('Select', Select)
 app.mount('#app')

@@ -1,142 +1,80 @@
 <template>
-	<div class="lead-list-container">
-		<!-- Loading indicator -->
-		<div
-			v-if="isLoading && !filteredLeads.length"
-			class="flex justify-center items-center py-10"
-		>
-			<span class="text-lg font-medium">Loading leads...</span>
-		</div>
-
-		<!-- Error message -->
-		<div
-			v-else-if="hasError"
-			class="bg-red-50 text-red-700 p-4 rounded mb-4 dark:bg-red-900/20 dark:text-red-400"
-		>
-			<p>{{ errorMessage || 'Error loading leads' }}</p>
-			<Button @click="fetchLeads" class="mt-2">Retry</Button>
-		</div>
-
-		<!-- Lead list table -->
-		<div v-else class="leads-table">
-			<!-- Filters section -->
-			<div class="mb-4 flex justify-between items-center">
-				<h2 class="text-xl font-semibold dark:text-gray-100">Leads</h2>
-				<div class="flex gap-2">
-					<Button @click="resetFilters" class="p-button-text">Reset Filters</Button>
-					<Button @click="createNewLead" severity="success">New Lead</Button>
-				</div>
-			</div>
-
-			<!-- Table -->
-			<div class="overflow-x-auto">
-				<table
-					class="min-w-full bg-white border border-gray-200 dark:bg-gray-800/50 dark:border-gray-700"
-				>
-					<thead class="bg-gray-50 dark:bg-gray-800">
-						<tr>
-							<th
-								class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
-							>
-								Name
-							</th>
-							<th
-								class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
-							>
-								Company
-							</th>
-							<th
-								class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
-							>
-								Lead Owner
-							</th>
-							<th
-								class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
-							>
-								Status
-							</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-						<tr
-							v-for="lead in filteredLeads"
-							:key="lead.name"
-							class="hover:bg-gray-50 cursor-pointer dark:hover:bg-gray-700/50"
-							:class="{
-								'bg-blue-50 dark:bg-blue-900/20': selectedLeadId === lead.name,
-							}"
-							@click="selectLead(lead)"
-						>
-							<td class="px-4 py-2 whitespace-nowrap">
-								<div class="font-medium text-gray-900 dark:text-gray-100">
-									{{
-										lead.lead_name ||
-										`${lead.first_name || ''} ${lead.last_name || ''}`
-									}}
-								</div>
-								<div
-									v-if="lead.position"
-									class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
-								>
-									{{ lead.position }}
-								</div>
-							</td>
-							<td
-								class="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300"
-							>
-								{{ lead.company || '-' }}
-							</td>
-							<td
-								class="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300"
-							>
-								{{ lead.lead_owner || '-' }}
-							</td>
-							<td class="px-4 py-2 whitespace-nowrap">
-								<StatusBadge :status="lead.status" :isDarkMode="isDarkMode" />
-							</td>
-						</tr>
-						<!-- Empty state -->
-						<tr v-if="!filteredLeads.length && !isLoading">
-							<td
-								colspan="4"
-								class="px-4 py-8 text-center text-gray-500 dark:text-gray-400"
-							>
-								No leads found. Create your first lead!
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-
-			<!-- Pagination -->
-			<div v-if="hasMoreLeads" class="mt-4 flex justify-center">
-				<Button @click="loadMoreLeads" :loading="isLoading" class="px-4 py-2">
-					Load More
-				</Button>
-			</div>
-		</div>
-	</div>
+        <DataTable v-model:filters="filters" :value="filteredLeads" paginator  :rows="10"  dataKey="name"
+                filterDisplay="menu" scrollable scrollHeight="flex" :loading="isLoading" :globalFilterFields="['lead_name', 'lead_owner', 'status']">
+            <template #header>
+                <div class="flex justify-between">
+                    <div class="flex gap-2">
+                    <Button type="button" icon="pi pi-filter-slash" label="" outlined @click="resetFilters()" />
+                    <IconField>
+                        <InputIcon>
+                            <i class="pi pi-search" />
+                        </InputIcon>
+                        <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+                    </IconField>
+                    </div>
+                    <Button type="button" icon="pi pi-plus" label="" @click="createNewLead()" />
+                </div>
+            </template>
+            <template #empty> No leads found. </template>
+            <template #loading> Loading leads data. Please wait. </template>
+            <Column selectionMode="single" headerStyle="width: 3rem"></Column>
+            <Column field="lead_name" header="Name" style="min-width: 12rem">
+                <template #body="{ data }">
+                    <a href="#" @click.prevent="selectLead(data)">{{ data.lead_name }}</a>
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
+                </template>
+            </Column>
+            
+            <Column field="lead_owner" header="Owner" style="min-width: 12rem">
+                <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" placeholder="Search by owner" />
+                </template>
+            </Column>
+            
+            <Column field="status" header="Status" :filterMenuStyle="{ width: '14rem' }" style="min-width: 12rem">
+                <template #body="{ data }">
+                    <div class="flex items-center">
+                        <Tag :value="data.status" :severity="getStatusConfig(data.status).severity" :icon="getStatusConfig(data.status).icon" />
+                    </div>
+                </template>
+                <template #filter="{ filterModel }">
+                    <Select v-model="filterModel.value" 
+                            :options="statusOptions" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            placeholder="Select Status" 
+                            class="w-full"
+                            showClear>
+                        <template #option="slotProps">
+                            <div class="flex items-center">
+                                <span class="status-indicator" :style="{ backgroundColor: getStatusConfig(slotProps.option.value).color }"></span>
+                                <span>{{ slotProps.option.label }}</span>
+                            </div>
+                        </template>
+                    </Select>
+                </template>
+            </Column>
+        </DataTable>
+        
+        <div v-if="hasMoreLeads" class="flex justify-center mt-4">
+            <Button type="button" label="Load More" @click="loadMoreLeads()" :loading="isLoading" />
+        </div>
 </template>
+
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useLeadStore } from '../../stores'
-import StatusBadge from '../common/StatusBadge.vue'
+import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
+import { getStatusConfig, LEAD_STATUSES } from '../../utils/statusConfig'
 
 // Initialize the lead store
 const leadStore = useLeadStore()
 
 // Selected lead tracking
 const selectedLeadId = ref(null)
-
-// Dark mode detection (can be improved based on your app's dark mode implementation)
-const isDarkMode = computed(() => {
-	return (
-		document.documentElement.classList.contains('dark') ||
-		document.body.classList.contains('dark') ||
-		window.matchMedia('(prefers-color-scheme: dark)').matches
-	)
-})
 
 // Define emitted events
 const emit = defineEmits(['lead-selected'])
@@ -149,61 +87,60 @@ const hasError = computed(() => leadStore.hasError)
 const errorMessage = computed(() => leadStore.errorMessage)
 const hasMoreLeads = computed(() => leadStore.hasMoreLeads)
 
+// Convert status array to options format for Select component
+const statusOptions = computed(() => 
+    LEAD_STATUSES.map(status => ({ label: status, value: status }))
+)
+
+// Filter setup
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    lead_name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+    lead_owner: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+    status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
+})
+
 // Actions
+onMounted(() => {
+    fetchLeads()
+})
+
 const fetchLeads = () => {
-	leadStore.updateFilters({ is_deal: 0 }).then(() => {
-		leadStore.fetchLeads()
-	})
+    leadStore.updateFilters({ is_deal: 0 }).then(() => {
+        leadStore.fetchLeads()
+    })
 }
 
 const loadMoreLeads = () => leadStore.loadMoreLeads()
 
 const resetFilters = () => {
-	leadStore.resetFilters().then(() => {
-		leadStore.updateFilters({ is_deal: 0 })
-	})
+    filters.value = {
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        lead_name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        lead_owner: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
+    }
+    
+    leadStore.resetFilters().then(() => {
+        leadStore.updateFilters({ is_deal: 0 })
+        leadStore.fetchLeads()
+    })
 }
 
 // Component methods
 const selectLead = (lead) => {
-	selectedLeadId.value = lead.name
-	emit('lead-selected', lead.name)
+    selectedLeadId.value = lead.name
+    emit('lead-selected', lead.name)
 }
 
 const createNewLead = () => {
-	// You can navigate to a lead creation page here
-	console.log('Create new lead')
-	// Example: router.push('/leads/new')
+    console.log('Create new lead')
 }
-
-// Fetch leads when component mounts
-onMounted(() => {
-	// Initialize filter to only show non-deals
-	leadStore.updateFilters({ is_deal: 0 }).then(() => {
-		leadStore.fetchLeads()
-	})
-})
 </script>
 
 <style scoped>
-.lead-list-container {
-	padding: 1rem;
-	height: 100%;
-	overflow-y: auto;
+.p-datatable{
+    width: 100%
 }
 
-.leads-table {
-	border-radius: 0.5rem;
-	overflow: hidden;
-}
-
-/* Dark mode styling for the container */
-:deep(.dark) .lead-list-container {
-	color: #e5e7eb;
-	background-color: #1f2937;
-}
-
-:deep(.dark) .lead-list-container table {
-	border-color: #374151;
-}
 </style>
