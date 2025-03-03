@@ -12,6 +12,7 @@ import { createPinia } from 'pinia'
 // Import PrimeVue components
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
 import Checkbox from 'primevue/checkbox'
@@ -94,6 +95,7 @@ app.component('InputText', InputText)
 app.component('Dropdown', Dropdown)
 app.component('Checkbox', Checkbox)
 app.component('Avatar', Avatar)
+app.component('Card', Card)
 app.component('TabView', TabView)
 app.component('TabPanel', TabPanel)
 app.component('Tag', Tag)

@@ -17,6 +17,7 @@ export const useLeadStore = defineStore('leads', {
 				'lead_owner',
 				'lead_source',
 				'is_deal',
+				'status',
 				'deal_owner',
 				'phonebook',
 			],
