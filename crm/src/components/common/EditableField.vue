@@ -3,7 +3,7 @@
     <span class="text-sm">{{ label }}</span>
     <InputGroup class="flex items-center">
       <InputText :label="label" disabled :value="value" />
-      <InputGroupAddon pt:root:class="!bg-white dark:!bg-zinc-800">
+      <InputGroupAddon>
         <Button 
           icon="pi pi-pen-to-square" 
           @click="$emit('edit', fieldName, value, label, fieldType)" 
@@ -16,6 +16,8 @@
 </template>
 
 <script setup>
+import { InputText, InputGroup, InputGroupAddon, Button } from 'primevue'
+
 defineProps({
   label: String,
   value: [String, Number],
