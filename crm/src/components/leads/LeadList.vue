@@ -13,7 +13,7 @@
                         <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
                     </IconField>
                     </div>
-                    <Button type="button" icon="pi pi-plus" label="" @click="createNewLead()" />
+                    <Button type="button" icon="pi pi-plus" label="" @click="openCreateDialog()" />
                 </div>
             </template>
             <template #empty> No leads found. </template>
@@ -62,11 +62,19 @@
         <div v-if="hasMoreLeads" class="flex justify-center mt-4">
             <Button type="button" label="Load More" @click="loadMoreLeads()" :loading="isLoading" />
         </div>
+        <CreateDialog
+    v-model:visible="createDialogVisible"
+    title="Create New Lead"
+    :fields="createLeadFields"
+    submit-button-label="Create Lead"
+    @submit="createLead"
+  />
 </template>
 
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import CreateDialog from '@/components/dialogs/CreateDialog.vue'
 import { useLeadStore } from '../../stores'
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
 import { getStatusConfig, LEAD_STATUSES } from '../../utils/statusConfig'
@@ -78,15 +86,80 @@ const leadStore = useLeadStore()
 const selectedLeadId = ref(null)
 const selectedLead = ref(null)
 
+// Create dialog state
+const createDialogVisible = ref(false)
+
+
+// Fields for create lead dialog
+const createLeadFields = [
+  { 
+    name: 'first_name', 
+    label: 'First Name', 
+    type: 'text',
+    validation: { 
+      required: true,
+      maxLength: 50, 
+      message: 'First name is required and should be less than 50 characters' 
+    }
+  },
+  { 
+    name: 'last_name', 
+    label: 'Last Name', 
+    type: 'text',
+    validation: { 
+      required: true,
+      maxLength: 50, 
+      message: 'Last name is required and should be less than 50 characters' 
+    }
+  },
+  { 
+    name: 'email', 
+    label: 'Email', 
+    type: 'text',
+    validation: { 
+      required: true,
+      pattern: '^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$', 
+      message: 'Valid email is required' 
+    }
+  },
+  { 
+    name: 'phone', 
+    label: 'Phone', 
+    type: 'text',
+    validation: {
+      pattern: '^[0-9+\\s-()]{7,20}$',
+      message: 'Please enter a valid phone number'
+    }
+  },
+  { 
+    name: 'company', 
+    label: 'Company', 
+    type: 'text',
+    fullWidth: true
+  },
+  { 
+    name: 'status', 
+    label: 'Status', 
+    type: 'status',
+    options: LEAD_STATUSES,
+    default: 'New'
+  },
+  { 
+    name: 'source', 
+    label: 'Lead Source', 
+    type: 'link', 
+    doctype: 'PRP Lead Source'
+  }
+]
+
+
 // Define emitted events
-const emit = defineEmits(['lead-selected'])
+const emit = defineEmits(['lead-selected', 'lead-created'])
 
 // Computed properties
 const leads = computed(() => leadStore.leads || [])
 const filteredLeads = computed(() => leads.value.filter((lead) => lead.is_deal !== 1))
-const isLoading = computed(() => leadStore.isLoading)
-const hasError = computed(() => leadStore.hasError)
-const errorMessage = computed(() => leadStore.errorMessage)
+const isLoading = computed(() => leadStore.isLoading)   
 const hasMoreLeads = computed(() => leadStore.hasMoreLeads)
 
 // Convert status array to options format for Select component
@@ -146,9 +219,21 @@ const selectLead = (lead) => {
     emit('lead-selected', lead.name)
 }
 
-const createNewLead = () => {
-    console.log('Create new lead')
+// Create lead methods
+const openCreateDialog = () => {
+  createDialogVisible.value = true
 }
+
+const createLead = async (formData) => {
+  try {
+    const newLead = await leadStore.createLead(formData)
+    // Emit an event to notify parent that lead was created
+    emit('lead-created', newLead)
+  } catch (error) {
+    console.error('Error creating lead:', error)
+  }
+}
+
 </script>
 
 <style scoped>

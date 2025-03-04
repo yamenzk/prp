@@ -1,10 +1,10 @@
 <template>
   <Dialog 
-    v-model:visible="visible" 
+    :visible="isVisible" 
+    @update:visible="updateVisible"
     modal 
     :header="title || 'Update Field'" 
     :style="{ width: '30rem' }"
-    @hide="$emit('update:visible', false)"
   >
     <!-- Field types -->
     
@@ -32,11 +32,12 @@
       <label :for="fieldName" class="block font-medium mb-2">{{ title }}</label>
       <Dropdown 
         v-model="internalValue" 
-        :options="options" 
+        :options="linkOptions" 
         optionLabel="label" 
         optionValue="value" 
         class="w-full" 
         :filter="true" 
+        :loading="linkResource?.loading"
         placeholder="Select an option"
       />
     </div>
@@ -63,7 +64,7 @@
     <!-- Date field -->
     <div v-else-if="fieldType === 'date'" class="mb-4">
       <label :for="fieldName" class="block font-medium mb-2">{{ title }}</label>
-      <Calendar v-model="internalValue" :id="fieldName" class="w-full" dateFormat="yy-mm-dd" />
+      <DatePicker v-model="internalValue" :id="fieldName" class="w-full" />
     </div>
     
     <!-- Text area field -->
@@ -75,28 +76,20 @@
     <!-- Default: Regular input field -->
     <div v-else class="mb-4">
       <label :for="fieldName" class="block font-medium mb-2">{{ title }}</label>
-      <InputText v-model="internalValue" :id="fieldName" class="w-full" />
+      <InputText v-model="internalValue" :id="fieldName" class="w-full" :class="{ 'p-invalid': validationError }" />
+      <small v-if="validationError" class="p-error">{{ validationError }}</small>
     </div>
     
     <template #footer>
       <Button label="Cancel" text @click="closeDialog" />
-      <Button label="Save" @click="saveAndClose" />
+      <Button label="Save" @click="saveAndClose" :disabled="!!validationError" />
     </template>
   </Dialog>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { 
-  Dialog, 
-  Button, 
-  InputText, 
-  Dropdown, 
-  Checkbox, 
-  InputNumber, 
-  Calendar, 
-  Textarea 
-} from 'primevue';
+import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue';
+import { createListResource } from 'frappe-ui';
 
 const props = defineProps({
   visible: {
@@ -105,7 +98,8 @@ const props = defineProps({
   },
   fieldName: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   },
   fieldType: {
     type: String,
@@ -122,31 +116,167 @@ const props = defineProps({
   options: {
     type: Array,
     default: () => []
+  },
+  validation: {
+    type: [Function, Object, String],
+    default: null
+  },
+  doctype: {
+    type: String,
+    default: ''
   }
 });
 
 const emit = defineEmits(['update:visible', 'save']);
 
+// Computed property for dialog visibility
+const isVisible = computed(() => props.visible);
+
+// Method to update visibility
+const updateVisible = (value) => {
+  emit('update:visible', value);
+};
+
 // Internal value to track changes
 const internalValue = ref(props.value);
+const validationError = ref('');
+const linkOptions = ref([]);
+const linkResource = ref(null);
 
 // Update internal value when prop changes
 watch(() => props.value, (newValue) => {
   internalValue.value = newValue;
+  validateField();
+});
+
+// Watch for changes to validate
+watch(() => internalValue.value, () => {
+  validateField();
 });
 
 // Update internal value when visible changes to true
 watch(() => props.visible, (newVisible) => {
   if (newVisible) {
     internalValue.value = props.value;
+    
+    // Load options if needed
+    if (props.fieldType === 'link' && props.doctype) {
+      fetchLinkOptions(props.doctype);
+    }
+    
+    validateField();
   }
 });
+
+// Initialize and fetch link options
+onMounted(() => {
+  // If it's a link field with doctype and dialog is visible, fetch options
+  if (props.fieldType === 'link' && props.doctype && props.visible) {
+    fetchLinkOptions(props.doctype);
+  }
+});
+
+// Clean up resources when component is unmounted
+onBeforeUnmount(() => {
+  if (linkResource.value) {
+    // No explicit cleanup needed for Frappe UI resources
+    linkResource.value = null;
+  }
+});
+
+// Validation function
+function validateField() {
+  validationError.value = '';
+  
+  if (!props.validation) return;
+  
+  if (typeof props.validation === 'function') {
+    const result = props.validation(internalValue.value);
+    if (result !== true) {
+      validationError.value = result || 'Invalid value';
+    }
+  } else if (typeof props.validation === 'string') {
+    // Simple required validation
+    if (props.validation === 'required' && !internalValue.value) {
+      validationError.value = 'This field is required';
+    }
+  } else if (typeof props.validation === 'object') {
+    // Handle validation object with rules
+    if (props.validation.required && !internalValue.value) {
+      validationError.value = props.validation.message || 'This field is required';
+    }
+    
+    if (props.validation.pattern && internalValue.value) {
+      const pattern = new RegExp(props.validation.pattern);
+      if (!pattern.test(internalValue.value)) {
+        validationError.value = props.validation.message || 'Invalid format';
+      }
+    }
+    
+    if (props.validation.minLength && internalValue.value && internalValue.value.length < props.validation.minLength) {
+      validationError.value = props.validation.message || `Minimum length is ${props.validation.minLength}`;
+    }
+    
+    if (props.validation.maxLength && internalValue.value && internalValue.value.length > props.validation.maxLength) {
+      validationError.value = props.validation.message || `Maximum length is ${props.validation.maxLength}`;
+    }
+    
+    if (props.validation.min !== undefined && internalValue.value < props.validation.min) {
+      validationError.value = props.validation.message || `Minimum value is ${props.validation.min}`;
+    }
+    
+    if (props.validation.max !== undefined && internalValue.value > props.validation.max) {
+      validationError.value = props.validation.message || `Maximum value is ${props.validation.max}`;
+    }
+    
+    // Custom validation function within the object
+    if (props.validation.custom && typeof props.validation.custom === 'function') {
+      const result = props.validation.custom(internalValue.value);
+      if (result !== true) {
+        validationError.value = result || props.validation.message || 'Invalid value';
+      }
+    }
+  }
+}
+
+// Fetch options for link fields using List Resource
+function fetchLinkOptions(doctype) {
+  if (!doctype) return;
+  
+  // Create a list resource for the doctype
+  linkResource.value = createListResource({
+    doctype: doctype,
+    fields: ['name'],
+    pageLength: 50,  // Fetch more records at once
+    orderBy: 'name asc',
+    onSuccess: (data) => {
+      linkOptions.value = data.map((item) => ({
+        value: item.name,
+        label: item.full_name || item.name,
+      }));
+    },
+    onError: (error) => {
+      console.error(`Error fetching options for ${doctype}:`, error);
+      linkOptions.value = [];
+    }
+  });
+  
+  // Fetch the data
+  linkResource.value.fetch();
+}
 
 function closeDialog() {
   emit('update:visible', false);
 }
 
 function saveAndClose() {
+  // Validate before saving
+  validateField();
+  
+  if (validationError.value) {
+    return;
+  }
+  
   emit('save', {
     fieldName: props.fieldName,
     value: internalValue.value

@@ -90,30 +90,10 @@
           </TabPanel>
           <TabPanel value="1">
             <div class="p-4">
-              <h3 class="text-lg font-medium mb-4">Contact Information</h3>
-              <Button 
-                label="Add Contact" 
-                icon="pi pi-plus" 
-                @click="openAddPhonebookDialog" 
-                class="mb-4"
+              <PhonebookTable 
+                :phonebook="currentLead.phonebook || []"
+                @update:phonebook="updatePhonebook"
               />
-              
-              <div v-if="!currentLead.phonebook || currentLead.phonebook.length === 0" class="text-tertiary">
-                No contact information available.
-              </div>
-              
-              <div v-else class="grid grid-cols-1 gap-3">
-                <div v-for="(contact, index) in currentLead.phonebook" :key="index" class="flex justify-between items-center p-3 border rounded">
-                  <div>
-                    <div class="font-medium">{{ contact.type }}</div>
-                    <div>{{ contact.value }}</div>
-                  </div>
-                  <div class="flex gap-2">
-                    <Button icon="pi pi-pencil" text @click="openEditPhonebookDialog(contact, index)" />
-                    <Button icon="pi pi-trash" text severity="danger" @click="deletePhonebookEntry(index)" />
-                  </div>
-                </div>
-              </div>
             </div>
           </TabPanel>
           <TabPanel value="2">
@@ -136,71 +116,33 @@
     :value="editValue"
     :title="dialogTitle"
     :options="dialogOptions"
+    :validation="dialogValidation"
+    :doctype="dialogDoctype"
     @save="handleDialogSave"
   />
 
-  <!-- Phonebook Dialog -->
-  <Dialog v-model:visible="phonebookDialogVisible" :header="phonebookDialogTitle" modal>
-    <div class="p-fluid">
-      <div class="field mb-4">
-        <label for="contactType" class="font-medium">Contact Type</label>
-        <Dropdown 
-          v-model="phonebookEditData.type" 
-          :options="contactTypeOptions" 
-          class="w-full mt-1" 
-          placeholder="Select Type"
-          id="contactType"
-        />
-      </div>
-      <div class="field">
-        <label for="contactValue" class="font-medium">Contact Value</label>
-        <InputText v-model="phonebookEditData.value" id="contactValue" class="w-full mt-1" />
-      </div>
-    </div>
-    <template #footer>
-      <Button label="Cancel" @click="phonebookDialogVisible = false" text />
-      <Button label="Save" @click="savePhonebookEdit" />
-    </template>
-  </Dialog>
-
   <!-- Delete Confirmation Dialog -->
-  <Dialog v-model:visible="deleteDialogVisible" header="Delete Lead" modal>
-    <div class="p-fluid">
-      <p class="mb-4">This action cannot be undone. To confirm deletion, please type the lead name below:</p>
-      <p class="font-bold mb-2">{{ currentLead?.name }}</p>
-      <InputText v-model="deleteConfirmText" class="w-full" placeholder="Type lead name to confirm" />
-    </div>
-    <template #footer>
-      <Button label="Cancel" @click="deleteDialogVisible = false" text />
-      <Button 
-        label="Delete Lead" 
-        severity="danger" 
-        :disabled="deleteConfirmText !== currentLead?.name" 
-        @click="confirmDeleteLead" 
-      />
-    </template>
-  </Dialog>
+  <DeleteDialog
+    v-model:visible="deleteDialogVisible"
+    title="Delete Lead"
+    message="This action cannot be undone. To confirm deletion, please type the lead name below:"
+    confirm-field="name"
+    :confirm-value="currentLead?.name"
+    delete-button-label="Delete Lead"
+    @confirm="confirmDeleteLead"
+  />
+
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useLeadStore } from '../../stores'
-import { frappeRequest } from 'frappe-ui'
 import { LEAD_STATUSES, getStatusConfig } from '../../utils/statusConfig'
 import FeatherIcon from 'frappe-ui/src/components/FeatherIcon.vue'
 import EditableFieldset from '@/components/common/EditableFieldset.vue'
-import EditDialog from '@/components/common/EditDialog.vue'
-import { 
-  Panel, 
-  Button, 
-  Tag, 
-  ScrollPanel, 
-  Tabs, 
-  TabPanel, 
-  Dialog,
-  InputText,
-  Dropdown
-} from 'primevue'
+import EditDialog from '@/components/dialogs/EditDialog.vue'
+import PhonebookTable from '@/components/leads/PhonebookTable.vue'
+import DeleteDialog from '@/components/dialogs/DeleteDialog.vue'
 
 // Props
 const props = defineProps({
@@ -210,26 +152,87 @@ const props = defineProps({
   },
 })
 
-// Field definitions
+// Field definitions with validations
 const personalFields = [
-  { name: 'first_name', label: 'First Name', type: 'text' },
-  { name: 'last_name', label: 'Last Name', type: 'text' },
-  { name: 'email', label: 'Email', type: 'text' },
-  { name: 'phone', label: 'Phone', type: 'text' }
+  { 
+    name: 'first_name', 
+    label: 'First Name', 
+    type: 'text',
+    validation: { 
+      maxLength: 50, 
+      message: 'First name should be less than 50 characters' 
+    }
+  },
+  { 
+    name: 'last_name', 
+    label: 'Last Name', 
+    type: 'text',
+    validation: { 
+      maxLength: 50, 
+      message: 'Last name should be less than 50 characters' 
+    }
+  },
+  { 
+    name: 'email', 
+    label: 'Email', 
+    type: 'text',
+    validation: { 
+      pattern: '^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$', 
+      message: 'Please enter a valid email address' 
+    }
+  },
+  { 
+    name: 'phone', 
+    label: 'Phone', 
+    type: 'text',
+    validation: {
+      pattern: '^[0-9+\\s-()]{7,20}$',
+      message: 'Please enter a valid phone number'
+    }
+  }
 ]
 
 const professionalFields = [
   { name: 'company', label: 'Company', type: 'text' },
   { name: 'position', label: 'Position', type: 'text' },
-  { name: 'salary', label: 'Salary', type: 'currency' }
+  { 
+    name: 'salary', 
+    label: 'Salary', 
+    type: 'currency',
+    validation: {
+      min: 0,
+      message: 'Salary must be a positive amount'
+    }
+  }
 ]
 
 const leadFields = [
-  { name: 'name', label: 'ID', type: 'text' },
-  { name: 'source', label: 'Lead Source', type: 'link' },
-  { name: 'owner', label: 'Owner', type: 'link' },
-  { name: 'status', label: 'Status', type: 'status' }
+  { 
+    name: 'name', 
+    label: 'ID', 
+    type: 'text',
+    validation: 'required'
+  },
+  { 
+    name: 'lead_source', 
+    label: 'Lead Source', 
+    type: 'link', 
+    doctype: 'PRP Lead Source'
+  },
+  { 
+    name: 'owner', 
+    label: 'Owner', 
+    type: 'link', 
+    doctype: 'User'
+  },
+  { 
+    name: 'status', 
+    label: 'Status', 
+    type: 'status',
+    options: LEAD_STATUSES
+  }
 ]
+
 
 // Store
 const leadStore = useLeadStore()
@@ -242,45 +245,16 @@ const editingField = ref(null)
 const editingFieldType = ref('text')
 const editValue = ref(null)
 const dialogOptions = ref([])
-
-// Phonebook dialog state
-const phonebookDialogVisible = ref(false)
-const phonebookDialogTitle = ref('Add Contact Information')
-const phonebookDialogMode = ref('add')
-const phonebookEditIndex = ref(-1)
-const phonebookEditData = ref({
-  type: 'Mobile',
-  value: '',
-})
+const dialogValidation = ref(null)
+const dialogDoctype = ref('')
 
 // Delete confirmation dialog state
 const deleteDialogVisible = ref(false)
-const deleteConfirmText = ref('')
 
-const contactTypeOptions = ['Mobile', 'Phone', 'Email', 'WhatsApp', 'Other']
-
-// Dark mode detection
-const isDarkMode = computed(() => {
-  return (
-    document.documentElement.classList.contains('dark') ||
-    document.body.classList.contains('dark') ||
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  )
-})
-
-// Status configuration for the current lead
-const statusConfig = computed(() => {
-  return getStatusConfig(currentLead.value?.status || 'New', isDarkMode.value)
-})
-
-// Only show lead statuses (non-deal) for leads
-const availableStatuses = computed(() => {
-  return LEAD_STATUSES
-})
 
 // Computed
 const currentLead = computed(() => leadStore.currentLead)
-
+const emit = defineEmits(['lead-deleted']);
 // Watch for changes in leadId prop
 watch(
   () => props.leadId,
@@ -295,60 +269,23 @@ watch(
   { immediate: true },
 )
 
-// Watch for lead changes to reset delete confirmation
-watch(currentLead, () => {
-  deleteConfirmText.value = ''
-})
-
 // Methods
-const openEditDialog = async (fieldName, currentValue, title, fieldType = 'text') => {
+const openEditDialog = (fieldName, currentValue, title) => {
+  // Find the field definition in any of the field arrays
+  const allFields = [...leadFields, ...personalFields, ...professionalFields]
+  const fieldDef = allFields.find(field => field.name === fieldName) || {}
+  
   editingField.value = fieldName
   dialogTitle.value = title
+  editingFieldType.value = fieldDef.type || 'text'
   
-  // Set the field type
-  if (fieldName === 'is_deal') {
-    editingFieldType.value = 'boolean'
-  } else if (fieldName === 'status') {
-    editingFieldType.value = 'status'
-    dialogOptions.value = availableStatuses.value
-  } else if (fieldType === 'link') {
-    editingFieldType.value = 'link'
-    
-    // Determine which link type to fetch based on field name
-    let doctype = 'User'
-    if (fieldName === 'source') {
-      doctype = 'PRP Lead Source'
-    }
-    
-    // Fetch options for link field
-    await fetchLinkOptions(doctype)
-  } else {
-    editingFieldType.value = fieldType || 'text'
-  }
+  // Set all properties from the field definition
+  dialogOptions.value = fieldDef.options || []
+  dialogValidation.value = fieldDef.validation || null
+  dialogDoctype.value = fieldDef.doctype || ''
   
   editValue.value = currentValue || ''
   dialogVisible.value = true
-}
-
-// Helper function to fetch link options
-const fetchLinkOptions = async (doctype) => {
-  try {
-    const response = await frappeRequest({
-      method: 'frappe.client.get_list',
-      params: {
-        doctype: doctype,
-        fields: ['name'],
-      },
-    })
-
-    dialogOptions.value = response.data.map((item) => ({
-      value: item.name,
-      label: item.full_name || item.name,
-    }))
-  } catch (error) {
-    console.error(`Error fetching options for ${doctype}:`, error)
-    dialogOptions.value = []
-  }
 }
 
 // Handle dialog save
@@ -369,52 +306,12 @@ const handleDialogSave = async ({ fieldName, value }) => {
   }
 }
 
-// Phonebook methods
-const openAddPhonebookDialog = () => {
-  phonebookDialogMode.value = 'add'
-  phonebookDialogTitle.value = 'Add Contact Information'
-  phonebookEditData.value = {
-    type: 'Mobile',
-    value: '',
-  }
-  phonebookEditIndex.value = -1
-  phonebookDialogVisible.value = true
-}
-
-const openEditPhonebookDialog = (contact, index) => {
-  phonebookDialogMode.value = 'edit'
-  phonebookDialogTitle.value = 'Edit Contact Information'
-  phonebookEditData.value = {
-    type: contact.type,
-    value: contact.value,
-  }
-  phonebookEditIndex.value = index
-  phonebookDialogVisible.value = true
-}
-
-const savePhonebookEdit = async () => {
+// Method to update phonebook from the PhonebookTable component
+const updatePhonebook = async (updatedPhonebook) => {
   if (!currentLead.value) return
 
   try {
-    const updatedPhonebook = [...(currentLead.value.phonebook || [])]
-
-    if (phonebookDialogMode.value === 'add') {
-      // Add new entry
-      updatedPhonebook.push({
-        type: phonebookEditData.value.type,
-        value: phonebookEditData.value.value,
-      })
-    } else {
-      // Update existing entry
-      updatedPhonebook[phonebookEditIndex.value] = {
-        type: phonebookEditData.value.type,
-        value: phonebookEditData.value.value,
-      }
-    }
-
     await leadStore.updatePhonebook(currentLead.value.name, updatedPhonebook)
-    phonebookDialogVisible.value = false
-
     // Refresh the lead data
     await leadStore.fetchLead(currentLead.value.name)
   } catch (error) {
@@ -422,40 +319,24 @@ const savePhonebookEdit = async () => {
   }
 }
 
-const deletePhonebookEntry = async (index) => {
-  if (!currentLead.value || !currentLead.value.phonebook) return
-
-  if (confirm('Are you sure you want to delete this contact information?')) {
-    try {
-      const updatedPhonebook = [...currentLead.value.phonebook]
-      updatedPhonebook.splice(index, 1)
-
-      await leadStore.updatePhonebook(currentLead.value.name, updatedPhonebook)
-
-      // Refresh the lead data
-      await leadStore.fetchLead(currentLead.value.name)
-    } catch (error) {
-      console.error('Error deleting phonebook entry:', error)
-    }
-  }
-}
-
 // Delete lead methods
 const openDeleteDialog = () => {
   deleteDialogVisible.value = true
-  deleteConfirmText.value = ''
 }
 
 const confirmDeleteLead = async () => {
-  if (!currentLead.value || deleteConfirmText.value !== currentLead.value.name) return
+  if (!currentLead.value) return
 
   try {
     await leadStore.deleteLead(currentLead.value.name)
     deleteDialogVisible.value = false
+    // Emit an event to notify parent that lead was deleted
+    emit('lead-deleted')
   } catch (error) {
     console.error('Error deleting lead:', error)
   }
 }
+
 </script>
 
 <style scoped></style>

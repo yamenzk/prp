@@ -3,7 +3,7 @@
     <span class="text-sm">{{ label }}</span>
     <InputGroup class="flex items-center">
       <InputText :label="label" disabled :value="value" />
-      <InputGroupAddon>
+      <InputGroupAddon v-if="!readonly">
         <Button 
           icon="pi pi-pen-to-square" 
           @click="$emit('edit', fieldName, value, label, fieldType)" 
@@ -33,6 +33,10 @@ defineProps({
   variant: {
     type: String,
     default: 'text'
+  },
+  readonly: {
+    type: Boolean,
+    default: false
   }
 })
 

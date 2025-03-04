@@ -15,6 +15,7 @@
         :fieldType="field.type || 'text'"
         :variant="field.variant || 'text'"
         :severity="field.severity || 'secondary'"
+        :readonly="readonly || field.readonly"
         @edit="$emit('edit', field.name, getFieldValue(field.name), field.label, field.type || 'text')"
       />
     </div>
@@ -25,7 +26,6 @@
 <script setup>
 import { computed } from 'vue'
 import EditableField from './EditableField.vue'
-import { Fieldset } from 'primevue/fieldset'
 
 const props = defineProps({
   legend: String,
@@ -38,13 +38,27 @@ const props = defineProps({
   customClass: {
     type: String,
     default: ''
+  },
+  readonly: {
+    type: Boolean,
+    default: false
   }
 })
 
 defineEmits(['edit'])
 
+// Map the column number to an actual Tailwind class
 const gridColumnClass = computed(() => {
-  return `md:grid-cols-${props.columns}`
+  const columnMap = {
+    1: 'md:grid-cols-1',
+    2: 'md:grid-cols-2',
+    3: 'md:grid-cols-3',
+    4: 'md:grid-cols-4',
+    5: 'md:grid-cols-5',
+    6: 'md:grid-cols-6'
+  };
+  
+  return columnMap[props.columns] || 'md:grid-cols-2'; // Default to 2 columns if invalid value
 })
 
 const getFieldValue = (fieldName) => {
