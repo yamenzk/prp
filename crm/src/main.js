@@ -38,6 +38,7 @@ import Fieldset from 'primevue/fieldset'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import FloatLabel from 'primevue/floatlabel'
+import ScrollPanel from 'primevue/scrollpanel'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -135,4 +136,5 @@ app.component('Fieldset', Fieldset)
 app.component('InputGroup', InputGroup)
 app.component('InputGroupAddon', InputGroupAddon)
 app.component('FloatLabel', FloatLabel)
+app.component('ScrollPanel', ScrollPanel)
 app.mount('#app')

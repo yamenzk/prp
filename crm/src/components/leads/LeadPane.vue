@@ -63,29 +63,30 @@
 		<ScrollPanel style="width: 100%; height: 100%">
 			<Tabs v-model:value="value" >
 				<TabPanels pt:root:class="!bg-white dark:!bg-zinc-800">
-					<TabPanel value="0" pt:root:class="!bg-white dark:!bg-zinc-800">
-						<Fieldset legend="Personal Information" :toggleable="true" pt:root:class="!bg-white dark:!bg-zinc-800">
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <span class="text-sm">First Name</span>
-                  <InputGroup class="flex items-center">
-                      <InputText label="First Name" disabled :value="currentLead.first_name" />
-                      <InputGroupAddon>
-                          <Button icon="pi pi-user" severity="secondary" variant="text" />
-                      </InputGroupAddon>
-                  </InputGroup>
-                </div>
-                <div>
-                  <span class="text-sm">First Name</span>
-                  <InputGroup class="flex items-center">
-                      <InputText label="First Name" disabled :value="currentLead.first_name" />
-                      <InputGroupAddon>
-                          <Button icon="pi pi-user" severity="secondary" variant="text" />
-                      </InputGroupAddon>
-                  </InputGroup>
-                </div>
-              </div>
-						</Fieldset>
+					<TabPanel value="0" pt:root:class="!bg-white dark:!bg-zinc-800 !flex !flex-col !gap-4">
+						<EditableFieldset
+              legend="Lead"
+              :fields="leadFields"
+              :data="currentLead"
+              :columns="3"
+              @edit="openEditDialog"
+            />
+
+            <EditableFieldset
+              legend="Personal"
+              :fields="personalFields"
+              :data="currentLead"
+              :columns="2"
+              @edit="openEditDialog"
+            />
+            
+            <EditableFieldset
+              legend="Professional" 
+              :fields="professionalFields"
+              :data="currentLead"
+              :columns="3"
+              @edit="openEditDialog"
+            />
 					</TabPanel>
 					<TabPanel value="1">
 						<p class="m-0"></p>
@@ -97,6 +98,48 @@
 			</Tabs>
 		</ScrollPanel>
 	</div>
+
+  <!-- Edit Dialog -->
+    <Dialog v-model:visible="dialogVisible" modal header="Update Lead" :style="{ width: '30rem' }">
+      <!-- <span class="text-surface-500 dark:text-surface-400 block mb-6">Update {{ dialogTitle }}</span> -->
+      
+      <!-- Status field (select) -->
+      <div v-if="editingField === 'status'" class="mb-4">
+        <label :for="editingField" class="block font-medium mb-2">{{ dialogTitle }}</label>
+        <Dropdown 
+          v-model="editValue" 
+          :options="availableStatuses" 
+          class="w-full" 
+          placeholder="Select Status"
+        />
+      </div>
+      
+      <!-- Boolean field (checkbox) -->
+      <div v-else-if="editingField && editingFieldType === 'boolean'" class="mb-4">
+        <div class="flex items-center">
+          <Checkbox v-model="editValue" :binary="true" :id="editingField" />
+          <label :for="editingField" class="ml-2">{{ dialogTitle }}</label>
+        </div>
+      </div>
+      
+      <!-- Link field (dropdown) -->
+      <div v-else-if="editingField && editingFieldType === 'link'" class="mb-4">
+        <label :for="editingField" class="block font-medium mb-2">{{ dialogTitle }}</label>
+        <Dropdown v-model="editValue" :options="linkOptions" optionLabel="label" 
+                  optionValue="value" class="w-full" :filter="true" />
+      </div>
+      
+      <!-- Regular input field -->
+      <div v-else class="mb-4">
+        <label :for="editingField" class="block font-medium mb-2">{{ dialogTitle }}</label>
+        <InputText v-model="editValue" :id="editingField" class="w-full" />
+      </div>
+      
+      <template #footer>
+        <Button label="Cancel" text @click="dialogVisible = false" />
+        <Button label="Save" @click="saveFieldEdit" />
+      </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -104,8 +147,7 @@ import { ref, computed, watch } from 'vue'
 import { useLeadStore } from '../../stores'
 import { frappeRequest } from 'frappe-ui'
 import { LEAD_STATUSES, getStatusConfig } from '../../utils/statusConfig'
-import FeatherIcon from 'frappe-ui/src/components/FeatherIcon.vue'
-import { ScrollPanel } from 'primevue'
+import EditableFieldset from '@/components/common/EditableFieldSet.vue'
 
 // Props
 const props = defineProps({
@@ -114,6 +156,23 @@ const props = defineProps({
 		default: null,
 	},
 })
+const personalFields = [
+  { name: 'first_name', label: 'First Name' },
+  { name: 'last_name', label: 'Last Name' }
+]
+
+const professionalFields = [
+  { name: 'company', label: 'Company' },
+  { name: 'position', label: 'Position' },
+  { name: 'salary', label: 'Salary', type: 'currency' }
+]
+
+const leadFields = [
+  { name: 'name', label: 'ID' },
+  { name: 'source', label: 'Lead Source', type: 'link' },
+  { name: 'owner', label: 'Owner', type: 'link' }
+]
+
 
 // Store
 const leadStore = useLeadStore()
