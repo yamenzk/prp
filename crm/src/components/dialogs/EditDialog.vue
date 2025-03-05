@@ -15,7 +15,9 @@
       :validation="validation"
       :options="options"
       :doctype="doctype"
-      :additional-props="additionalProps"
+      :icon="icon"
+      :disabled="readonly || disabled"
+      v-bind="allAdditionalProps"
     />
     
     <template #footer>
@@ -68,6 +70,22 @@ const props = defineProps({
   doctype: {
     type: String,
     default: ''
+  },
+  icon: {
+    type: String,
+    default: ''
+  },
+  readonly: {
+    type: Boolean,
+    default: false
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
+  additionalProps: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -76,9 +94,22 @@ const emit = defineEmits(['update:visible', 'save'])
 const { validateField } = useFields()
 const fieldValue = ref(props.value)
 const validationError = ref('')
-const additionalProps = computed(() => 
-  props.fieldType === 'currency' ? { currency: 'USD', locale: 'en-US' } : {}
-)
+
+// Combine default additionalProps with currency-specific props when needed
+const allAdditionalProps = computed(() => {
+  const baseProps = props.additionalProps || {};
+  
+  // Add currency formatting props if needed
+  if (props.fieldType === 'currency' && !baseProps.currency) {
+    return {
+      ...baseProps,
+      currency: 'AED',
+      locale: 'en-AE'
+    };
+  }
+  
+  return baseProps;
+})
 
 const isValid = computed(() => {
   const result = validateField(fieldValue.value, props.validation)

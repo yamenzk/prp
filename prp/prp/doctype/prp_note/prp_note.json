@@ -10,11 +10,15 @@
   "rel_docname",
   "column_break_gcfd",
   "icon",
-  "password",
-  "column_break_eawx",
-  "sticky",
-  "journal",
   "color",
+  "sticky",
+  "column_break_eawx",
+  "journal",
+  "task",
+  "due",
+  "column_break_qrds",
+  "status",
+  "priority",
   "section_break_sxpk",
   "title",
   "details"
@@ -54,11 +58,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "password",
-   "fieldtype": "Password",
-   "label": "Password"
-  },
-  {
    "fieldname": "rel_doctype",
    "fieldtype": "Link",
    "label": "Rel Doctype",
@@ -80,11 +79,39 @@
    "fieldname": "color",
    "fieldtype": "Color",
    "label": "Color"
+  },
+  {
+   "default": "0",
+   "fieldname": "task",
+   "fieldtype": "Check",
+   "label": "Task"
+  },
+  {
+   "fieldname": "due",
+   "fieldtype": "Datetime",
+   "label": "Due"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "\nHigh\nMedium\nLow"
+  },
+  {
+   "fieldname": "column_break_qrds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Backlog",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Backlog\nCompleted\nCancelled\nDelayed\nOn Hold\nTo Do"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-24 00:53:01.966923",
+ "modified": "2025-03-05 22:56:17.307313",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Note",
@@ -104,6 +131,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

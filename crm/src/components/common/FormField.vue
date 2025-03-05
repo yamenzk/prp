@@ -2,7 +2,23 @@
 <template>
   <div class="form-field">
     <!-- Field Label -->
-    <label v-if="showLabel" :for="id" class="block font-medium mb-2">
+    <label v-if="showLabel" :for="id" class="block font-medium mb-2 flex items-center gap-1">
+      <!-- Icon display -->
+      <span v-if="icon" class="text-base">
+        <!-- PrimeIcons (pi) -->
+        <i v-if="icon.includes('pi-')" :class="icon"></i>
+        
+        <!-- Emoji -->
+        <span v-else-if="isEmoji(icon)">{{ icon }}</span>
+        
+        <!-- Feather icons -->
+        <span v-else-if="icon.startsWith('feather-')" class="w-4 h-4">
+          <FeatherIcon :name="icon.replace('feather-', '')" />
+        </span>
+        
+        <!-- Custom icon class -->
+        <i v-else :class="icon"></i>
+      </span>
       {{ label }}
       <span v-if="isRequired" class="text-red-500">*</span>
     </label>
@@ -43,8 +59,8 @@
       :id="id" 
       class="w-full" 
       mode="currency" 
-      currency="USD" 
-      locale="en-US"
+      currency="AED" 
+      locale="en-AE"
       :class="{ 'p-invalid': !!error }"
     />
     
@@ -143,6 +159,10 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  icon: {  // Add the icon prop definition
+    type: String,
+    default: ''
   }
 })
 
@@ -232,6 +252,12 @@ async function fetchLinkOptions() {
 }
 
 // Validate the field
+function isEmoji(str) {
+  if (!str) return false
+  const emojiRegex = /[\p{Emoji}]/u
+  return emojiRegex.test(str)
+}
+
 function validateValue(value) {
   if (!props.validation) {
     error.value = ''

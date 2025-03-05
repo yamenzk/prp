@@ -46,19 +46,6 @@
       />
     </div>
     
-    <!-- Status field with tag -->
-    <div v-else-if="fieldType === 'status'" class="flex items-center justify-between">
-      <Tag :value="value" :severity="getTagSeverity(value)" />
-      <Button 
-        v-if="!readonly" 
-        icon="pi pi-pen-to-square" 
-        @click="handleEdit" 
-        :severity="severity" 
-        :variant="variant"
-        class="hover:!bg-zinc-200 dark:hover:!bg-zinc-700"
-      />
-    </div>
-    
     <!-- Currency field with formatting -->
     <div v-else-if="fieldType === 'currency'" class="flex items-center">
       <InputGroup class="flex items-center w-full">
@@ -185,27 +172,13 @@ const isEmoji = (str) => {
 // Format currency values
 const formatCurrency = (value) => {
   if (value === null || value === undefined || value === '') return ''
-  return new Intl.NumberFormat('en-US', { 
+  return new Intl.NumberFormat('en-AE', { 
     style: 'currency', 
-    currency: 'USD',
+    currency: 'AED',
     minimumFractionDigits: 2
   }).format(value)
 }
 
-// Determine the severity for status tags
-const getTagSeverity = (status) => {
-  const statusMap = {
-    'New': 'info',
-    'Contacted': 'info',
-    'Qualified': 'success',
-    'Proposal': 'warning',
-    'Negotiation': 'warning',
-    'Closed': 'success',
-    'Lost': 'danger',
-    'Inactive': 'secondary'
-  }
-  return statusMap[status] || 'info'
-}
 
 // Computed property to handle display of various value types
 const displayValue = computed(() => {

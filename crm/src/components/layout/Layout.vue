@@ -35,12 +35,14 @@
 			</div>
 		</div>
 	</div>
+	<AppDock></AppDock>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Sidebar from './Sidebar.vue'
+import AppDock from './AppDock.vue'
 
 const route = useRoute()
 

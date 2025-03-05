@@ -1,15 +1,17 @@
 <template>
   <DataTable 
-    v-model:filters="filters" 
-    :value="filteredLeads" 
-    dataKey="name"
-    v-model:selection="selectedLead" 
-    filterDisplay="menu" 
-    scrollable 
-    scrollHeight="flex" 
-    :loading="isLoading" 
-    :globalFilterFields="['lead_name', 'first_name', 'last_name', 'lead_owner', 'status']"
-  >
+  v-model:filters="filters" 
+  :value="filteredLeads" 
+  dataKey="name"
+  v-model:selection="selectedLead" 
+  filterDisplay="menu" 
+  scrollable 
+  scrollHeight="flex" 
+  :loading="isLoading" 
+  :globalFilterFields="['lead_name', 'first_name', 'last_name', 'lead_owner', 'status']"
+  selectionMode="single" 
+  :metaKeySelection="metaKey" 
+>
     <template #header>
       <div class="flex justify-between">
         <div class="flex gap-2">
@@ -27,9 +29,7 @@
     
     <template #empty> No leads found. </template>
     <template #loading> Loading leads data. Please wait. </template>
-    
-    <Column selectionMode="single" headerStyle="width: 3rem"></Column>
-    
+        
     <Column field="lead_name" header="Name" style="min-width: 12rem">
       <template #body="{ data }">
         <a href="#" @click.prevent="selectLead(data)">{{ data.lead_name || `${data.first_name || ''} ${data.last_name || ''}`.trim() }}</a>
@@ -98,7 +98,7 @@ const leadStore = useLeadStore()
 // Selected lead tracking
 const selectedLeadId = ref(null)
 const selectedLead = ref(null)
-
+const metaKey = ref(true);
 // Create dialog state
 const createDialogVisible = ref(false)
 
@@ -108,10 +108,11 @@ const createLeadFields = [
     name: 'first_name', 
     label: 'First Name', 
     type: 'text',
+    icon: 'pi pi-user',
     validation: { 
       required: true,
       maxLength: 50, 
-      message: 'First name is required and should be less than 50 characters' 
+      message: 'First name should be less than 50 characters' 
     }
   },
   { 
@@ -273,13 +274,5 @@ const createLead = async (formData) => {
 <style scoped>
 .p-datatable {
   width: 100%;
-}
-
-.status-indicator {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 8px;
 }
 </style>

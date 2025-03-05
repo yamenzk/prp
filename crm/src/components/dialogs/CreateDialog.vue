@@ -22,6 +22,9 @@
             :validation="field.validation"
             :options="field.options"
             :doctype="field.doctype"
+            :icon="field.icon"
+            :disabled="field.readonly || field.disabled"
+            v-bind="getAdditionalProps(field)"
           />
         </div>
       </div>
@@ -101,6 +104,22 @@ const isFormValid = computed(() => {
   }
   return true
 })
+
+// Get any additional props from the field definition
+const getAdditionalProps = (field) => {
+  // List of props we've already handled explicitly
+  const handledProps = ['name', 'label', 'type', 'validation', 'options', 'doctype', 'icon', 'readonly', 'disabled', 'fullWidth', 'default'];
+  
+  // Create an object with all remaining props
+  const additionalProps = {};
+  Object.keys(field).forEach(key => {
+    if (!handledProps.includes(key)) {
+      additionalProps[key] = field[key];
+    }
+  });
+  
+  return additionalProps;
+}
 
 // Reset the form to initial values
 const resetForm = () => {

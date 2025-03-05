@@ -320,6 +320,8 @@ watch(selectedPreference, (newValue) => {
   selectedPreferenceId.value = newValue?.name || null
 })
 
+
+
 // Methods for Preference Management
 const loadLeadPreferences = async () => {
   if (!props.leadId) return
@@ -332,12 +334,26 @@ const loadLeadPreferences = async () => {
     
     // Auto-select the most recent preference if available
     if (preferences.value.length > 0 && !selectedPreference.value) {
-      selectedPreference.value = preferences.value[0]
+      // Sort by creation date if needed (assuming newest first)
+      const sortedPreferences = [...preferences.value].sort((a, b) => 
+        new Date(b.creation) - new Date(a.creation)
+      );
+      selectedPreference.value = sortedPreferences[0];
     }
   } catch (error) {
     console.error('Error loading preferences:', error)
   }
 }
+
+watch(() => props.leadId, (newLeadId) => {
+  // Clear the selected preference when lead changes
+  selectedPreference.value = null
+  
+  // Load preferences for the new lead
+  if (newLeadId) {
+    loadLeadPreferences()
+  }
+}, { immediate: true })
 
 const openCreatePreferenceDialog = () => {
   createPreferenceDialogVisible.value = true
