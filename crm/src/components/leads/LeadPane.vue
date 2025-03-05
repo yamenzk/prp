@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!currentLead">
+  <div v-if="!currentLead" class="m-auto">
     <Panel class="m-8" pt:root:class="!border-0 !bg-white dark:!bg-zinc-800">
       <div class="flex flex-col items-center justify-center h-full text-center py-12">
         <FeatherIcon
@@ -57,11 +57,12 @@
         </div>
       </div>
     </div>
-    <ScrollPanel style="width: 100%; height: 100%">
+    <ScrollPanel style="width: 100%; height: 85%">
       <Tabs v-model:value="value" >
         <TabPanels pt:root:class="!bg-white dark:!bg-zinc-800">
-          <TabPanel value="0" pt:root:class="!bg-white dark:!bg-zinc-800 !flex !flex-col !gap-4">
-            <EditableFieldset
+          <TabPanel value="0" pt:root:class="!bg-white dark:!bg-zinc-800">
+            <div class="flex flex-col gap-4">
+            <EditableFieldset 
               legend="Lead"
               :fields="leadFields"
               :data="currentLead"
@@ -87,6 +88,7 @@
               customClass="mb-2"
               @edit="openEditDialog"
             />
+            </div>
           </TabPanel>
           <TabPanel value="1">
             <div class="p-4">
@@ -172,24 +174,6 @@ const personalFields = [
       message: 'Last name should be less than 50 characters' 
     }
   },
-  { 
-    name: 'email', 
-    label: 'Email', 
-    type: 'text',
-    validation: { 
-      pattern: '^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$', 
-      message: 'Please enter a valid email address' 
-    }
-  },
-  { 
-    name: 'phone', 
-    label: 'Phone', 
-    type: 'text',
-    validation: {
-      pattern: '^[0-9+\\s-()]{7,20}$',
-      message: 'Please enter a valid phone number'
-    }
-  }
 ]
 
 const professionalFields = [
@@ -211,7 +195,8 @@ const leadFields = [
     name: 'name', 
     label: 'ID', 
     type: 'text',
-    validation: 'required'
+    validation: 'required',
+    readonly: true
   },
   { 
     name: 'lead_source', 
@@ -223,14 +208,15 @@ const leadFields = [
     name: 'owner', 
     label: 'Owner', 
     type: 'link', 
-    doctype: 'User'
+    doctype: 'User',
+    readonly: true
   },
-  { 
-    name: 'status', 
-    label: 'Status', 
-    type: 'status',
-    options: LEAD_STATUSES
-  }
+  // { 
+  //   name: 'status', 
+  //   label: 'Status', 
+  //   type: 'status',
+  //   options: LEAD_STATUSES
+  // }
 ]
 
 
@@ -338,5 +324,3 @@ const confirmDeleteLead = async () => {
 }
 
 </script>
-
-<style scoped></style>

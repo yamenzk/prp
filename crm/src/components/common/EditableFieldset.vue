@@ -3,6 +3,7 @@
     :legend="legend" 
     :toggleable="true" 
     pt:root:class="!bg-white dark:!bg-zinc-800"
+    pt:legend:class="dark:!bg-zinc-800 dark:hover:!bg-zinc-700"
     :class="customClass"
   >
     <div class="grid grid-cols-1 gap-4" :class="gridColumnClass">

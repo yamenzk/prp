@@ -14,7 +14,7 @@
     </div>
     
     <div v-else class="grid grid-cols-1 gap-3">
-      <div v-for="(row, index) in rows" :key="index" class="flex justify-between items-center p-3 border rounded">
+      <div v-for="(row, index) in rows" :key="index" class="flex justify-between items-center p-3 border rounded-xl">
         <slot name="row-content" :row="row" :index="index">
           <!-- Default row display if no slot is provided -->
           <div>
@@ -25,8 +25,14 @@
           </div>
         </slot>
         <div class="flex gap-2">
-          <Button icon="pi pi-pencil" text @click="openEditDialog(row, index)" />
-          <Button icon="pi pi-trash" text severity="danger" @click="confirmDelete(index)" />
+          <slot name="row-actions" 
+            :row="row" 
+            :index="index" 
+            :open-edit-dialog="openEditDialog" 
+            :confirm-delete="confirmDelete">
+            <Button icon="pi pi-pencil" text @click="openEditDialog(row, index)" />
+            <Button icon="pi pi-trash" text severity="danger" @click="confirmDelete(index)" />
+          </slot>
         </div>
       </div>
     </div>
