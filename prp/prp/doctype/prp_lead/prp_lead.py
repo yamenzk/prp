@@ -6,4 +6,6 @@ from frappe.model.document import Document
 
 
 class PRPLead(Document):
-	pass
+    def on_update(self):
+        if self.has_value_changed("first_name") or self.has_value_changed("last_name"):
+            self.lead_name = f"{self.first_name or ''} {self.last_name or ''}".strip()

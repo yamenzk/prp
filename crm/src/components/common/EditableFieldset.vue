@@ -17,7 +17,10 @@
         :variant="field.variant || 'text'"
         :severity="field.severity || 'secondary'"
         :readonly="readonly || field.readonly"
+        :icon="field.icon || ''"
+        :direct-toggle="field.directToggle !== false"
         @edit="$emit('edit', field.name, getFieldValue(field.name), field.label, field.type || 'text')"
+        @toggle-boolean="handleToggle"
       />
     </div>
     <slot></slot>
@@ -46,7 +49,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['edit'])
+const emit = defineEmits(['edit', 'update'])
 
 // Map the column number to an actual Tailwind class
 const gridColumnClass = computed(() => {
@@ -63,6 +66,25 @@ const gridColumnClass = computed(() => {
 })
 
 const getFieldValue = (fieldName) => {
-  return props.data?.[fieldName] || ''
+  if (fieldName in props.data) {
+    // For boolean fields, handle '0' and '1' values from the database
+    const value = props.data[fieldName];
+    const fieldDef = props.fields.find(f => f.name === fieldName);
+    
+    if (fieldDef && fieldDef.type === 'boolean') {
+      if (typeof value === 'boolean') return value;
+      if (value === 0 || value === '0') return false;
+      if (value === 1 || value === '1') return true;
+      return !!value;
+    }
+    
+    return value;
+  }
+  return '';
+}
+
+// Handle boolean toggle from triple-click
+const handleToggle = ({ fieldName, value }) => {
+  emit('update', { fieldName, value });
 }
 </script>
