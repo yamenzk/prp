@@ -1,3 +1,4 @@
+<!-- components/dialogs/DeleteDialog.vue -->
 <template>
   <Dialog 
     v-model:visible="isVisible" 

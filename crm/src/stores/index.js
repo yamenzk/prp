@@ -1,6 +1,4 @@
-// Export all store modules
+
+export { globalStore } from './global'
 export { useLeadStore } from './leads'
 export { usePreferenceStore } from './preferences'
-
-// You can add more store exports here as your application grows
-// export { useAnotherStore } from './another'

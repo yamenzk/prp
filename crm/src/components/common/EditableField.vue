@@ -1,3 +1,4 @@
+<!-- components/common/EditableField.vue -->
 <template>
   <div>
     <div class="flex items-center gap-1 mb-1">
@@ -23,7 +24,7 @@
       v-if="fieldType === 'boolean'" 
       class="flex items-center justify-between"
       :class="{'cursor-pointer': !readonly && directToggle}"
-      @click.stop="handleTripleClick($event)"
+      @click.stop="handleTripleClick"
     >
       <div class="flex items-center gap-2">
         <Checkbox 
@@ -38,7 +39,7 @@
       <Button 
         v-if="!readonly" 
         icon="pi pi-pen-to-square" 
-        @click.stop="$emit('edit', fieldName, value, label, fieldType)" 
+        @click.stop="handleEdit" 
         :severity="severity" 
         :variant="variant"
         class="hover:!bg-zinc-200 dark:hover:!bg-zinc-700"
@@ -51,7 +52,7 @@
       <Button 
         v-if="!readonly" 
         icon="pi pi-pen-to-square" 
-        @click="$emit('edit', fieldName, value, label, fieldType)" 
+        @click="handleEdit" 
         :severity="severity" 
         :variant="variant"
         class="hover:!bg-zinc-200 dark:hover:!bg-zinc-700"
@@ -70,7 +71,7 @@
         <InputGroupAddon v-if="!readonly" pt:root:class="!bg-zinc-100 dark:!bg-zinc-800 hover:!bg-zinc-200 dark:hover:!bg-zinc-700">
           <Button 
             icon="pi pi-pen-to-square" 
-            @click="$emit('edit', fieldName, value, label, fieldType)" 
+            @click="handleEdit" 
             :severity="severity" 
             :variant="variant" 
             class="hover:!bg-zinc-200 dark:hover:!bg-zinc-700"
@@ -90,7 +91,7 @@
       <InputGroupAddon v-if="!readonly" pt:root:class="!bg-zinc-100 dark:!bg-zinc-800 hover:!bg-zinc-200 dark:hover:!bg-zinc-700">
         <Button 
           icon="pi pi-pen-to-square" 
-          @click="$emit('edit', fieldName, value, label, fieldType)" 
+          @click="handleEdit" 
           :severity="severity" 
           :variant="variant" 
           class="hover:!bg-zinc-200 dark:hover:!bg-zinc-700"
@@ -143,7 +144,7 @@ const clickTimer = ref(null)
 const TRIPLE_CLICK_TIMEOUT = 300 // milliseconds
 
 // Handle triple click for boolean toggle
-const handleTripleClick = (event) => {
+const handleTripleClick = () => {
   if (props.readonly || !props.directToggle || props.fieldType !== 'boolean') return
   
   clickCount.value++
@@ -164,28 +165,31 @@ const handleTripleClick = (event) => {
       fieldName: props.fieldName,
       value: !props.value
     })
-    
-    // Prevent default behavior
-    event.preventDefault()
-    event.stopPropagation()
   }
+}
+
+// Handle edit button click
+const handleEdit = () => {
+  // Pass each argument individually rather than as an array
+  emit('edit', props.fieldName, props.value, props.label, props.fieldType)
 }
 
 // Check if the icon is an emoji
 const isEmoji = (str) => {
+  if (!str) return false
   // Simple emoji detection - checks if string contains emoji characters
-  const emojiRegex = /[\p{Emoji}]/u;
-  return emojiRegex.test(str);
+  const emojiRegex = /[\p{Emoji}]/u
+  return emojiRegex.test(str)
 }
 
 // Format currency values
 const formatCurrency = (value) => {
-  if (value === null || value === undefined || value === '') return '';
+  if (value === null || value === undefined || value === '') return ''
   return new Intl.NumberFormat('en-US', { 
     style: 'currency', 
     currency: 'USD',
     minimumFractionDigits: 2
-  }).format(value);
+  }).format(value)
 }
 
 // Determine the severity for status tags
@@ -199,39 +203,39 @@ const getTagSeverity = (status) => {
     'Closed': 'success',
     'Lost': 'danger',
     'Inactive': 'secondary'
-  };
-  return statusMap[status] || 'info';
+  }
+  return statusMap[status] || 'info'
 }
 
 // Computed property to handle display of various value types
 const displayValue = computed(() => {
-  if (props.value === null || props.value === undefined) return '';
+  if (props.value === null || props.value === undefined) return ''
   
   // For select/dropdown fields, just return the value as string
   if (props.fieldType === 'select') {
-    return String(props.value);
+    return String(props.value)
   }
   
   // For date fields, format the date
   if (props.fieldType === 'date' && props.value) {
     try {
-      return new Date(props.value).toLocaleDateString();
+      return new Date(props.value).toLocaleDateString()
     } catch (e) {
-      return props.value;
+      return props.value
     }
   }
   
   // For number fields
   if (props.fieldType === 'number' || props.fieldType === 'int') {
-    return String(props.value);
+    return String(props.value)
   }
   
   // For boolean fields - handled in template with checkbox
   if (props.fieldType === 'boolean') {
-    return props.value ? 'Yes' : 'No';
+    return props.value ? 'Yes' : 'No'
   }
   
   // Default case - just convert to string
-  return String(props.value);
+  return String(props.value)
 })
 </script>

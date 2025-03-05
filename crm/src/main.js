@@ -1,5 +1,4 @@
 import './index.css'
-
 import { createApp } from 'vue'
 import router from './router'
 import App from './App.vue'
@@ -8,48 +7,23 @@ import { definePreset } from '@primeuix/themes'
 import Aura from '@primeuix/themes/aura'
 import { setConfig, frappeRequest, resourcesPlugin, FeatherIcon } from 'frappe-ui'
 import { createPinia } from 'pinia'
+import { initSocket } from './socket'
+import { globalStore } from './stores/global'
 
 // Import PrimeVue components
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import Card from 'primevue/card'
-import InputText from 'primevue/inputtext'
-import Dropdown from 'primevue/dropdown'
-import Checkbox from 'primevue/checkbox'
-import Avatar from 'primevue/avatar'
 import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
-import Tag from 'primevue/tag'
-import Splitter from 'primevue/splitter'
-import SplitterPanel from 'primevue/splitterpanel'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import ColumnGroup from 'primevue/columngroup' 
-import Row from 'primevue/row'   
-import IconField from 'primevue/iconfield'
-import InputIcon from 'primevue/inputicon'
 import Select from 'primevue/select'
-import Panel from 'primevue/panel'
 import 'primeicons/primeicons.css'
-import Fieldset from 'primevue/fieldset'
-import InputGroup from 'primevue/inputgroup'
-import InputGroupAddon from 'primevue/inputgroupaddon'
-import FloatLabel from 'primevue/floatlabel'
-import ScrollPanel from 'primevue/scrollpanel'
 import DatePicker from 'primevue/datepicker'
-import InputNumber from 'primevue/inputnumber'
-import Textarea from 'primevue/textarea'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
 
+console.log('📊 Creating Pinia store')
 // Initialize Pinia
 const pinia = createPinia()
 app.use(pinia)
-
 app.use(router)
 app.use(resourcesPlugin)
 
@@ -100,7 +74,6 @@ const Noir = definePreset(Aura, {
 		},
 	},
 })
-
 app.use(PrimeVue, {
 	theme: {
 		preset: Noir,
@@ -109,11 +82,44 @@ app.use(PrimeVue, {
 		},
 	},
 })
-
 // Register PrimeVue components
 app.component('TabPanels', TabPanels)
 app.component('Tabs', Tabs)
 app.component('FeatherIcon', FeatherIcon)
 app.component('Select', Select)
 app.component('DatePicker', DatePicker)
-app.mount('#app')
+
+let socket
+if (import.meta.env.DEV) {
+	console.log('🧪 Running in DEV mode')
+	frappeRequest({ url: '/api/method/prp.www.prp.get_context_for_dev' }).then((values) => {
+		console.log('📄 Received context for dev', Object.keys(values))
+		for (let key in values) {
+			window[key] = values[key]
+		}
+
+		console.log('🔌 Initializing socket in DEV mode')
+		socket = initSocket()
+		app.config.globalProperties.$socket = socket
+
+		console.log('🏗️ Mounting app in DEV mode')
+		app.mount('#app')
+
+		console.log('🔄 Setting socket in global store after app mount (DEV)')
+		const store = globalStore()
+		store.setSocket(socket)
+		console.log('✅ App initialization complete in DEV mode')
+	})
+} else {
+	console.log('🚀 Running in PRODUCTION mode')
+	socket = initSocket()
+	app.config.globalProperties.$socket = socket
+
+	console.log('🏗️ Mounting app in PRODUCTION mode')
+	app.mount('#app')
+
+	console.log('🔄 Setting socket in global store after app mount (PROD)')
+	const store = globalStore()
+	store.setSocket(socket)
+	console.log('✅ App initialization complete in PRODUCTION mode')
+}

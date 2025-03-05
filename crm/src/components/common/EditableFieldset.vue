@@ -1,30 +1,23 @@
+<!-- components/common/EditableFieldset.vue -->
 <template>
-  <Fieldset 
-    :legend="legend" 
-    :toggleable="true" 
-    pt:root:class="!bg-white dark:!bg-zinc-800"
-    pt:legend:class="dark:!bg-zinc-800 dark:hover:!bg-zinc-700"
-    :class="customClass"
-  >
-    <div class="grid grid-cols-1 gap-4" :class="gridColumnClass">
-      <EditableField
-        v-for="field in fields"
+  <fieldset class="border rounded-xl p-4" :class="customClass">
+    <legend class="px-2 font-bold">{{ legend }}</legend>
+    <div class="grid gap-4" :class="gridClass">
+      <EditableField 
+        v-for="field in fields" 
         :key="field.name"
+        :field-name="field.name"
         :label="field.label"
-        :value="getFieldValue(field.name)"
-        :fieldName="field.name"
-        :fieldType="field.type || 'text'"
-        :variant="field.variant || 'text'"
-        :severity="field.severity || 'secondary'"
-        :readonly="readonly || field.readonly"
-        :icon="field.icon || ''"
-        :direct-toggle="field.directToggle !== false"
-        @edit="$emit('edit', field.name, getFieldValue(field.name), field.label, field.type || 'text')"
-        @toggle-boolean="handleToggle"
+        :value="data[field.name]"
+        :field-type="field.type"
+        :readonly="field.readonly"
+        :icon="field.icon"
+        :direct-toggle="field.type === 'boolean'"
+        @edit="handleEdit"
+        @toggle-boolean="$emit('update', $event)"
       />
     </div>
-    <slot></slot>
-  </Fieldset>
+  </fieldset>
 </template>
 
 <script setup>
@@ -32,9 +25,18 @@ import { computed } from 'vue'
 import EditableField from './EditableField.vue'
 
 const props = defineProps({
-  legend: String,
-  fields: Array,
-  data: Object,
+  legend: {
+    type: String,
+    required: true
+  },
+  fields: {
+    type: Array,
+    default: () => []
+  },
+  data: {
+    type: Object,
+    required: true
+  },
   columns: {
     type: Number,
     default: 2
@@ -42,49 +44,30 @@ const props = defineProps({
   customClass: {
     type: String,
     default: ''
-  },
-  readonly: {
-    type: Boolean,
-    default: false
   }
 })
 
 const emit = defineEmits(['edit', 'update'])
 
-// Map the column number to an actual Tailwind class
-const gridColumnClass = computed(() => {
-  const columnMap = {
-    1: 'md:grid-cols-1',
-    2: 'md:grid-cols-2',
-    3: 'md:grid-cols-3',
-    4: 'md:grid-cols-4',
-    5: 'md:grid-cols-5',
-    6: 'md:grid-cols-6'
-  };
-  
-  return columnMap[props.columns] || 'md:grid-cols-2'; // Default to 2 columns if invalid value
+// Fix: Create proper grid classes based on columns prop
+const gridClass = computed(() => {
+  // Use an object with boolean values for each possible class
+  return {
+    'grid-cols-1': true,
+    'sm:grid-cols-2': props.columns === 2,
+    'sm:grid-cols-3': props.columns === 3,
+    'sm:grid-cols-4': props.columns === 4,
+    'sm:grid-cols-5': props.columns === 5,
+    'sm:grid-cols-6': props.columns === 6
+  }
 })
 
-const getFieldValue = (fieldName) => {
-  if (fieldName in props.data) {
-    // For boolean fields, handle '0' and '1' values from the database
-    const value = props.data[fieldName];
-    const fieldDef = props.fields.find(f => f.name === fieldName);
-    
-    if (fieldDef && fieldDef.type === 'boolean') {
-      if (typeof value === 'boolean') return value;
-      if (value === 0 || value === '0') return false;
-      if (value === 1 || value === '1') return true;
-      return !!value;
-    }
-    
-    return value;
-  }
-  return '';
-}
-
-// Handle boolean toggle from triple-click
-const handleToggle = ({ fieldName, value }) => {
-  emit('update', { fieldName, value });
+// Fix: Handle edit events properly by forwarding them with the right arguments
+const handleEdit = (fieldName, value, label, type) => {
+  // Find the complete field definition to get validation and doctype
+  const field = props.fields.find(f => f.name === fieldName) || {}
+  
+  // Forward the event with all necessary details
+  emit('edit', fieldName, value, label, type, field.options, field.validation, field.doctype)
 }
 </script>

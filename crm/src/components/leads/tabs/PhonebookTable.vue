@@ -1,3 +1,4 @@
+<!-- PhonebookTable.vue -->
 <template>
   <ChildTable
     title="Contact Information"
