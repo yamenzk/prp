@@ -18,7 +18,7 @@ export const formatDateForDisplay = (date) => {
 }
 
 /**
- * Format date for server (DD-MM-YYYY HH:MM:SS in 24h format)
+ * Format date for server (YYYY-MM-DD HH:MM:SS in 24h format)
  * @param {Date} date - JavaScript Date object
  * @returns {string} Formatted date string for server
  */
@@ -26,8 +26,8 @@ export const formatDateForServer = (date) => {
 	if (!date) return null
 
 	try {
-		// Format as DD-MM-YYYY HH:MM:SS for Frappe backend in 24-hour format
-		return format(date, 'MM-dd-yyyy HH:mm:ss')
+		// Format as YYYY-MM-DD HH:MM:SS for Frappe backend in 24-hour format
+		return format(date, 'yyyy-MM-dd HH:mm:ss')
 	} catch (e) {
 		console.error('Error formatting date for server:', e)
 		return null

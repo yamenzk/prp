@@ -15,7 +15,7 @@
 							:value="draftNote.status || 'Backlog'"
 							:severity="getStatusSeverity(draftNote.status)"
 							class="cursor-pointer"
-							@click="statusMenuVisible = true"
+							@click="openStatusMenu($event)"
 						>
 							<template #icon>
 								<i :class="getStatusIcon(draftNote.status)" class="mr-1"></i>
@@ -26,8 +26,6 @@
 							ref="statusMenu"
 							:model="statusItems"
 							:popup="true"
-							:visible="statusMenuVisible"
-							@hide="statusMenuVisible = false"
 						/>
 					</div>
 
@@ -37,7 +35,7 @@
 							:value="draftNote.priority || 'Medium'"
 							:severity="getPrioritySeverity(draftNote.priority)"
 							class="cursor-pointer"
-							@click="priorityMenuVisible = true"
+							@click="openPriorityMenu($event)"
 						>
 							<template #icon>
 								<i :class="getPriorityIcon(draftNote.priority)" class="mr-1"></i>
@@ -48,8 +46,6 @@
 							ref="priorityMenu"
 							:model="priorityItems"
 							:popup="true"
-							:visible="priorityMenuVisible"
-							@hide="priorityMenuVisible = false"
 						/>
 					</div>
 
@@ -61,7 +57,7 @@
 							size="small"
 							text
 							class="p-button-rounded p-button-secondary"
-							@click="datePickerVisible = true"
+							@click="openDatePicker($event)"
 						/>
 
 						<Tag
@@ -69,20 +65,19 @@
 							:value="formatDateForDisplay(draftNote.dueDate)"
 							:severity="isOverdue(draftNote.dueDate) ? 'danger' : 'warning'"
 							class="cursor-pointer"
-							@click="datePickerVisible = true"
+							@click="openDatePicker($event)"
 						>
 							<template #icon>
 								<i class="pi pi-calendar mr-1"></i>
 							</template>
 						</Tag>
 
-						<Calendar
-							v-model="localDueDate"
+						<DatePicker 
+							v-model="localDueDate" 
 							:visible="datePickerVisible"
-							:inline="true"
-							:showTime="true"
-							hourFormat="12"
-							dateFormat="dd/MM/yy"
+							showTime 
+							hourFormat="12" 
+							fluid
 							@date-select="handleDateSelect"
 							@hide="handleDatePickerHide"
 							panelClass="date-picker-panel"
@@ -288,9 +283,11 @@ const customEmoji = ref('')
 // UI state
 const colorPickerVisible = ref(false)
 const emojiPickerVisible = ref(false)
-const statusMenuVisible = ref(false)
-const priorityMenuVisible = ref(false)
 const datePickerVisible = ref(false)
+
+// Menu refs
+const statusMenu = ref(null)
+const priorityMenu = ref(null)
 
 const availableTags = ref([
 	{ label: 'Work', value: 'work' },
@@ -324,7 +321,6 @@ const statusItems = computed(() => {
 			getStatusIcon(option.value).split(' ')[1],
 		command: () => {
 			emit('update:status', option.value)
-			statusMenuVisible.value = false
 		},
 	}))
 })
@@ -339,10 +335,22 @@ const priorityItems = computed(() => {
 			getPriorityIcon(option.value).split(' ')[1],
 		command: () => {
 			emit('update:priority', option.value)
-			priorityMenuVisible.value = false
 		},
 	}))
 })
+
+// Menu open methods
+const openStatusMenu = (event) => {
+	statusMenu.value.toggle(event)
+}
+
+const openPriorityMenu = (event) => {
+	priorityMenu.value.toggle(event)
+}
+
+const openDatePicker = (event) => {
+	datePickerVisible.value = true
+}
 
 // Tag methods
 const removeTag = (index) => {
@@ -377,7 +385,7 @@ const addCustomEmoji = () => {
 const handleDateSelect = () => {
 	if (localDueDate.value) {
 		const formattedDate = formatDateForServer(localDueDate.value)
-		emit('update:due-date', localDueDate.value)
+		emit('update:due-date', formattedDate)
 	}
 }
 
