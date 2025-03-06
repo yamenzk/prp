@@ -1,3 +1,4 @@
+// useNoteEditor.js 
  import { ref, computed } from 'vue';
 
 export function useNoteEditor(initialContext = { doctype: 'User', docname: '' }) {
@@ -101,7 +102,7 @@ export function useNoteEditor(initialContext = { doctype: 'User', docname: '' })
 			title: '',
 			details: '',
 			color: null,
-			icon: null,
+			icon: '📝',
 			sticky: false,
 			task: false,
 			journal: false,
@@ -126,7 +127,7 @@ export function useNoteEditor(initialContext = { doctype: 'User', docname: '' })
 			title: '',
 			details: '',
 			color: null,
-			icon: null,
+			icon: '✅',
 			sticky: false,
 			task: true,
 			journal: false,
@@ -224,26 +225,30 @@ export function useNoteEditor(initialContext = { doctype: 'User', docname: '' })
 	// Toggle between note types
 	const toggleNoteType = (type) => {
 		noteType.value = type
-
-		// Update draft note based on type
 		draftNote.value.task = type === 'task'
 		draftNote.value.journal = type === 'journal'
 
-		// Set default values based on type
-		if (type === 'task') {
-			if (!draftNote.value.status || draftNote.value.status === 'Backlog') {
-				draftNote.value.status = 'To Do'
-			}
-			if (!draftNote.value.priority) {
-				draftNote.value.priority = 'Medium'
-			}
-			if (!draftNote.value.dueDate) {
-				draftNote.value.dueDate = new Date()
-			}
-		} else if (type === 'journal') {
-			if (!draftNote.value.icon) {
-				draftNote.value.icon = '📔'
-			}
+		// Reset task and journal specific fields based on type
+		switch (type) {
+			case 'note':
+				draftNote.value.status = 'Backlog'
+				draftNote.value.priority = null
+				draftNote.value.dueDate = null
+				draftNote.value.icon = draftNote.value.icon || '📝'
+				break
+			case 'task':
+				draftNote.value.status =
+					draftNote.value.status === 'Backlog' ? 'To Do' : draftNote.value.status
+				draftNote.value.priority = draftNote.value.priority || 'Medium'
+				draftNote.value.dueDate = draftNote.value.dueDate || new Date()
+				draftNote.value.icon = draftNote.value.icon || '✅'
+				break
+			case 'journal':
+				draftNote.value.status = 'Backlog'
+				draftNote.value.priority = null
+				draftNote.value.dueDate = null
+				draftNote.value.icon = draftNote.value.icon || '📔'
+				break
 		}
 	}
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-between p-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-sm">
+  <div class="flex items-center justify-between px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-sm">
     <!-- Dynamic header content based on view type -->
     <HomeViewHeader 
       v-if="activeView === 'home' && !composingNote"
@@ -27,9 +27,11 @@
     />
     
     <ComposerHeader 
-      v-else-if="composingNote"
-      :header-title="headerTitle"
-    />
+  v-else-if="composingNote"
+  :header-title="headerTitle"
+  :note-type="noteType"
+  @toggle-note-type="$emit('toggle-note-type', $event)"
+/>
     
     <!-- Close/Minimize buttons (always present) -->
     <div class="flex items-center gap-1">
@@ -80,6 +82,10 @@ defineProps({
     type: Number,
     default: 0
   },
+  noteType: {
+    type: String,
+    default: 'note'  // Add a default value
+  },
   viewMode: {
     type: String,
     default: 'list'
@@ -103,6 +109,7 @@ defineEmits([
   'close',
   'navigate-back',
   'set-view-mode',
+  'toggle-note-type',
   'update:search-query',
   'update:hide-completed'
 ]);

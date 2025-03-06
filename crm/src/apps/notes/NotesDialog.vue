@@ -93,6 +93,7 @@
           @update:due-date="draftNote.dueDate = $event"
           @drag-task="dragTask($event.originalEvent, $event.detail)"
           @drop-task="dropTask($event.originalEvent, $event.detail)"
+          
         />
       </div>
     </template>

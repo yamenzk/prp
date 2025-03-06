@@ -1,66 +1,14 @@
+<!-- ComposerView.vue -->
 <template>
 	<div class="h-full flex flex-col bg-white dark:bg-zinc-900">
 		<!-- Header section with title, type selector and main actions -->
 		<div
 			class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
 		>
-			<!-- Title input field -->
-			<div class="relative mb-4">
-				<input
-					v-model="localTitle"
-					type="text"
-					placeholder="Untitled"
-					class="w-full text-xl font-medium border-0 border-b border-transparent outline-none focus:border-primary-300 dark:focus:border-primary-700 bg-transparent px-0 pb-1 transition-colors"
-					@input="$emit('update:title', localTitle)"
-				/>
-			</div>
-
-			<!-- Note controls bar -->
+		<!-- Note controls bar -->
 			<div class="flex items-center justify-between">
 				<!-- Left controls: type selector and metadata -->
 				<div class="flex items-center gap-2">
-					<!-- Note type selector -->
-					<div class="flex h-8 bg-zinc-100 dark:bg-zinc-800 rounded-md overflow-hidden">
-						<button
-								@click="handleNoteTypeChange('note')"
-								class="px-3 h-full flex items-center transition-colors"
-								:class="
-									noteType === 'note'
-										? 'bg-blue-500 text-white'
-										: 'hover:bg-zinc-200 dark:hover:bg-zinc-700'
-								"
-							>
-								<i class="pi pi-file text-sm mr-1"></i>
-								<span class="text-xs font-medium">Note</span>
-							</button>
-	
-							<button
-								@click="handleNoteTypeChange('task')"
-								class="px-3 h-full flex items-center transition-colors"
-								:class="
-									noteType === 'task'
-										? 'bg-green-500 text-white'
-										: 'hover:bg-zinc-200 dark:hover:bg-zinc-700'
-								"
-							>
-								<i class="pi pi-check-square text-sm mr-1"></i>
-								<span class="text-xs font-medium">Task</span>
-							</button>
-	
-							<button
-								@click="handleNoteTypeChange('journal')"
-								class="px-3 h-full flex items-center transition-colors"
-								:class="
-									noteType === 'journal'
-										? 'bg-purple-500 text-white'
-										: 'hover:bg-zinc-200 dark:hover:bg-zinc-700'
-								"
-							>
-								<i class="pi pi-book text-sm mr-1"></i>
-								<span class="text-xs font-medium">Journal</span>
-							</button>
-					</div>
-
 					<!-- Status tag (for all note types) -->
 					<div>
 						<Tag
@@ -174,29 +122,15 @@
 					/>
 				</div>
 			</div>
-
-			<!-- Tags input -->
-			<div class="mt-3">
-				<AutoComplete
-					v-model="localTags"
-					placeholder="Add tags (press enter after each tag)"
-					class="w-full chips-autocomplete"
-					multiple
-					:typeahead="false"
-					@update:modelValue="$emit('update:tags', localTags)"
-				>
-					<template #chip="slotProps">
-						<div
-							class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 mr-1 mb-1"
-						>
-							<span class="mr-1">#{{ slotProps.value }}</span>
-							<i
-								class="pi pi-times cursor-pointer"
-								@click.stop="removeTag(slotProps.i)"
-							></i>
-						</div>
-					</template>
-				</AutoComplete>
+			<!-- Title input field -->
+			<div class="relative my-4">
+				<input
+					v-model="localTitle"
+					type="text"
+					placeholder="Untitled"
+					class="w-full text-xl font-medium border-0 border-b border-transparent outline-none focus:border-primary-300 dark:focus:border-primary-700 bg-transparent px-0 pb-1 transition-colors"
+					@input="$emit('update:title', localTitle)"
+				/>
 			</div>
 		</div>
 
@@ -207,7 +141,7 @@
 				:content="localDetails"
 				placeholder="Type something..."
 				@change="handleEditorChange"
-				:bubbleMenu="true"
+				:bubbleMenu="false"
 				:fixed-menu="true"
 				class="flex-grow editor-container"
 			/>
@@ -216,6 +150,46 @@
 		<!-- Footer section with action buttons -->
 		<div class="px-4 py-3 border-t border-zinc-200 dark:border-zinc-800 flex justify-between">
 			<Button label="Cancel" icon="pi pi-times" text @click="$emit('cancel-compose')" />
+			<div>
+				<MultiSelect
+					v-model="localTags"
+					:options="availableTags"
+					:filter="true"
+					optionLabel="label"
+					optionValue="value"
+					placeholder="Add tags"
+					display="chip"
+					:showToggleAll="false"
+					:allowEmpty="true"
+					class="w-full"
+					@change="handleTagChange"
+				>
+					<template #option="slotProps">
+						<div class="flex items-center">
+							<span class="mr-2">#</span>
+							<div>{{ slotProps.option.label }}</div>
+						</div>
+					</template>
+					<template #dropdownicon>
+						<i class="pi pi-tags" />
+					</template>
+					<template #header>
+						<div class="font-medium px-3 py-2">Available Tags</div>
+					</template>
+					<template #footer>
+						<div class="p-3 flex justify-between">
+							<Button
+								label="Create Tag"
+								severity="secondary"
+								text
+								size="small"
+								icon="pi pi-plus"
+								@click="openTagCreationModal"
+							/>
+						</div>
+					</template>
+				</MultiSelect>
+			</div>
 			<Button
 				label="Save"
 				icon="pi pi-check"
@@ -255,8 +229,6 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-// Remove SimpleEditor import if you're not using it anymore
-// import SimpleEditor from './SimpleEditor.vue';
 import { TextEditor } from 'frappe-ui'
 import { commonEmojis } from '../../utils/noteIcons'
 import {
@@ -293,6 +265,7 @@ const emit = defineEmits([
 	'update:priority',
 	'update:due-date',
 	'select-note-type',
+	'toggle-note-type',
 	'cancel-compose',
 	'save-note',
 ])
@@ -300,7 +273,14 @@ const emit = defineEmits([
 // Local state for form values
 const localTitle = ref(props.draftNote.title || '')
 const localDetails = ref(props.draftNote.details || '')
-const localTags = ref(props.draftNote.tags || [])
+const localTags = ref(
+	props.draftNote.tags
+		? props.draftNote.tags
+				.map((tag) => availableTags.value.find((t) => t.value === tag)?.value || tag)
+				.filter(Boolean) // Remove any undefined values
+		: [],
+)
+
 const localColor = ref(props.draftNote.color || '')
 const localDueDate = ref(props.draftNote.dueDate ? new Date(props.draftNote.dueDate) : null)
 const customEmoji = ref('')
@@ -311,6 +291,15 @@ const emojiPickerVisible = ref(false)
 const statusMenuVisible = ref(false)
 const priorityMenuVisible = ref(false)
 const datePickerVisible = ref(false)
+
+const availableTags = ref([
+	{ label: 'Work', value: 'work' },
+	{ label: 'Personal', value: 'personal' },
+	{ label: 'Important', value: 'important' },
+	{ label: 'Listing', value: 'listing' },
+	{ label: 'Lead', value: 'lead' },
+	{ label: 'Deal', value: 'deal' },
+])
 
 // Watch for prop changes
 watch(
@@ -409,12 +398,65 @@ const handleEditorChange = (content) => {
 
 // Add this new method to handle note type changes
 const handleNoteTypeChange = (type) => {
-	emit('select-note-type', type)
+	emit('toggle-note-type', type) // Use the correct event name
+}
+
+const handleTagChange = () => {
+	// Ensure we're always working with values
+	const tagValues = localTags.value
+		.map((tag) => (typeof tag === 'object' ? tag.value : tag))
+		.filter(Boolean)
+
+	emit('update:tags', tagValues)
+}
+// Open modal/prompt for creating new tag
+const openTagCreationModal = () => {
+	const newTag = prompt('Enter a new tag name:')
+	if (newTag && newTag.trim()) {
+		const formattedTag = newTag.trim().toLowerCase()
+		// Check if tag already exists
+		const existingTag = availableTags.value.find((t) => t.value === formattedTag)
+
+		if (!existingTag) {
+			const newTagObject = { label: formattedTag, value: formattedTag }
+			availableTags.value.push(newTagObject)
+
+			// Add to selected tags
+			localTags.value = [...localTags.value, newTagObject]
+
+			// Emit updated tags
+			emit(
+				'update:tags',
+				localTags.value.map((tag) => tag.value),
+			)
+		}
+	}
 }
 </script>
 
 <style scoped>
 /* Custom styling for the form elements */
+
+:deep(.p-multiselect-label-container) {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+}
+
+:deep(.p-multiselect-token) {
+	background-color: rgba(0, 0, 0, 0.1);
+	color: rgba(0, 0, 0, 0.7);
+	padding: 0.25rem 0.5rem;
+	border-radius: 9999px;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+:deep(.p-multiselect-token-label) {
+	margin-right: 0.25rem;
+}
+
 :deep(.p-tag) {
 	height: 24px;
 }

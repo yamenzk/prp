@@ -1,3 +1,4 @@
+<!-- NotesContent.vue -->
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden">
     <!-- Header -->
@@ -7,6 +8,7 @@
       :header-title="headerTitle"
       :active-tab-index="activeTabIndex"
       :view-mode="viewMode"
+      :note-type="noteType"
       :search-query="searchQuery"
       :hide-completed="hideCompleted"
       :current-context="currentContext"
@@ -16,6 +18,7 @@
       @set-view-mode="$emit('set-view-mode', $event)"
       @update:search-query="$emit('update:search-query', $event)"
       @update:hide-completed="$emit('update:hide-completed', $event)"
+      @toggle-note-type="toggleNoteType"
     />
     
     <!-- Main Content with scroll physics -->
@@ -92,7 +95,7 @@
         :icon-picker-items="iconPickerItems"
         @cancel-compose="$emit('cancel-compose')"
         @save-note="$emit('save-note')"
-        @toggle-note-type="$emit('toggle-note-type')"
+        @toggle-note-type="$emit('toggle-note-type', $event)"
         @toggle-color-picker="$emit('toggle-color-picker')"
         @update:color="$emit('update:color', $event)"
         @update:icon="$emit('update:icon', $event)"
@@ -115,8 +118,9 @@ import RoomView from './RoomView.vue';
 import DetailView from './DetailView.vue';
 import ComposerView from './ComposerView.vue';
 import { statusOptions, priorityOptions } from '../../utils/noteStatusHelpers';
+import { ref, watch } from 'vue';
 
-defineProps({
+const props = defineProps({
   activeView: {
     type: String,
     required: true
@@ -163,6 +167,10 @@ defineProps({
   },
   noteType: {
     type: String,
+    default: 'note'
+  },
+  draftNote: {
+    type: Object,
     required: true
   },
   filteredStickyNotes: {
@@ -218,6 +226,46 @@ defineProps({
     required: true
   }
 });
+const noteType = ref(props.noteType)
+const draftNote = ref(props.draftNote)
+watch(() => props.noteType, (newType) => {
+  noteType.value = newType
+})
+
+watch(() => props.draftNote, (newDraftNote) => {
+  draftNote.value = newDraftNote
+}, { deep: true })
+
+const toggleNoteType = (type) => {
+  // Update note type
+  noteType.value = type
+
+  // Reset task and journal flags
+  draftNote.value.task = type === 'task'
+  draftNote.value.journal = type === 'journal'
+
+  // Reset specific fields based on type
+  switch (type) {
+    case 'note':
+      draftNote.value.status = 'Backlog'
+      draftNote.value.priority = null
+      draftNote.value.dueDate = null
+      draftNote.value.icon = draftNote.value.icon || '📝'
+      break
+    case 'task':
+      draftNote.value.status = draftNote.value.status === 'Backlog' ? 'To Do' : draftNote.value.status
+      draftNote.value.priority = draftNote.value.priority || 'Medium'
+      draftNote.value.dueDate = draftNote.value.dueDate || new Date()
+      draftNote.value.icon = draftNote.value.icon || '✅'
+      break
+    case 'journal':
+      draftNote.value.status = 'Backlog'
+      draftNote.value.priority = null
+      draftNote.value.dueDate = null
+      draftNote.value.icon = draftNote.value.icon || '📔'
+      break
+  }
+}
 
 defineEmits([
   'minimize-dialog',

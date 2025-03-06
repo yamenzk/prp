@@ -124,7 +124,7 @@ export const getStatusIcon = (status) => {
 		case 'Cancelled':
 			return 'pi pi-times-circle text-gray-500'
 		case 'Backlog':
-			return 'pi pi-inbox text-gray-500'
+			return 'pi pi-inbox text-cyan-800'
 		default:
 			return 'pi pi-circle-fill text-gray-400'
 	}

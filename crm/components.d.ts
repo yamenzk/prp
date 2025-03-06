@@ -54,6 +54,7 @@ declare module 'vue' {
     LeadPane: typeof import('./src/components/leads/LeadPane.vue')['default']
     Menu: typeof import('primevue/menu')['default']
     Menubar: typeof import('primevue/menubar')['default']
+    MultiSelect: typeof import('primevue/multiselect')['default']
     NoteCard: typeof import('./src/components/apps/notes/components/cards/NoteCard.vue')['default']
     NotesContent: typeof import('./src/components/apps/notes/components/content/NotesContent.vue')['default']
     NotesDialog: typeof import('./src/components/apps/notes/NotesDialog.vue')['default']
