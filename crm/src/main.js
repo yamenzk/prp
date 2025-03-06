@@ -16,6 +16,7 @@ import TabPanels from 'primevue/tabpanels'
 import Select from 'primevue/select'
 import 'primeicons/primeicons.css'
 import DatePicker from 'primevue/datepicker'
+import TagInput from './components/common/TagInput.vue'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -88,6 +89,16 @@ app.component('Tabs', Tabs)
 app.component('FeatherIcon', FeatherIcon)
 app.component('Select', Select)
 app.component('DatePicker', DatePicker)
+app.component('TagInput', TagInput)
+
+document.addEventListener('keydown', (e) => {
+	// Cmd+N or Ctrl+N to open notes
+	if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+		e.preventDefault()
+		const noteStore = useNoteStore()
+		noteStore.openDialog()
+	}
+})
 
 let socket
 if (import.meta.env.DEV) {

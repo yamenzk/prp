@@ -114,3 +114,13 @@ body {
 .app-card-content {
 	padding: 1rem;
 }
+
+:root {
+  --app-sidebar-width: 260px;
+  --app-header-height: 64px;
+}
+
+/* Dark mode adjustments */
+.dark {
+  color-scheme: dark;
+}

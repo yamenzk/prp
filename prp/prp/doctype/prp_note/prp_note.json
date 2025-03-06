@@ -8,6 +8,7 @@
  "field_order": [
   "rel_doctype",
   "rel_docname",
+  "tags",
   "column_break_gcfd",
   "icon",
   "color",
@@ -107,11 +108,16 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Backlog\nCompleted\nCancelled\nDelayed\nOn Hold\nTo Do"
+  },
+  {
+   "fieldname": "tags",
+   "fieldtype": "Small Text",
+   "label": "Tags"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-05 22:56:17.307313",
+ "modified": "2025-03-06 04:27:55.265281",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Note",

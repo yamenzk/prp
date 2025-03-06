@@ -13,6 +13,12 @@ export const useNoteStore = defineStore('notes', {
 
 		// Filters state
 		filters: {},
+
+		dialogVisible: false,
+		currentContext: { doctype: 'User', docname: '' },
+		lastView: 'home', // Remember last view (home, room, detail)
+		lastComposeState: false, // Was user composing when dialog closed?
+		draftNote: null, // Store draft when composing
 	}),
 
 	getters: {
@@ -121,6 +127,32 @@ export const useNoteStore = defineStore('notes', {
 					}
 				}
 			})
+		},
+
+		formatDateForServer(date) {
+			if (!date) return null
+
+			// Format the date as DD-MM-YYYY HH:MM:SS in Dubai timezone (GMT+4)
+			const options = {
+				timeZone: 'Asia/Dubai',
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
+				second: '2-digit',
+				hour12: false,
+			}
+
+			const formatter = new Intl.DateTimeFormat('en-CA', options)
+			const parts = formatter.formatToParts(date)
+			const dateObj = {}
+
+			parts.forEach((part) => {
+				dateObj[part.type] = part.value
+			})
+
+			return `${dateObj.day}-${dateObj.month}-${dateObj.year} ${dateObj.hour}:${dateObj.minute}:${dateObj.second}`
 		},
 
 		// Refetch notes when notified of changes
@@ -372,6 +404,14 @@ export const useNoteStore = defineStore('notes', {
 			}
 		},
 
+		// Fetch notes by context
+		async fetchNotesByContext(doctype, docname) {
+			if (!this.noteList || this.notes.length === 0) {
+				await this.fetchNotes()
+			}
+			return this.notesByRelatedDoc(doctype, docname)
+		},
+
 		// Link note to a document
 		async linkToDocument(name, doctype, docname) {
 			try {
@@ -382,6 +422,53 @@ export const useNoteStore = defineStore('notes', {
 			} catch (error) {
 				console.error(`Error linking note ${name}:`, error)
 				throw error
+			}
+		},
+
+		openDialog(context = null, startComposing = false) {
+			if (context) {
+				this.currentContext = { ...context }
+			}
+
+			this.dialogVisible = true
+
+			// If composing flag is set, prepare a new draft
+			if (startComposing) {
+				this.lastComposeState = true
+				if (!this.draftNote) {
+					this.draftNote = {
+						title: '',
+						details: '',
+						color: null,
+						icon: null,
+						sticky: false,
+						task: false,
+						journal: false,
+						status: 'Backlog',
+						priority: null,
+						due: null,
+						rel_doctype: this.currentContext.doctype,
+						rel_docname: this.currentContext.docname,
+					}
+				}
+			}
+		},
+
+		closeDialog() {
+			this.dialogVisible = false
+		},
+
+		setCurrentContext(context) {
+			this.currentContext = { ...context }
+		},
+
+		// Save view state for reopening
+		saveViewState(viewName, isComposing = false, draft = null) {
+			this.lastView = viewName
+			this.lastComposeState = isComposing
+
+			if (draft) {
+				this.draftNote = { ...draft }
 			}
 		},
 	},

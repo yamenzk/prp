@@ -1,50 +1,96 @@
 <template>
-    <div class="dock-container" :class="{ collapsed }">
-        <ContextMenu global :model="menuItems" />
-        <div class="dock" v-if="!collapsed">
-            <div 
-                v-for="item in items" 
-                :key="item.label" 
-                class="dock-item"
-                v-tooltip.top="item.label"
-            >
-                <img :src="item.icon" :alt="item.label" />
-            </div>
-        </div>
-        <div class="dock-handle bg-zinc-600 dark:bg-zinc-200" @click="toggleDock" v-if="collapsed"></div>
+  <div class="dock-container" :class="{ collapsed }">
+    <ContextMenu global :model="menuItems" />
+    <div class="dock" v-if="!collapsed">
+      <div 
+        v-for="item in items" 
+        :key="item.id" 
+        class="dock-item cursor-pointer transition-transform duration-200 hover:scale-110"
+        @click="handleDockItemClick(item)"
+      >
+        <img :src="item.icon" :alt="item.label" />
+      </div>
     </div>
+    <div 
+      class="dock-handle bg-zinc-600 dark:bg-zinc-200 cursor-pointer" 
+      @click="toggleDock" 
+      v-if="collapsed"
+    ></div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, inject, onMounted } from "vue";
+import ContextMenu from 'primevue/contextmenu';
 
-const items = ref([
-    { label: "Notes", icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_Notes_icon.svg/2048px-Apple_Notes_icon.svg.png" },
-    { label: "App Store", icon: "https://primefaces.org/cdn/primevue/images/dock/appstore.svg" },
-    { label: "Photos", icon: "https://primefaces.org/cdn/primevue/images/dock/photos.svg" },
-    { label: "Trash", icon: "https://primefaces.org/cdn/primevue/images/dock/trash.png" }
-]);
+const emit = defineEmits(['open-notes']);
 
-const collapsed = ref(false);
-
-const menuItems = ref([
-    {
-        label: 'Collapse Dock',
-        icon: 'pi pi-angle-double-down',
-        command: () => collapsed.value = true
-    }
-]);
-
-const toggleDock = () => {
-    collapsed.value = !collapsed.value;
+// Initialize with a fallback that emits an event
+let notesDialog = {
+  open: () => emit('open-notes')
 };
 
-const handleSwipe = (event) => {
-    if (event.deltaY > 50) collapsed.value = true;
+// Access the notes dialog API provided by App.vue when available
+onMounted(() => {
+  const injectedDialog = inject('notesDialog', null);
+  if (injectedDialog) {
+    notesDialog = injectedDialog;
+  }
+});
+
+// Dock items
+const items = ref([
+  { 
+    id: 'notes', 
+    label: "Notes", 
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_Notes_icon.svg/2048px-Apple_Notes_icon.svg.png" 
+  },
+  { 
+    id: 'appstore', 
+    label: "App Store", 
+    icon: "https://primefaces.org/cdn/primevue/images/dock/appstore.svg" 
+  },
+  { 
+    id: 'photos', 
+    label: "Photos", 
+    icon: "https://primefaces.org/cdn/primevue/images/dock/photos.svg" 
+  },
+  { 
+    id: 'trash', 
+    label: "Trash", 
+    icon: "https://primefaces.org/cdn/primevue/images/dock/trash.png" 
+  }
+]);
+
+// UI state
+const collapsed = ref(false);
+
+// Context menu items
+const menuItems = ref([
+  {
+    label: 'Collapse Dock',
+    icon: 'pi pi-angle-double-down',
+    command: () => collapsed.value = true
+  }
+]);
+
+// Handle clicking on dock items
+const handleDockItemClick = (item) => {
+  if (item.id === 'notes') {
+    // Using emit as a more reliable method instead of inject
+    emit('open-notes');
+  }
+  // Handle other dock items as needed
+};
+
+// Toggle dock collapsed state
+const toggleDock = () => {
+  collapsed.value = !collapsed.value;
 };
 </script>
 
 <style scoped>
+/* Styles remain the same */
 .dock-container {
     display: flex;
     justify-content: center;
