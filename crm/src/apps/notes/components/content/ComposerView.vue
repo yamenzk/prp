@@ -131,15 +131,13 @@
 
 		<!-- Editor section -->
 		<div class="flex-1 overflow-hidden flex flex-col">
-			<TextEditor
-				editor-class="prose prose-sm max-h-[500px] overflow-y-auto p-4 flex-grow"
-				:content="localDetails"
-				placeholder="Type something..."
-				@change="handleEditorChange"
-				:bubbleMenu="false"
-				:fixed-menu="false"
-				class="flex-grow editor-container"
-			/>
+			<Editor 
+      v-model="localDetails"
+      placeholder="Type something..."
+      class="flex-grow editor-container" 
+      @text-change="handleEditorChange"
+      editorStyle="height: 100%; min-height: 300px; max-height: 500px; overflow-y: auto; padding: 1rem;"
+    />
 		</div>
 
 		<!-- Footer section with action buttons -->
@@ -235,6 +233,14 @@ import {
 	priorityOptions,
 } from '../../utils/noteStatusHelpers'
 import { formatDateForDisplay, formatDateForServer, isOverdue } from '../../utils/noteFormatters'
+const availableTags = ref([
+	{ label: 'Work', value: 'work' },
+	{ label: 'Personal', value: 'personal' },
+	{ label: 'Important', value: 'important' },
+	{ label: 'Listing', value: 'listing' },
+	{ label: 'Lead', value: 'lead' },
+	{ label: 'Deal', value: 'deal' },
+])
 
 // Props
 const props = defineProps({
@@ -289,14 +295,6 @@ const datePickerVisible = ref(false)
 const statusMenu = ref(null)
 const priorityMenu = ref(null)
 
-const availableTags = ref([
-	{ label: 'Work', value: 'work' },
-	{ label: 'Personal', value: 'personal' },
-	{ label: 'Important', value: 'important' },
-	{ label: 'Listing', value: 'listing' },
-	{ label: 'Lead', value: 'lead' },
-	{ label: 'Deal', value: 'deal' },
-])
 
 // Watch for prop changes
 watch(
@@ -400,8 +398,32 @@ const handleDatePickerHide = () => {
 
 // Add this handler for TextEditor changes
 const handleEditorChange = (content) => {
-	localDetails.value = content
-	emit('update:details', content)
+  // Log what we're getting from the editor
+  console.log("Editor content:", content);
+  
+  let htmlContent = '';
+  
+  // If it's a string, use it directly
+  if (typeof content === 'string') {
+    htmlContent = content;
+  }
+  // If it's an object with htmlValue (common in PrimeVue Editor)
+  else if (content && typeof content === 'object') {
+    if (content.htmlValue) {
+      htmlContent = content.htmlValue;
+    } else if (content.innerHTML) {
+      htmlContent = content.innerHTML;
+    } else if (content.textContent) {
+      htmlContent = content.textContent;
+    } else {
+      // If we can't find HTML content, log this for debugging
+      console.warn("Editor content structure:", content);
+      htmlContent = String(content);
+    }
+  }
+  
+  localDetails.value = htmlContent;
+  emit('update:details', htmlContent);
 }
 
 // Add this new method to handle note type changes

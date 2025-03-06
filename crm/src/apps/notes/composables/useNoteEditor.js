@@ -1,6 +1,7 @@
 // useNoteEditor.js 
  import { ref, computed } from 'vue';
  import { commonEmojis } from '../utils/noteIcons';
+import { formatDateForServer } from '../utils/noteFormatters'
 
 export function useNoteEditor(initialContext = { doctype: 'User', docname: '' }) {
 	// Composing state
@@ -237,28 +238,47 @@ export function useNoteEditor(initialContext = { doctype: 'User', docname: '' })
 			let formattedData = { ...draftNote.value }
 			delete formattedData.dueDate
 
-			if (draftNote.value.dueDate) {
-				// Format the date as DD-MM-YYYY HH:MM:SS in Dubai timezone (GMT+4)
-				const options = {
-					timeZone: 'Asia/Dubai',
-					day: '2-digit',
-					month: '2-digit',
-					year: 'numeric',
-					hour: '2-digit',
-					minute: '2-digit',
-					second: '2-digit',
-					hour12: false,
+			// Handle the details field properly
+			if (formattedData.details) {
+				// If it's a PrimeVue Editor object with HTML content
+				if (typeof formattedData.details === 'object') {
+					// Check if it has an htmlValue property (PrimeVue Editor typically has this)
+					if (formattedData.details.htmlValue) {
+						formattedData.details = formattedData.details.htmlValue
+					}
+					// Check if it has a textContent property
+					else if (formattedData.details.textContent) {
+						formattedData.details = formattedData.details.textContent
+					}
+					// If we still have an object, try to get its innerHTML
+					else if (formattedData.details.innerHTML) {
+						formattedData.details = formattedData.details.innerHTML
+					}
+					// Last resort - convert to JSON and then extract
+					else {
+						try {
+							const detailsStr = JSON.stringify(formattedData.details)
+							// Try to extract content
+							const contentMatch = detailsStr.match(/"content":"([^"]+)"/)
+							if (contentMatch && contentMatch[1]) {
+								formattedData.details = contentMatch[1]
+							} else {
+								// If we couldn't extract content, use whatever string representation we can get
+								formattedData.details = formattedData.details.toString()
+							}
+						} catch (e) {
+							// If JSON stringification fails, use simple toString
+							formattedData.details = 'Failed to extract content from editor'
+							console.error('Failed to extract editor content:', e)
+						}
+					}
 				}
+				// If it's already a string, we're good to go
+			}
 
-				const formatter = new Intl.DateTimeFormat('en-AE', options)
-				const parts = formatter.formatToParts(draftNote.value.dueDate)
-				const dateObj = {}
-
-				parts.forEach((part) => {
-					dateObj[part.type] = part.value
-				})
-
-				formattedData.due = `${dateObj.day}-${dateObj.month}-${dateObj.year} ${dateObj.hour}:${dateObj.minute}:${dateObj.second}`
+			// Use formatDateForServer utility for due date
+			if (draftNote.value.dueDate) {
+				formattedData.due = formatDateForServer(draftNote.value.dueDate)
 			}
 
 			// Convert tags array to string if needed

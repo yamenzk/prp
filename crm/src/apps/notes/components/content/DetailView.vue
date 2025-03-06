@@ -112,8 +112,11 @@
       </div>
     </div>
     
-    <div v-html="safeHtml(currentNote.details)" class="prose prose-zinc dark:prose-invert max-w-none p-4 content-area"></div>
-    
+    <div 
+  v-html="renderNoteContent(currentNote.details)" 
+  :style="currentNote.color ? {backgroundColor: `${currentNote.color}20`} : {}"
+  class="prose prose-zinc dark:prose-invert max-w-none p-4 content-area h-full overflow-auto">
+</div>
     <!-- Status dropdown -->
     <Menu ref="statusDropdown" :model="statusDropdownItems" :popup="true" />
     
@@ -222,6 +225,16 @@ const priorityDropdownItems = computed(() => {
 const openStatusDropdown = (event) => {
   statusDropdown.value.toggle(event);
 };
+
+const renderNoteContent = (content) => {
+  if (!content) return '';
+  
+  // Log the content to debug
+  console.log('Rendering note content:', content);
+  
+  // Pass through safeHtml but preserve more formatting
+  return safeHtml(content);
+}
 
 // Open priority dropdown
 const openPriorityDropdown = (event) => {

@@ -61,7 +61,7 @@ export const getContrastColor = (color) => {
 export const safeHtml = (html) => {
 	if (!html) return ''
 
-	// Simple sanitization approach (for more complex needs, use a library like DOMPurify)
+	// Less restrictive sanitization approach
 	return html
 		.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
 		.replace(/on\w+="[^"]*"/g, '')

@@ -5,7 +5,6 @@ import frappeui from 'frappe-ui/vite'
 import Components from 'unplugin-vue-components/vite'
 import { PrimeVueResolver } from 'unplugin-vue-components/resolvers'
 
-
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [
@@ -19,6 +18,7 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@': path.resolve(__dirname, 'src'),
+			quill: path.resolve(__dirname, 'node_modules/quill/dist/quill.js'),
 		},
 	},
 	build: {
@@ -27,6 +27,6 @@ export default defineConfig({
 		target: 'es2015',
 	},
 	optimizeDeps: {
-		include: ['frappe-ui > feather-icons', 'showdown', 'engine.io-client'],
+		include: ['frappe-ui > feather-icons', 'showdown', 'engine.io-client', 'quill'],
 	},
 })
