@@ -137,7 +137,7 @@
 				placeholder="Type something..."
 				@change="handleEditorChange"
 				:bubbleMenu="false"
-				:fixed-menu="true"
+				:fixed-menu="false"
 				class="flex-grow editor-container"
 			/>
 		</div>

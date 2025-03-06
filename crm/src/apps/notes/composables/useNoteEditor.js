@@ -1,5 +1,6 @@
 // useNoteEditor.js 
  import { ref, computed } from 'vue';
+ import { commonEmojis } from '../utils/noteIcons';
 
 export function useNoteEditor(initialContext = { doctype: 'User', docname: '' }) {
 	// Composing state
@@ -24,39 +25,6 @@ export function useNoteEditor(initialContext = { doctype: 'User', docname: '' })
 		tags: [],
 	})
 
-	// Common emoji list for icon picker
-	const commonEmojis = [
-		'📝',
-		'✅',
-		'📌',
-		'⭐',
-		'🔖',
-		'📎',
-		'📁',
-		'📞',
-		'✉️',
-		'💡',
-		'⚠️',
-		'💰',
-		'🔍',
-		'📊',
-		'🗓️',
-		'⏱️',
-		'🏆',
-		'🎯',
-		'📈',
-		'📉',
-		'✨',
-		'🚀',
-		'❤️',
-		'👍',
-		'🔆',
-		'🔔',
-		'📣',
-		'🔧',
-		'🛠️',
-		'🧩',
-	]
 
 	// Icon picker menu items
 	const iconPickerItems = computed(() => {
