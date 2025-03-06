@@ -7,7 +7,7 @@
     :resizable="true"
     :draggable="true"
     position="top-right"
-    :style="{ width: '900px', minHeight: '650px', maxHeight: '85vh' }"
+    :style="{ width: '900px', height: '70vh'}"
     pt:root:class="notes-dialog !rounded-xl !border !border-zinc-200 dark:!border-zinc-700 !bg-zinc-50 dark:!bg-zinc-900 !shadow-xl"
     pt:content:class="!p-0"
   >

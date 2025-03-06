@@ -222,23 +222,28 @@ export function useNoteEditor(initialContext = { doctype: 'User', docname: '' })
 	}
 
 	// Toggle between note types
-	const toggleNoteType = () => {
-		// Cycle through note types
-		if (noteType.value === 'note') {
-			noteType.value = 'task'
-			draftNote.value.task = true
-			draftNote.value.journal = false
-			draftNote.value.status = 'To Do'
-			if (!draftNote.value.priority) draftNote.value.priority = 'Medium'
-			if (!draftNote.value.dueDate) draftNote.value.dueDate = new Date()
-		} else if (noteType.value === 'task') {
-			noteType.value = 'journal'
-			draftNote.value.task = false
-			draftNote.value.journal = true
-		} else {
-			noteType.value = 'note'
-			draftNote.value.task = false
-			draftNote.value.journal = false
+	const toggleNoteType = (type) => {
+		noteType.value = type
+
+		// Update draft note based on type
+		draftNote.value.task = type === 'task'
+		draftNote.value.journal = type === 'journal'
+
+		// Set default values based on type
+		if (type === 'task') {
+			if (!draftNote.value.status || draftNote.value.status === 'Backlog') {
+				draftNote.value.status = 'To Do'
+			}
+			if (!draftNote.value.priority) {
+				draftNote.value.priority = 'Medium'
+			}
+			if (!draftNote.value.dueDate) {
+				draftNote.value.dueDate = new Date()
+			}
+		} else if (type === 'journal') {
+			if (!draftNote.value.icon) {
+				draftNote.value.icon = '📔'
+			}
 		}
 	}
 

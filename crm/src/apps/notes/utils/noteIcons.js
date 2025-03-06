@@ -49,8 +49,7 @@ export const getStatusFeatherIcon = (status) => {
 			return 'pause-circle'
 		case 'In Progress':
 			return 'rotate-cw'
-		case 'Delayed':
-			return 'alert-triangle'
+
 		case 'Cancelled':
 			return 'x-circle'
 		case 'Backlog':

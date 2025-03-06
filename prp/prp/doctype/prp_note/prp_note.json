@@ -107,7 +107,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Backlog\nCompleted\nCancelled\nDelayed\nOn Hold\nTo Do"
+   "options": "Backlog\nCompleted\nCancelled\nIn Progress\nOn Hold\nTo Do"
   },
   {
    "fieldname": "tags",
@@ -117,7 +117,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-06 04:27:55.265281",
+ "modified": "2025-03-06 18:58:22.837048",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Note",

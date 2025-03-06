@@ -1,137 +1,47 @@
-import { format, parseISO, isAfter, addDays } from 'date-fns'
+import { format, parse, parseISO, isAfter, addDays } from 'date-fns'
 
 /**
- * Format standard date string
- * @param {string} dateString - Date string from server
+ * Format date for display (DD/MM/YYYY, 12-hour format)
+ * @param {string|Date} date - Date to format
  * @returns {string} Formatted date string
  */
-export const formatDate = (dateString) => {
-	if (!dateString) return ''
+export const formatDateForDisplay = (date) => {
+	if (!date) return ''
 
 	try {
-		return format(parseISO(dateString), 'MMM d, yyyy h:mm a')
+		const dateObj = date instanceof Date ? date : new Date(date)
+		return format(dateObj, 'dd/MM/yyyy h:mm a')
 	} catch (e) {
-		return dateString
+		console.error('Error formatting date for display:', e)
+		return ''
 	}
 }
 
 /**
- * Format due date with relative time (Today, Tomorrow)
- * @param {string} dateString - Date string from server in format DD-MM-YYYY HH:MM:SS
- * @returns {string} Formatted date with relative indicators
- */
-export const formatDueDate = (dateString) => {
-	if (!dateString) return ''
-
-	try {
-		// Parse the date from DD-MM-YYYY HH:MM:SS format
-		const parts = dateString.match(/(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2})/)
-		if (!parts) return dateString
-
-		const date = new Date(parts[3], parts[2] - 1, parts[1], parts[4], parts[5], parts[6])
-		const today = new Date()
-
-		// If due today
-		if (format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')) {
-			return `Today at ${format(date, 'h:mm a')}`
-		}
-
-		// If due tomorrow
-		const tomorrow = addDays(today, 1)
-		if (format(date, 'yyyy-MM-dd') === format(tomorrow, 'yyyy-MM-dd')) {
-			return `Tomorrow at ${format(date, 'h:mm a')}`
-		}
-
-		return format(date, 'MMM d, yyyy h:mm a')
-	} catch (e) {
-		console.error('Error formatting due date:', e)
-		return dateString
-	}
-}
-
-/**
- * Format journal date with relative time (Today, Yesterday)
- * @param {string} dateString - ISO date string
- * @returns {string} Formatted date with relative indicators
- */
-export const formatJournalDate = (dateString) => {
-	if (!dateString) return ''
-
-	try {
-		const date = parseISO(dateString)
-		const today = new Date()
-
-		// If it's today
-		if (format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')) {
-			return 'Today'
-		}
-
-		// If it's yesterday
-		const yesterday = new Date(today)
-		yesterday.setDate(yesterday.getDate() - 1)
-		if (format(date, 'yyyy-MM-dd') === format(yesterday, 'yyyy-MM-dd')) {
-			return 'Yesterday'
-		}
-
-		return format(date, 'MMMM d, yyyy')
-	} catch (e) {
-		return dateString
-	}
-}
-
-/**
- * Check if a date is overdue
- * @param {string} dateString - Date string from server in format DD-MM-YYYY HH:MM:SS
- * @returns {boolean} True if date is overdue
- */
-export const isOverdue = (dateString) => {
-	if (!dateString) return false
-
-	try {
-		// Parse the date from DD-MM-YYYY HH:MM:SS format
-		const parts = dateString.match(/(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2})/)
-		if (!parts) return false
-
-		const date = new Date(parts[3], parts[2] - 1, parts[1], parts[4], parts[5], parts[6])
-		return !isAfter(date, new Date())
-	} catch (e) {
-		return false
-	}
-}
-
-/**
- * Format date from client timezone to server format (Dubai timezone)
+ * Format date for server (DD-MM-YYYY HH:MM:SS in 24h format)
  * @param {Date} date - JavaScript Date object
- * @returns {string} Formatted date string in format DD-MM-YYYY HH:MM:SS
+ * @returns {string} Formatted date string for server
  */
 export const formatDateForServer = (date) => {
 	if (!date) return null
 
 	try {
-		// Format the date as DD-MM-YYYY HH:MM:SS in Dubai timezone (GMT+4)
-		const options = {
-			timeZone: 'Asia/Dubai',
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-			second: '2-digit',
-			hour12: false,
-		}
-
-		const formatter = new Intl.DateTimeFormat('en-AE', options)
-		const parts = formatter.formatToParts(date)
-		const dateObj = {}
-
-		parts.forEach((part) => {
-			dateObj[part.type] = part.value
-		})
-
-		return `${dateObj.day}-${dateObj.month}-${dateObj.year} ${dateObj.hour}:${dateObj.minute}:${dateObj.second}`
+		// Format as DD-MM-YYYY HH:MM:SS for Frappe backend in 24-hour format
+		return format(date, 'MM-dd-yyyy HH:mm:ss')
 	} catch (e) {
 		console.error('Error formatting date for server:', e)
 		return null
+	}
+}
+
+export const formatDate = (date) => {
+	if (!date) return ''
+
+	try {
+		return format(parseISO(date), 'dd/MM/yyyy')
+	} catch (e) {
+		console.error('Error formatting date:', e)
+		return ''
 	}
 }
 
@@ -145,12 +55,141 @@ export const parseServerDate = (dateString) => {
 
 	try {
 		// Parse the date from DD-MM-YYYY HH:MM:SS format
-		const parts = dateString.match(/(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2})/)
-		if (!parts) return null
-
-		return new Date(parts[3], parts[2] - 1, parts[1], parts[4], parts[5], parts[6])
+		return parse(dateString, 'dd-MM-yyyy HH:mm:ss', new Date())
 	} catch (e) {
 		console.error('Error parsing server date:', e)
 		return null
+	}
+}
+
+/**
+ * Format due date with relative time (Today, Tomorrow)
+ * @param {string|Date} dateString - Date to format
+ * @returns {string} Formatted date with relative indicators
+ */
+export const formatDueDate = (dateString) => {
+	if (!dateString) return ''
+
+	try {
+		const date = dateString instanceof Date ? dateString : parseServerDate(dateString)
+		if (!date) return ''
+
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+
+		const tomorrow = new Date(today)
+		tomorrow.setDate(tomorrow.getDate() + 1)
+
+		// Get just the date parts for comparison
+		const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+		const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+		const tomorrowDay = new Date(
+			tomorrow.getFullYear(),
+			tomorrow.getMonth(),
+			tomorrow.getDate(),
+		)
+
+		// If due today
+		if (dateDay.getTime() === todayDay.getTime()) {
+			return `Today at ${format(date, 'h:mm a')}`
+		}
+
+		// If due tomorrow
+		if (dateDay.getTime() === tomorrowDay.getTime()) {
+			return `Tomorrow at ${format(date, 'h:mm a')}`
+		}
+
+		// Otherwise show date
+		return format(date, 'dd/MM/yyyy h:mm a')
+	} catch (e) {
+		console.error('Error formatting due date:', e)
+		return dateString instanceof Date ? format(dateString, 'dd/MM/yyyy h:mm a') : dateString
+	}
+}
+
+/**
+ * Check if a date is overdue
+ * @param {string|Date} dateString - Date to check
+ * @returns {boolean} True if date is overdue
+ */
+export const isOverdue = (dateString) => {
+	if (!dateString) return false
+
+	try {
+		const date = dateString instanceof Date ? dateString : parseServerDate(dateString)
+		return date && date < new Date()
+	} catch (e) {
+		console.error('Error checking if date is overdue:', e)
+		return false
+	}
+}
+
+/**
+ * Format date for journal entries (Today, Yesterday, etc)
+ * @param {string} dateString - ISO date string or date object
+ * @returns {string} Formatted date with relative indicators
+ */
+export const formatJournalDate = (dateString) => {
+	if (!dateString) return ''
+
+	try {
+		const date = dateString instanceof Date ? dateString : new Date(dateString)
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+
+		const yesterday = new Date(today)
+		yesterday.setDate(yesterday.getDate() - 1)
+
+		// Get just the date parts for comparison
+		const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+		const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+		const yesterdayDay = new Date(
+			yesterday.getFullYear(),
+			yesterday.getMonth(),
+			yesterday.getDate(),
+		)
+
+		// If today
+		if (dateDay.getTime() === todayDay.getTime()) {
+			return 'Today'
+		}
+
+		// If yesterday
+		if (dateDay.getTime() === yesterdayDay.getTime()) {
+			return 'Yesterday'
+		}
+
+		// Otherwise show date
+		return format(date, 'dd MMMM yyyy')
+	} catch (e) {
+		console.error('Error formatting journal date:', e)
+		return ''
+	}
+}
+
+/**
+ * Format date based on note type
+ * @param {string|Date} date - Date to format
+ * @param {string} noteType - Type of note (note, task, journal)
+ * @returns {string} Formatted date appropriate for the note type
+ */
+export const formatDateForNoteType = (date, noteType) => {
+	if (!date) return ''
+
+	try {
+		const dateObj = date instanceof Date ? date : new Date(date)
+
+		switch (noteType) {
+			case 'task':
+				return formatDueDate(dateObj)
+			case 'journal':
+				return formatJournalDate(dateObj)
+			case 'note':
+			default:
+				return formatDateForDisplay(dateObj)
+		}
+	} catch (e) {
+		console.error('Error formatting date for note type:', e)
+		return ''
 	}
 }

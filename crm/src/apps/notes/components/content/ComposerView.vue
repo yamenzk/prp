@@ -1,244 +1,483 @@
 <template>
-  <div class="h-full flex flex-col">
-    <div class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-sm">
-      <!-- Note type and basic options -->
-      <div class="flex flex-wrap gap-2 mb-3">
-        <div class="flex items-center">
-          <Button 
-            :label="noteType === 'note' ? 'Note' : noteType === 'task' ? 'Task' : 'Journal'" 
-            :class="getNoteTypeClass(noteType)"
-            @click="$emit('toggle-note-type')" 
-            text 
-            class="!px-3 !py-1 border dark:border-zinc-700 rounded-full transition-all"
-          >
-            <template #icon>
-              <FeatherIcon 
-                :name="noteType === 'note' ? 'file-text' : noteType === 'task' ? 'check-square' : 'book'" 
-                class="w-4 h-4 mr-1"
-              />
-            </template>
-          </Button>
-        </div>
-        
-        <div class="flex items-center border dark:border-zinc-700 rounded-full overflow-hidden">
-          <Button
-            text
-            class="!px-2 !py-1"
-            :class="draftNote.sticky ? '!bg-amber-100 dark:!bg-amber-900/30 !text-amber-600 dark:!text-amber-400' : ''"
-            @click="$emit('update:sticky', !draftNote.sticky)"
-          >
-            <FeatherIcon :name="'star'" class="w-4 h-4" :class="draftNote.sticky ? 'fill-amber-500 text-amber-500' : ''" />
-          </Button>
-          
-          <div class="h-4 w-px bg-zinc-200 dark:bg-zinc-700"></div>
-          
-          <div class="!px-2 !py-1 flex items-center">
-            <div 
-              class="w-6 h-6 rounded-full cursor-pointer transition-all"
-              :style="{ backgroundColor: draftNote.color || '#cccccc' }"
-              @click="$emit('toggle-color-picker')"
-            ></div>
-            <ColorPicker 
-              v-model="localColor" 
-              class="ml-1" 
-              v-if="showColorPicker"
-              @update:modelValue="$emit('update:color', localColor)" 
-            />
-          </div>
-          
-          <div class="h-4 w-px bg-zinc-200 dark:bg-zinc-700"></div>
-          
-          <Menu ref="iconPickerMenu" :model="iconPickerItems" :popup="true" />
-          <Button
-            text
-            class="!px-2 !py-1 flex items-center"
-            @click="iconPickerMenu.toggle($event)"
-          >
-            <span v-if="draftNote.icon" class="text-lg mr-1">{{ draftNote.icon }}</span>
-            <FeatherIcon v-else name="smile" class="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-      
-      <!-- Status section for any note type -->
-      <div class="flex flex-wrap gap-2 mb-3">
-        <Select
-          v-model="localStatus"
-          :options="statusOptions"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Status"
-          @update:modelValue="$emit('update:status', localStatus)"
-          class="w-32 !text-sm"
-        />
-        
-        <Select
-          v-if="noteType === 'task'"
-          v-model="localPriority"
-          :options="priorityOptions"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Priority"
-          @update:modelValue="$emit('update:priority', localPriority)"
-          class="w-32 !text-sm"
-        />
-        
-        <DatePicker
-          v-if="noteType === 'task'"
-          v-model="localDueDate"
-          showTime
-          showIcon
-          placeholder="Due date"
-          class="!text-sm"
-          hourFormat="24"
-          :showButtonBar="true"
-          @update:modelValue="$emit('update:due-date', localDueDate)"
-        />
-      </div>
-      
-      <!-- Title field -->
-      <div class="mb-3">
-        <InputText 
-          v-model="localTitle" 
-          placeholder="Title" 
-          class="w-full !bg-white dark:!bg-zinc-800 !p-2 !text-lg !rounded-lg"
-          @update:modelValue="$emit('update:title', localTitle)" 
-        />
-      </div>
-      
-      <!-- Tags field -->
-      <AutoComplete 
-  v-model="localTags" 
-  placeholder="Add tags (press enter to separate)" 
-  class="w-full" 
-  multiple
-  :typeahead="false"
-/>
+	<div class="h-full flex flex-col bg-white dark:bg-zinc-900">
+		<!-- Header section with title, type selector and main actions -->
+		<div
+			class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+		>
+			<!-- Title input field -->
+			<div class="relative mb-4">
+				<input
+					v-model="localTitle"
+					type="text"
+					placeholder="Untitled"
+					class="w-full text-xl font-medium border-0 border-b border-transparent outline-none focus:border-primary-300 dark:focus:border-primary-700 bg-transparent px-0 pb-1 transition-colors"
+					@input="$emit('update:title', localTitle)"
+				/>
+			</div>
 
-<div v-if="localTags && localTags.length > 0" class="mt-2 flex flex-wrap gap-1">
-  <span 
-    v-for="(tag, index) in localTags" 
-    :key="index"
-    class="text-xs px-2 py-1 rounded-full cursor-pointer bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700"
-  >
-    #{{ tag }}
-  </span>
-</div>
-    </div>
-    
-    <div class="flex-1">
-      <!-- Simple Editor -->
-      <SimpleEditor 
-        v-model="localDetails" 
-        placeholder="Type something..."
-        class="h-full border-none"
-        @update:modelValue="$emit('update:details', localDetails)"
-      />
-    </div>
-    
-    <!-- Footer actions -->
-    <div class="p-3 border-t border-zinc-200 dark:border-zinc-800 flex justify-between bg-zinc-50 dark:bg-zinc-900">
-      <Button 
-        label="Cancel" 
-        text 
-        @click="$emit('cancel-compose')" 
-        class="!text-zinc-600 dark:!text-zinc-400 hover:!bg-zinc-200 dark:hover:!bg-zinc-800 transition-colors"
-      >
-        <template #icon>
-          <FeatherIcon name="x" class="w-4 h-4 mr-1" />
-        </template>
-      </Button>
-      <Button 
-        label="Save" 
-        @click="$emit('save-note')" 
-        class="!bg-zinc-800 dark:!bg-zinc-200 !text-white dark:!text-zinc-900 hover:!bg-zinc-900 dark:hover:!bg-zinc-100 transition-colors !px-4"
-      >
-        <template #icon>
-          <FeatherIcon name="check" class="w-4 h-4 mr-1" />
-        </template>
-      </Button>
-    </div>
-  </div>
+			<!-- Note controls bar -->
+			<div class="flex items-center justify-between">
+				<!-- Left controls: type selector and metadata -->
+				<div class="flex items-center gap-2">
+					<!-- Note type selector -->
+					<div class="flex h-8 bg-zinc-100 dark:bg-zinc-800 rounded-md overflow-hidden">
+						<button
+								@click="handleNoteTypeChange('note')"
+								class="px-3 h-full flex items-center transition-colors"
+								:class="
+									noteType === 'note'
+										? 'bg-blue-500 text-white'
+										: 'hover:bg-zinc-200 dark:hover:bg-zinc-700'
+								"
+							>
+								<i class="pi pi-file text-sm mr-1"></i>
+								<span class="text-xs font-medium">Note</span>
+							</button>
+	
+							<button
+								@click="handleNoteTypeChange('task')"
+								class="px-3 h-full flex items-center transition-colors"
+								:class="
+									noteType === 'task'
+										? 'bg-green-500 text-white'
+										: 'hover:bg-zinc-200 dark:hover:bg-zinc-700'
+								"
+							>
+								<i class="pi pi-check-square text-sm mr-1"></i>
+								<span class="text-xs font-medium">Task</span>
+							</button>
+	
+							<button
+								@click="handleNoteTypeChange('journal')"
+								class="px-3 h-full flex items-center transition-colors"
+								:class="
+									noteType === 'journal'
+										? 'bg-purple-500 text-white'
+										: 'hover:bg-zinc-200 dark:hover:bg-zinc-700'
+								"
+							>
+								<i class="pi pi-book text-sm mr-1"></i>
+								<span class="text-xs font-medium">Journal</span>
+							</button>
+					</div>
+
+					<!-- Status tag (for all note types) -->
+					<div>
+						<Tag
+							:value="draftNote.status || 'Backlog'"
+							:severity="getStatusSeverity(draftNote.status)"
+							class="cursor-pointer"
+							@click="statusMenuVisible = true"
+						>
+							<template #icon>
+								<i :class="getStatusIcon(draftNote.status)" class="mr-1"></i>
+							</template>
+						</Tag>
+
+						<Menu
+							ref="statusMenu"
+							:model="statusItems"
+							:popup="true"
+							:visible="statusMenuVisible"
+							@hide="statusMenuVisible = false"
+						/>
+					</div>
+
+					<!-- Priority tag (for Tasks) -->
+					<div v-if="noteType === 'task'">
+						<Tag
+							:value="draftNote.priority || 'Medium'"
+							:severity="getPrioritySeverity(draftNote.priority)"
+							class="cursor-pointer"
+							@click="priorityMenuVisible = true"
+						>
+							<template #icon>
+								<i :class="getPriorityIcon(draftNote.priority)" class="mr-1"></i>
+							</template>
+						</Tag>
+
+						<Menu
+							ref="priorityMenu"
+							:model="priorityItems"
+							:popup="true"
+							:visible="priorityMenuVisible"
+							@hide="priorityMenuVisible = false"
+						/>
+					</div>
+
+					<!-- Due date (for Tasks) -->
+					<div v-if="noteType === 'task'">
+						<Button
+							v-if="!draftNote.dueDate"
+							icon="pi pi-calendar"
+							size="small"
+							text
+							class="p-button-rounded p-button-secondary"
+							@click="datePickerVisible = true"
+						/>
+
+						<Tag
+							v-else
+							:value="formatDateForDisplay(draftNote.dueDate)"
+							:severity="isOverdue(draftNote.dueDate) ? 'danger' : 'warning'"
+							class="cursor-pointer"
+							@click="datePickerVisible = true"
+						>
+							<template #icon>
+								<i class="pi pi-calendar mr-1"></i>
+							</template>
+						</Tag>
+
+						<Calendar
+							v-model="localDueDate"
+							:visible="datePickerVisible"
+							:inline="true"
+							:showTime="true"
+							hourFormat="12"
+							dateFormat="dd/MM/yy"
+							@date-select="handleDateSelect"
+							@hide="handleDatePickerHide"
+							panelClass="date-picker-panel"
+						/>
+					</div>
+				</div>
+
+				<!-- Right controls: color, icon, pin -->
+				<div class="flex items-center gap-2">
+					<!-- Note color picker -->
+					<ColorPicker
+						v-model="localColor"
+						@update:modelValue="updateNoteColor"
+						:pt="{
+							root: { class: 'p-button-rounded' },
+							input: { style: { backgroundColor: draftNote.color || '#D1D5DB' } },
+						}"
+					/>
+
+					<!-- Note icon selector -->
+					<Button
+						class="p-button-rounded p-button-secondary"
+						@click="emojiPickerVisible = true"
+					>
+						<template #icon>
+							<span v-if="draftNote.icon" class="text-lg">{{ draftNote.icon }}</span>
+							<i v-else class="pi pi-smile"></i>
+						</template>
+					</Button>
+
+					<!-- Sticky/pin toggle -->
+					<Button
+						:icon="draftNote.sticky ? 'pi pi-star-fill' : 'pi pi-star'"
+						:class="draftNote.sticky ? 'p-button-warning' : 'p-button-secondary'"
+						class="p-button-rounded"
+						@click="$emit('update:sticky', !draftNote.sticky)"
+					/>
+				</div>
+			</div>
+
+			<!-- Tags input -->
+			<div class="mt-3">
+				<AutoComplete
+					v-model="localTags"
+					placeholder="Add tags (press enter after each tag)"
+					class="w-full chips-autocomplete"
+					multiple
+					:typeahead="false"
+					@update:modelValue="$emit('update:tags', localTags)"
+				>
+					<template #chip="slotProps">
+						<div
+							class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 mr-1 mb-1"
+						>
+							<span class="mr-1">#{{ slotProps.value }}</span>
+							<i
+								class="pi pi-times cursor-pointer"
+								@click.stop="removeTag(slotProps.i)"
+							></i>
+						</div>
+					</template>
+				</AutoComplete>
+			</div>
+		</div>
+
+		<!-- Editor section -->
+		<div class="flex-1 overflow-hidden flex flex-col">
+			<TextEditor
+				editor-class="prose prose-sm max-h-[500px] overflow-y-auto p-4 flex-grow"
+				:content="localDetails"
+				placeholder="Type something..."
+				@change="handleEditorChange"
+				:bubbleMenu="true"
+				:fixed-menu="true"
+				class="flex-grow editor-container"
+			/>
+		</div>
+
+		<!-- Footer section with action buttons -->
+		<div class="px-4 py-3 border-t border-zinc-200 dark:border-zinc-800 flex justify-between">
+			<Button label="Cancel" icon="pi pi-times" text @click="$emit('cancel-compose')" />
+			<Button
+				label="Save"
+				icon="pi pi-check"
+				@click="$emit('save-note')"
+				class="p-button-primary"
+			/>
+		</div>
+
+		<!-- Emoji Picker Dialog -->
+		<Dialog
+			v-model:visible="emojiPickerVisible"
+			header="Choose Icon"
+			:style="{ width: '400px' }"
+			modal
+		>
+			<div class="grid grid-cols-8 gap-2 p-3">
+				<button
+					v-for="emoji in commonEmojis"
+					:key="emoji"
+					class="w-10 h-10 flex items-center justify-center text-xl rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+					@click="selectEmoji(emoji)"
+				>
+					{{ emoji }}
+				</button>
+			</div>
+			<div class="px-3 pb-3">
+				<InputText
+					v-model="customEmoji"
+					placeholder="Custom emoji or text"
+					class="w-full mb-2"
+				/>
+				<Button label="Add Custom" @click="addCustomEmoji" class="w-full" />
+			</div>
+		</Dialog>
+	</div>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, watch } from 'vue';
-import SimpleEditor from './SimpleEditor.vue';
-import { getNoteTypeClass } from '../../utils/noteStatusHelpers';
-
-// References for pop-up menus
-const iconPickerMenu = ref(null);
+import { ref, computed, watch } from 'vue'
+// Remove SimpleEditor import if you're not using it anymore
+// import SimpleEditor from './SimpleEditor.vue';
+import { TextEditor } from 'frappe-ui'
+import { commonEmojis } from '../../utils/noteIcons'
+import {
+	getStatusIcon,
+	getPriorityIcon,
+	getStatusSeverity,
+	getPrioritySeverity,
+	statusOptions,
+	priorityOptions,
+} from '../../utils/noteStatusHelpers'
+import { formatDateForDisplay, formatDateForServer, isOverdue } from '../../utils/noteFormatters'
 
 // Props
 const props = defineProps({
-  draftNote: {
-    type: Object,
-    required: true
-  },
-  noteType: {
-    type: String,
-    required: true
-  },
-  showColorPicker: {
-    type: Boolean,
-    required: true
-  },
-  statusOptions: {
-    type: Array,
-    required: true
-  },
-  priorityOptions: {
-    type: Array,
-    required: true
-  },
-  iconPickerItems: {
-    type: Array,
-    required: true
-  }
-});
-
-// Local state to avoid direct mutation of props
-const localTitle = ref(props.draftNote.title);
-const localDetails = ref(props.draftNote.details);
-const localTags = ref(props.draftNote.tags || []);
-const localColor = ref(props.draftNote.color);
-const localStatus = ref(props.draftNote.status);
-const localPriority = ref(props.draftNote.priority);
-const localDueDate = ref(props.draftNote.dueDate);
+	draftNote: {
+		type: Object,
+		required: true,
+	},
+	noteType: {
+		type: String,
+		required: true,
+	},
+})
 
 // Emits
 const emit = defineEmits([
-  'cancel-compose',
-  'save-note',
-  'toggle-note-type',
-  'toggle-color-picker',
-  'update:color',
-  'update:icon',
-  'update:sticky',
-  'update:tags',
-  'update:title',
-  'update:details',
-  'update:status',
-  'update:priority',
-  'update:due-date'
-]);
+	'update:title',
+	'update:details',
+	'update:tags',
+	'update:color',
+	'update:icon',
+	'update:sticky',
+	'update:status',
+	'update:priority',
+	'update:due-date',
+	'select-note-type',
+	'cancel-compose',
+	'save-note',
+])
+
+// Local state for form values
+const localTitle = ref(props.draftNote.title || '')
+const localDetails = ref(props.draftNote.details || '')
+const localTags = ref(props.draftNote.tags || [])
+const localColor = ref(props.draftNote.color || '')
+const localDueDate = ref(props.draftNote.dueDate ? new Date(props.draftNote.dueDate) : null)
+const customEmoji = ref('')
+
+// UI state
+const colorPickerVisible = ref(false)
+const emojiPickerVisible = ref(false)
+const statusMenuVisible = ref(false)
+const priorityMenuVisible = ref(false)
+const datePickerVisible = ref(false)
 
 // Watch for prop changes
-watch(() => props.draftNote, (newValue) => {
-  localTitle.value = newValue.title;
-  localDetails.value = newValue.details;
-  localTags.value = newValue.tags || [];
-  localColor.value = newValue.color;
-  localStatus.value = newValue.status;
-  localPriority.value = newValue.priority;
-  localDueDate.value = newValue.dueDate;
-}, { deep: true });
+watch(
+	() => props.draftNote,
+	(newValue) => {
+		localTitle.value = newValue.title || ''
+		localDetails.value = newValue.details || ''
+		localTags.value = Array.isArray(newValue.tags) ? [...newValue.tags] : []
+		localColor.value = newValue.color || ''
+		localDueDate.value = newValue.dueDate ? new Date(newValue.dueDate) : null
+	},
+	{ deep: true },
+)
 
-// Update tags
-const updateTags = (newTags) => {
-  // Remove any empty tags and trim whitespace
-  const cleanedTags = newTags.filter(tag => tag.trim()).map(tag => tag.trim());
-  localTags.value = cleanedTags;
-  emit('update:tags', cleanedTags);
-};
+// Generate status menu items
+const statusItems = computed(() => {
+	return statusOptions.map((option) => ({
+		label: option.label,
+		icon:
+			getStatusIcon(option.value).split(' ')[0] +
+			' ' +
+			getStatusIcon(option.value).split(' ')[1],
+		command: () => {
+			emit('update:status', option.value)
+			statusMenuVisible.value = false
+		},
+	}))
+})
+
+// Generate priority menu items
+const priorityItems = computed(() => {
+	return priorityOptions.map((option) => ({
+		label: option.label,
+		icon:
+			getPriorityIcon(option.value).split(' ')[0] +
+			' ' +
+			getPriorityIcon(option.value).split(' ')[1],
+		command: () => {
+			emit('update:priority', option.value)
+			priorityMenuVisible.value = false
+		},
+	}))
+})
+
+// Tag methods
+const removeTag = (index) => {
+	const newTags = [...localTags.value]
+	newTags.splice(index, 1)
+	localTags.value = newTags
+	emit('update:tags', newTags)
+}
+
+// Color picker methods
+const updateNoteColor = (color) => {
+	// Ensure the color has a # prefix when sending to the server
+	const formattedColor = color.startsWith('#') ? color : `#${color}`
+	emit('update:color', formattedColor)
+}
+
+// Emoji picker methods
+const selectEmoji = (emoji) => {
+	emit('update:icon', emoji)
+	emojiPickerVisible.value = false
+}
+
+const addCustomEmoji = () => {
+	if (customEmoji.value.trim()) {
+		emit('update:icon', customEmoji.value)
+		customEmoji.value = ''
+		emojiPickerVisible.value = false
+	}
+}
+
+// Date picker methods
+const handleDateSelect = () => {
+	if (localDueDate.value) {
+		const formattedDate = formatDateForServer(localDueDate.value)
+		emit('update:due-date', localDueDate.value)
+	}
+}
+
+const handleDatePickerHide = () => {
+	datePickerVisible.value = false
+
+	// Ensure we update the date when closing
+	if (localDueDate.value) {
+		emit('update:due-date', localDueDate.value)
+	}
+}
+
+// Add this handler for TextEditor changes
+const handleEditorChange = (content) => {
+	localDetails.value = content
+	emit('update:details', content)
+}
+
+// Add this new method to handle note type changes
+const handleNoteTypeChange = (type) => {
+	emit('select-note-type', type)
+}
 </script>
+
+<style scoped>
+/* Custom styling for the form elements */
+:deep(.p-tag) {
+	height: 24px;
+}
+
+:deep(.p-tag .p-tag-value) {
+	font-size: 12px;
+}
+
+:deep(.p-datepicker) {
+	font-size: 0.875rem;
+}
+
+:deep(.date-picker-panel) {
+	position: absolute;
+	z-index: 1000;
+}
+
+/* Remove the old color-picker-panel styling that was positioning it incorrectly */
+.color-picker-panel {
+	box-shadow:
+		0 4px 6px -1px rgba(0, 0, 0, 0.1),
+		0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	border-radius: 0.375rem;
+	overflow: hidden;
+}
+
+/* Style the color picker button to be rounded and use correct size */
+:deep(.p-colorpicker) {
+	width: 2rem;
+	height: 2rem;
+}
+
+:deep(.p-colorpicker-preview) {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 9999px;
+}
+
+/* Editor styling */
+.editor-container {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+:deep(.ProseMirror) {
+	min-height: 300px;
+	max-height: 500px;
+	overflow-y: auto;
+	padding: 1rem;
+}
+
+:deep(.ProseMirror p.is-editor-empty:first-child::before) {
+	content: attr(data-placeholder);
+	float: left;
+	color: #adb5bd;
+	pointer-events: none;
+	height: 0;
+}
+
+:deep(.editor-content-wrapper) {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+</style>

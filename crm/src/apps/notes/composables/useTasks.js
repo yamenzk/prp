@@ -31,7 +31,6 @@ export function useTasks(noteStore) {
 		{ label: 'To Do', value: 'To Do' },
 		{ label: 'On Hold', value: 'On Hold' },
 		{ label: 'In Progress', value: 'In Progress' },
-		{ label: 'Delayed', value: 'Delayed' },
 		{ label: 'Completed', value: 'Completed' },
 		{ label: 'Cancelled', value: 'Cancelled' },
 	]
@@ -54,8 +53,6 @@ export function useTasks(noteStore) {
 				return 'pause-circle'
 			case 'In Progress':
 				return 'rotate-cw'
-			case 'Delayed':
-				return 'alert-triangle'
 			case 'Cancelled':
 				return 'x-circle'
 			case 'Backlog':
@@ -76,8 +73,6 @@ export function useTasks(noteStore) {
 				return 'warn'
 			case 'In Progress':
 				return 'info'
-			case 'Delayed':
-				return 'danger'
 			case 'Cancelled':
 				return 'secondary'
 			default:

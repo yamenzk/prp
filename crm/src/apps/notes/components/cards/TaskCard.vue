@@ -121,7 +121,6 @@ const statusClasses = {
   'To Do': 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
   'On Hold': 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
   'In Progress': 'bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-  'Delayed': 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400',
   'Cancelled': 'bg-zinc-100 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400'
 };
 
