@@ -1,6 +1,6 @@
 <!-- components/common/EditableFieldset.vue -->
 <template>
-  <fieldset class="border rounded-xl p-4" :class="customClass">
+  <fieldset class="border border-zinc-200 dark:border-zinc-700 rounded-xl p-4" :class="customClass">
     <legend class="px-2 font-bold">{{ legend }}</legend>
     <div class="grid gap-4" :class="gridClass">
       <EditableField 
