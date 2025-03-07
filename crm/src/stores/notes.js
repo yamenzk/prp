@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { createListResource, createDocumentResource } from 'frappe-ui'
 import { globalStore } from './global'
+import { format } from 'date-fns'
 
 export const useNoteStore = defineStore('notes', {
 	state: () => ({
@@ -132,27 +133,14 @@ export const useNoteStore = defineStore('notes', {
 		formatDateForServer(date) {
 			if (!date) return null
 
-			// Format the date as DD-MM-YYYY HH:MM:SS in Dubai timezone (GMT+4)
-			const options = {
-				timeZone: 'Asia/Dubai',
-				day: '2-digit',
-				month: '2-digit',
-				year: 'numeric',
-				hour: '2-digit',
-				minute: '2-digit',
-				second: '2-digit',
-				hour12: false,
+			// Use the standardized date formatter from noteFormatters.js
+			// Format as YYYY-MM-DD HH:MM:SS for Frappe backend
+			try {
+				return format(date, 'yyyy-MM-dd HH:mm:ss')
+			} catch (e) {
+				console.error('Error formatting date for server:', e)
+				return null
 			}
-
-			const formatter = new Intl.DateTimeFormat('en-CA', options)
-			const parts = formatter.formatToParts(date)
-			const dateObj = {}
-
-			parts.forEach((part) => {
-				dateObj[part.type] = part.value
-			})
-
-			return `${dateObj.day}-${dateObj.month}-${dateObj.year} ${dateObj.hour}:${dateObj.minute}:${dateObj.second}`
 		},
 
 		// Refetch notes when notified of changes

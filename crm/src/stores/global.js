@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const globalStore = defineStore('global', {
 	state: () => ({
 		socket: null,
+		session: null, 
 	}),
 	getters: {
 		getSocket: (state) => {
@@ -11,7 +12,7 @@ export const globalStore = defineStore('global', {
 				state.socket ? 'Available' : 'Not available',
 			)
 			return state.socket
-		},
+		}
 	},
 	actions: {
 		setSocket(socket) {
@@ -21,5 +22,8 @@ export const globalStore = defineStore('global', {
 			)
 			this.socket = socket
 		},
+		setSession(session){
+			this.session = session
+		}
 	},
 })

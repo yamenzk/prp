@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-3xl py-12 mx-auto">
     <h2 class="font-bold text-lg text-gray-600 mb-4">
-      Welcome {{ session.user }}!
+      Welcome {{ store.session?.user }}!
     </h2>
 
     <Button theme="gray" variant="solid" icon-left="code" @click="ping.fetch" :loading="ping.loading">
@@ -26,7 +26,8 @@
 import { ref } from 'vue'
 import { Dialog } from 'frappe-ui'
 import { createResource } from 'frappe-ui'
-import { session } from '../data/session'
+import { globalStore } from '@/stores/global'
+const store = globalStore()
 
 const ping = createResource({
   url: 'ping',

@@ -1,17 +1,19 @@
 import { computed } from 'vue'
 import { globalStore } from '@/stores/global'
 
+
 export function useTagsAndContexts(noteStore) {
+	const store = globalStore()
 	// Auto-generated rooms based on notes
 	const autoRooms = computed(() => {
 		// Get unique doctype/docname combinations
 		const uniqueContexts = new Map()
 
 		// Always include user's own room
-		if (globalStore.user?.name) {
-			uniqueContexts.set('User_' + globalStore.user.name, {
+		if (store?.session?.user) {
+			uniqueContexts.set('User_' + store?.session.user, {
 				doctype: 'User',
-				docname: globalStore.user.name,
+				docname: store?.session.user,
 			})
 		}
 
@@ -30,8 +32,8 @@ export function useTagsAndContexts(noteStore) {
 
 		// Convert to array and sort by doctype
 		return Array.from(uniqueContexts.values()).sort((a, b) => {
-			if (a.doctype === 'User' && a.docname === globalStore.user?.name) return -1
-			if (b.doctype === 'User' && b.docname === globalStore.user?.name) return 1
+			if (a.doctype === 'User' && a.docname === store?.session?.user) return -1
+			if (b.doctype === 'User' && b.docname === store?.session?.user) return 1
 			return a.doctype.localeCompare(b.doctype) || a.docname.localeCompare(b.docname)
 		})
 	})

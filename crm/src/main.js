@@ -9,6 +9,7 @@ import { setConfig, frappeRequest, resourcesPlugin, FeatherIcon } from 'frappe-u
 import { createPinia } from 'pinia'
 import { initSocket } from './socket'
 import { globalStore } from './stores/global'
+import { session } from './data/session'
 
 // Import PrimeVue components
 import Tabs from 'primevue/tabs'
@@ -17,6 +18,8 @@ import Select from 'primevue/select'
 import 'primeicons/primeicons.css'
 import DatePicker from 'primevue/datepicker'
 import TagInput from './components/common/TagInput.vue'
+import Tab from 'primevue/tab'
+import TabList from 'primevue/tablist'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -86,6 +89,8 @@ app.use(PrimeVue, {
 // Register PrimeVue components
 app.component('TabPanels', TabPanels)
 app.component('Tabs', Tabs)
+app.component('Tab', Tab)
+app.component('TabList', TabList)
 app.component('FeatherIcon', FeatherIcon)
 app.component('Select', Select)
 app.component('DatePicker', DatePicker)
@@ -119,6 +124,8 @@ if (import.meta.env.DEV) {
 		console.log('🔄 Setting socket in global store after app mount (DEV)')
 		const store = globalStore()
 		store.setSocket(socket)
+		store.setSession(session)
+		console.log('Store Session:', store.session)
 		console.log('✅ App initialization complete in DEV mode')
 	})
 } else {
@@ -132,5 +139,7 @@ if (import.meta.env.DEV) {
 	console.log('🔄 Setting socket in global store after app mount (PROD)')
 	const store = globalStore()
 	store.setSocket(socket)
+	store.setSession(session)
+	console.log('Store Session:', store.session)
 	console.log('✅ App initialization complete in PRODUCTION mode')
 }

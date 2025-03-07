@@ -61,6 +61,13 @@
 						class="w-8 h-8 p-0"
 						:outlined="activeTab !== '3'"
 					/>
+					<Button
+						@click="activeTab = '4'"
+						rounded
+						icon="pi pi-clipboard"
+						class="w-8 h-8 p-0"
+						:outlined="activeTab !== '4'"
+					/>
 				</div>
 			</div>
 		</div>
@@ -84,6 +91,9 @@
 					</TabPanel>
 					<TabPanel value="3">
 						<VersionTab :doctype="'PRP Lead'" :docname="currentLead.name" />
+					</TabPanel>
+					<TabPanel value="4">
+						<NotesTab :doctype="'PRP Lead'" :docname="currentLead.name" />
 					</TabPanel>
 				</TabPanels>
 			</Tabs>
@@ -126,6 +136,7 @@ import LeadInfoTab from '@/components/leads/tabs/LeadInfoTab.vue'
 import PhonebookTab from '@/components/leads/tabs/PhonebookTab.vue'
 import PreferencesTab from '@/components/leads/tabs/PreferencesTab.vue'
 import VersionTab from './tabs/VersionTab.vue'
+import NotesTab from './tabs/NotesTab.vue'
 
 // Props
 const props = defineProps({

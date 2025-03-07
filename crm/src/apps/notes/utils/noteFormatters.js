@@ -1,7 +1,7 @@
 import { format, parse, parseISO, isAfter, addDays } from 'date-fns'
 
 /**
- * Format date for display (DD/MM/YYYY, 12-hour format)
+ * Format date for display (DD/MM/YYYY HH:MM AM/PM)
  * @param {string|Date} date - Date to format
  * @returns {string} Formatted date string
  */
@@ -10,7 +10,7 @@ export const formatDateForDisplay = (date) => {
 
 	try {
 		const dateObj = date instanceof Date ? date : new Date(date)
-		return format(dateObj, 'dd/MM/yyyy h:mm a')
+		return format(dateObj, 'dd/MM/yyyy HH:mm')
 	} catch (e) {
 		console.error('Error formatting date for display:', e)
 		return ''
@@ -38,7 +38,9 @@ export const formatDate = (date) => {
 	if (!date) return ''
 
 	try {
-		return format(parseISO(date), 'dd/MM/yyyy')
+		// If date is a string, try to parse it
+		const dateObj = typeof date === 'string' ? parseISO(date) : date
+		return format(dateObj, 'dd/MM/yyyy')
 	} catch (e) {
 		console.error('Error formatting date:', e)
 		return ''
@@ -47,15 +49,30 @@ export const formatDate = (date) => {
 
 /**
  * Parse server date format to JavaScript Date
- * @param {string} dateString - Date string from server in format DD-MM-YYYY HH:MM:SS
+ * @param {string} dateString - Date string from server in format YYYY-MM-DD HH:MM:SS
  * @returns {Date|null} JavaScript Date object or null if invalid
  */
 export const parseServerDate = (dateString) => {
 	if (!dateString) return null
 
 	try {
-		// Parse the date from DD-MM-YYYY HH:MM:SS format
-		return parse(dateString, 'dd-MM-yyyy HH:mm:ss', new Date())
+		// Try parsing as ISO string first (most common server format)
+		if (typeof dateString === 'string') {
+			// Check if it's already in ISO format
+			if (dateString.includes('T') || dateString.includes('Z')) {
+				return parseISO(dateString)
+			}
+
+			// Otherwise, parse as YYYY-MM-DD HH:MM:SS
+			return parse(dateString, 'yyyy-MM-dd HH:mm:ss', new Date())
+		}
+
+		// If it's already a Date object, return as is
+		if (dateString instanceof Date) {
+			return dateString
+		}
+
+		return null
 	} catch (e) {
 		console.error('Error parsing server date:', e)
 		return null
@@ -91,19 +108,19 @@ export const formatDueDate = (dateString) => {
 
 		// If due today
 		if (dateDay.getTime() === todayDay.getTime()) {
-			return `Today at ${format(date, 'h:mm a')}`
+			return `Today at ${format(date, 'HH:mm')}`
 		}
 
 		// If due tomorrow
 		if (dateDay.getTime() === tomorrowDay.getTime()) {
-			return `Tomorrow at ${format(date, 'h:mm a')}`
+			return `Tomorrow at ${format(date, 'HH:mm')}`
 		}
 
 		// Otherwise show date
-		return format(date, 'dd/MM/yyyy h:mm a')
+		return format(date, 'dd/MM/yyyy HH:mm')
 	} catch (e) {
 		console.error('Error formatting due date:', e)
-		return dateString instanceof Date ? format(dateString, 'dd/MM/yyyy h:mm a') : dateString
+		return dateString instanceof Date ? format(dateString, 'dd/MM/yyyy HH:mm') : dateString
 	}
 }
 

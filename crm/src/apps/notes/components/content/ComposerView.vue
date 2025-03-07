@@ -5,7 +5,7 @@
 		<div
 			class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
 		>
-		<!-- Note controls bar -->
+			<!-- Note controls bar -->
 			<div class="flex items-center justify-between">
 				<!-- Left controls: type selector and metadata -->
 				<div class="flex items-center gap-2">
@@ -22,11 +22,7 @@
 							</template>
 						</Tag>
 
-						<Menu
-							ref="statusMenu"
-							:model="statusItems"
-							:popup="true"
-						/>
+						<Menu ref="statusMenu" :model="statusItems" :popup="true" />
 					</div>
 
 					<!-- Priority tag (for Tasks) -->
@@ -42,11 +38,7 @@
 							</template>
 						</Tag>
 
-						<Menu
-							ref="priorityMenu"
-							:model="priorityItems"
-							:popup="true"
-						/>
+						<Menu ref="priorityMenu" :model="priorityItems" :popup="true" />
 					</div>
 
 					<!-- Due date (for Tasks) -->
@@ -72,12 +64,13 @@
 							</template>
 						</Tag>
 
-						<DatePicker 
-							v-model="localDueDate" 
+						<Calendar
+							v-model="localDueDate"
 							:visible="datePickerVisible"
-							showTime 
-							hourFormat="12" 
-							fluid
+							:inline="true"
+							:showTime="true"
+							hourFormat="24"
+							dateFormat="dd/MM/yy"
 							@date-select="handleDateSelect"
 							@hide="handleDatePickerHide"
 							panelClass="date-picker-panel"
@@ -131,13 +124,13 @@
 
 		<!-- Editor section -->
 		<div class="flex-1 overflow-hidden flex flex-col">
-			<Editor 
-      v-model="localDetails"
-      placeholder="Type something..."
-      class="flex-grow editor-container" 
-      @text-change="handleEditorChange"
-      editorStyle="height: 100%; min-height: 300px; max-height: 500px; overflow-y: auto; padding: 1rem;"
-    />
+			<Editor
+				v-model="localDetails"
+				placeholder="Type something..."
+				class="flex-grow editor-container"
+				@text-change="handleEditorChange"
+				editorStyle="height: 100%; min-height: 300px; max-height: 500px; overflow-y: auto; padding: 1rem;"
+			/>
 		</div>
 
 		<!-- Footer section with action buttons -->
@@ -232,7 +225,11 @@ import {
 	statusOptions,
 	priorityOptions,
 } from '../../utils/noteStatusHelpers'
-import { formatDateForDisplay, formatDateForServer, isOverdue } from '../../utils/noteFormatters'
+import {
+	formatDateForDisplay,
+	formatDateForServer,
+	isOverdue,
+} from '@/apps/notes/utils/noteFormatters'
 const availableTags = ref([
 	{ label: 'Work', value: 'work' },
 	{ label: 'Personal', value: 'personal' },
@@ -294,7 +291,6 @@ const datePickerVisible = ref(false)
 // Menu refs
 const statusMenu = ref(null)
 const priorityMenu = ref(null)
-
 
 // Watch for prop changes
 watch(
@@ -382,8 +378,9 @@ const addCustomEmoji = () => {
 // Date picker methods
 const handleDateSelect = () => {
 	if (localDueDate.value) {
-		const formattedDate = formatDateForServer(localDueDate.value)
-		emit('update:due-date', formattedDate)
+		// We send the raw Date object to the parent component
+		// The parent will use formatDateForServer when sending to backend
+		emit('update:due-date', localDueDate.value)
 	}
 }
 
@@ -398,32 +395,32 @@ const handleDatePickerHide = () => {
 
 // Add this handler for TextEditor changes
 const handleEditorChange = (content) => {
-  // Log what we're getting from the editor
-  console.log("Editor content:", content);
-  
-  let htmlContent = '';
-  
-  // If it's a string, use it directly
-  if (typeof content === 'string') {
-    htmlContent = content;
-  }
-  // If it's an object with htmlValue (common in PrimeVue Editor)
-  else if (content && typeof content === 'object') {
-    if (content.htmlValue) {
-      htmlContent = content.htmlValue;
-    } else if (content.innerHTML) {
-      htmlContent = content.innerHTML;
-    } else if (content.textContent) {
-      htmlContent = content.textContent;
-    } else {
-      // If we can't find HTML content, log this for debugging
-      console.warn("Editor content structure:", content);
-      htmlContent = String(content);
-    }
-  }
-  
-  localDetails.value = htmlContent;
-  emit('update:details', htmlContent);
+	// Log what we're getting from the editor
+	console.log('Editor content:', content)
+
+	let htmlContent = ''
+
+	// If it's a string, use it directly
+	if (typeof content === 'string') {
+		htmlContent = content
+	}
+	// If it's an object with htmlValue (common in PrimeVue Editor)
+	else if (content && typeof content === 'object') {
+		if (content.htmlValue) {
+			htmlContent = content.htmlValue
+		} else if (content.innerHTML) {
+			htmlContent = content.innerHTML
+		} else if (content.textContent) {
+			htmlContent = content.textContent
+		} else {
+			// If we can't find HTML content, log this for debugging
+			console.warn('Editor content structure:', content)
+			htmlContent = String(content)
+		}
+	}
+
+	localDetails.value = htmlContent
+	emit('update:details', htmlContent)
 }
 
 // Add this new method to handle note type changes

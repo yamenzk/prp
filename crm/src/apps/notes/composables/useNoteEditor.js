@@ -1,7 +1,7 @@
-// useNoteEditor.js 
- import { ref, computed } from 'vue';
- import { commonEmojis } from '../utils/noteIcons';
-import { formatDateForServer } from '../utils/noteFormatters'
+// useNoteEditor.js
+import { ref, computed } from 'vue'
+import { commonEmojis } from '../utils/noteIcons'
+import { formatDateForServer, parseServerDate } from '../utils/noteFormatters'
 
 export function useNoteEditor(initialContext = { doctype: 'User', docname: '' }) {
 	// Composing state
@@ -25,7 +25,6 @@ export function useNoteEditor(initialContext = { doctype: 'User', docname: '' })
 		rel_docname: initialContext.docname,
 		tags: [],
 	})
-
 
 	// Icon picker menu items
 	const iconPickerItems = computed(() => {
@@ -147,18 +146,8 @@ export function useNoteEditor(initialContext = { doctype: 'User', docname: '' })
 		// Convert due date string to date object if exists
 		if (note.due) {
 			try {
-				// Parse the date from DD-MM-YYYY HH:MM:SS format
-				const parts = note.due.match(/(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2})/)
-				if (parts) {
-					draftNote.value.dueDate = new Date(
-						parts[3],
-						parts[2] - 1,
-						parts[1],
-						parts[4],
-						parts[5],
-						parts[6],
-					)
-				}
+				// Use the parseServerDate function to handle various date formats
+				draftNote.value.dueDate = parseServerDate(note.due)
 			} catch (e) {
 				console.error('Error parsing date:', e)
 				draftNote.value.dueDate = null
