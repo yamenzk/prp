@@ -33,7 +33,7 @@ export const STATUS_CONFIG = {
 		darkBgColor: 'rgba(79, 70, 229, 0.2)',
 		textColor: '#4F46E5',
 		darkTextColor: '#818CF8',
-		severity: 'contrast'
+		severity: 'primary'
 
 	},
 	Contacted: {

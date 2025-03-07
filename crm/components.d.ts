@@ -8,8 +8,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Accordion: typeof import('primevue/accordion')['default']
     AppDock: typeof import('./src/components/layout/AppDock.vue')['default']
     AutoComplete: typeof import('primevue/autocomplete')['default']
+    Badge: typeof import('primevue/badge')['default']
     Button: typeof import('primevue/button')['default']
     Calendar: typeof import('primevue/calendar')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
@@ -93,6 +95,8 @@ declare module 'vue' {
     TasksTab: typeof import('./src/components/apps/notes/components/tabs/TasksTab.vue')['default']
     Terminal: typeof import('primevue/terminal')['default']
     Textarea: typeof import('primevue/textarea')['default']
+    Timeline: typeof import('primevue/timeline')['default']
     Tree: typeof import('primevue/tree')['default']
+    VersionTab: typeof import('./src/components/leads/tabs/VersionTab.vue')['default']
   }
 }

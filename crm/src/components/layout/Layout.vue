@@ -35,7 +35,6 @@
 			</div>
 		</div>
 	</div>
-	<AppDock></AppDock>
 </template>
 
 <script setup>

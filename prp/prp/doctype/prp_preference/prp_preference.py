@@ -3,22 +3,29 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 import prp
 
 class PRPPreference(Document):
     def before_save(self):
         if self.has_value_changed("min_sqm"):
-            self.min_sqft = self.min_sqm * 10.7639
+            min_sqm = self.min_sqm or 0
+            self.min_sqft = flt(min_sqm) * 10.7639
         if self.has_value_changed("max_sqm"):
-            self.max_sqft = self.max_sqm * 10.7639
+            max_sqm = self.max_sqm or 0
+            self.max_sqft = flt(max_sqm) * 10.7639
         if self.has_value_changed("min_sqft"):
-            self.min_sqm = self.min_sqft / 10.7639
+            min_sqft = self.min_sqft or 0
+            self.min_sqm = flt(min_sqft) / 10.7639
         if self.has_value_changed("max_sqft"):
-            self.max_sqm = self.max_sqft / 10.7639
+            max_sqft = self.max_sqft or 0
+            self.max_sqm = flt(max_sqft) / 10.7639
         if self.has_value_changed("sqm"):
-            self.sqft = self.sqm * 10.7639
+            sqm = self.sqm or 0
+            self.sqft = flt(sqm) * 10.7639
         if self.has_value_changed("sqft"):
-            self.sqm = self.sqft / 10.7639
+            sqft = self.sqft or 0
+            self.sqm = flt(sqft) / 10.7639
 
     def on_update(self):
         prp.refetch_resource(self, "doc_update")

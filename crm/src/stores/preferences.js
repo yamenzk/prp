@@ -87,7 +87,7 @@ export const usePreferenceStore = defineStore('preferences', {
 
 			// Listen for our custom refetch_resource event
 			socket.on('prp:refetch_resource', (data) => {
-				console.log('🔄 Received refetch_resource event:', data)
+				// console.log('🔄 Received refetch_resource event:', data)
 
 				if (data.cache_key === 'prp:prp_preference') {
 					// Handle different event types
