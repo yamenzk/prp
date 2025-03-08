@@ -376,11 +376,14 @@ export const useTerritoryStore = defineStore('territories', {
 		async createTerritoryFromGeometry(territoryName, geometry, isProject = true) {
 			try {
 				// Use Frappe's call method for standalone API methods
-				const result = await call('prp.prp.doctype.prp_territory.prp_territory.create_territory_from_geometry', {
-					name: territoryName,
-					geometry: geometry,
-					is_project: isProject ? 1 : 0,
-				})
+				const result = await call(
+					'prp.prp.doctype.prp_territory.prp_territory.create_territory_from_geometry',
+					{
+						name: territoryName,
+						geometry: geometry,
+						is_project: isProject ? 1 : 0,
+					},
+				)
 
 				if (result.success) {
 					// Store potential phases if returned
@@ -431,11 +434,15 @@ export const useTerritoryStore = defineStore('territories', {
 		// Convert detected territories to phases for a project
 		async convertToPhasesForProject(projectId) {
 			try {
+				// Get the potential phases from cache
+				const potentialPhases = this.potentialPhases
+
 				// Use Frappe's call method for standalone API methods
 				const result = await call(
 					'prp.prp.doctype.prp_territory.prp_territory.convert_to_phases',
 					{
 						project_id: projectId,
+						phase_ids: potentialPhases.map((phase) => phase.id), // Extract IDs
 					},
 				)
 

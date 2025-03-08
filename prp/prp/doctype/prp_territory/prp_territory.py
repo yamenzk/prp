@@ -629,11 +629,18 @@ def create_territory_from_geometry():
         # After inserting, check for territories that should be phases of this project
         territory.detect_potential_subprojects()
 
-        # Return success response with hierarchy info
+        # Get potential phases if they exist
+        potential_phases = []
+        cached_phases = frappe.cache().get_value(f"potential_phases_{territory.name}")
+        if cached_phases:
+            potential_phases = json.loads(cached_phases)
+
+        # Return success response with hierarchy info and potential phases
         return {
             "success": True,
             "territory_id": territory.name,
             "hierarchy": [h["name"] for h in processed_hierarchy],
+            "potential_phases": potential_phases
         }
 
     except Exception as e:
@@ -709,26 +716,35 @@ def create_phase_for_project(project_id, phase_data):
 
 
 @frappe.whitelist()
-def convert_to_phases(project_id):
+def convert_to_phases(project_id, phase_ids=None):
     """Convert detected territories to phases of this project"""
     try:
-        potential_phases = json.loads(
-            frappe.cache().get_value(f"potential_phases_{project_id}") or "[]"
-        )
+        # If phase_ids were provided, use them
+        if phase_ids:
+            if isinstance(phase_ids, str):
+                phase_ids = json.loads(phase_ids)
+        else:
+            # Otherwise, get potential phases from cache
+            potential_phases = json.loads(
+                frappe.cache().get_value(f"potential_phases_{project_id}") or "[]"
+            )
+            phase_ids = [phase["id"] for phase in potential_phases]
 
-        if not potential_phases:
+        if not phase_ids:
             return {"success": False, "message": "No potential phases found"}
 
         converted = []
 
-        for phase in potential_phases:
+        for phase_id in phase_ids:
+            # Get territory details before updating
+            territory = frappe.get_doc("PRP Territory", phase_id)
             # Update territory to be a phase of the project
             frappe.db.set_value(
                 "PRP Territory",
-                phase["id"],
+                phase_id,
                 {"parent_territory": project_id, "is_phase": 1},
             )
-            converted.append(phase["name"])
+            converted.append(territory.territory_name)
 
         return {
             "success": True,
@@ -879,50 +895,50 @@ spatial_index = SpatialIndex()
 
 # Territory document class
 class PRPTerritory(Document):
-   def before_insert(self):
-       if self.osm_id and not self.is_custom and not self.osm_id.startswith(("PROJ_", "PH_", "PHASE_")):
-           try:
-               # Fetch OSM data for real OSM IDs
-               osm_data = fetch_osm_data(self.osm_id)
-               
-               if osm_data:
-                   # Update document with OSM data
-                   for field, value in osm_data.items():
-                       if hasattr(self, field) and value is not None:
-                           setattr(self, field, value)
-                           
-           except Exception as e:
-               frappe.log_error(f"Error in before_insert: {str(e)}", "PRP Territory")
-   
-   def update_spatial_index(self):
-       """Update spatial index information for the territory"""
-       try:
-           # Get bounds
-           bounds = [
+    def before_insert(self):
+        if self.osm_id and not self.is_custom and not self.osm_id.startswith(("PROJ_", "PH_", "PHASE_")):
+            try:
+                # Fetch OSM data for real OSM IDs
+                osm_data = fetch_osm_data(self.osm_id)
+
+                if osm_data:
+                    # Update document with OSM data
+                    for field, value in osm_data.items():
+                        if hasattr(self, field) and value is not None:
+                            setattr(self, field, value)
+
+            except Exception as e:
+                frappe.log_error(f"Error in before_insert: {str(e)}", "PRP Territory")
+
+    def update_spatial_index(self):
+        """Update spatial index information for the territory"""
+        try:
+            # Get bounds
+            bounds = [
                flt(self.min_lng),
                flt(self.min_lat),
                flt(self.max_lng),
                flt(self.max_lat)
            ]
-           
-           # Calculate appropriate quadtree level based on territory size
-           lng_span = bounds[2] - bounds[0]
-           lat_span = bounds[3] - bounds[1]
-           max_span = max(lng_span, lat_span)
-           
-           # Adjust level based on territory size
-           quadtree_level = 6  # default
-           if max_span > 1.0:
-               quadtree_level = 2
-           elif max_span > 0.1:
-               quadtree_level = 4
-               
-           # Get covering cells
-           cells = spatial_index.get_covering_cells(bounds, quadtree_level)
-           cell_bounds = spatial_index.get_cell_bounds(cells[0])
-           
-           # Update document fields
-           frappe.db.set_value(
+
+            # Calculate appropriate quadtree level based on territory size
+            lng_span = bounds[2] - bounds[0]
+            lat_span = bounds[3] - bounds[1]
+            max_span = max(lng_span, lat_span)
+
+            # Adjust level based on territory size
+            quadtree_level = 6  # default
+            if max_span > 1.0:
+                quadtree_level = 2
+            elif max_span > 0.1:
+                quadtree_level = 4
+
+            # Get covering cells
+            cells = spatial_index.get_covering_cells(bounds, quadtree_level)
+            cell_bounds = spatial_index.get_cell_bounds(cells[0])
+
+            # Update document fields
+            frappe.db.set_value(
                "PRP Territory", 
                self.name, 
                {
@@ -931,21 +947,21 @@ class PRPTerritory(Document):
                    "cell_bounds": json.dumps(cell_bounds)
                }
            )
-           
-           frappe.log(f"Updated spatial index for {self.name}: Level {quadtree_level}, Cell {cells[0]}")
-           
-       except Exception as e:
-           frappe.log_error(f"Error updating spatial index: {str(e)}", "PRP Territory Spatial Index")
-   
-   def get_potential_overlaps(self):
-       """Enhanced territory overlap detection using spatial index"""
-       frappe.log(f"\n=== Checking potential overlaps ===")
 
-       # Get territories in the same or adjacent cells
-       cell_id = self.spatial_index_cell
-       parent_cell = cell_id[:-1] if cell_id else ""
+            frappe.log(f"Updated spatial index for {self.name}: Level {quadtree_level}, Cell {cells[0]}")
 
-       potential_territories = frappe.get_all(
+        except Exception as e:
+            frappe.log_error(f"Error updating spatial index: {str(e)}", "PRP Territory Spatial Index")
+
+    def get_potential_overlaps(self):
+        """Enhanced territory overlap detection using spatial index"""
+        frappe.log(f"\n=== Checking potential overlaps ===")
+
+        # Get territories in the same or adjacent cells
+        cell_id = self.spatial_index_cell
+        parent_cell = cell_id[:-1] if cell_id else ""
+
+        potential_territories = frappe.get_all(
            "PRP Territory",
            filters={
                "name": ["!=", self.name],
@@ -958,220 +974,223 @@ class PRPTerritory(Document):
            ]
        )
 
-       frappe.log(f"Found {len(potential_territories)} territories in nearby cells")
+        frappe.log(f"Found {len(potential_territories)} territories in nearby cells")
 
-       # Filter by bounding box
-       filtered_territories = []
-       for territory in potential_territories:
-           if (
+        # Filter by bounding box
+        filtered_territories = []
+        for territory in potential_territories:
+            if (
                flt(territory.min_lat) <= flt(self.max_lat)
                and flt(territory.max_lat) >= flt(self.min_lat)
                and flt(territory.min_lng) <= flt(self.max_lng)
                and flt(territory.max_lng) >= flt(self.min_lng)
            ):
-               filtered_territories.append(territory)
-               frappe.log(f"Added {territory.name} as potential overlap")
+                filtered_territories.append(territory)
+                frappe.log(f"Added {territory.name} as potential overlap")
 
-       return filtered_territories
-   
-   def update_territory_hierarchy(self):
-       """Update territory hierarchy based on spatial relationships"""
-       frappe.log(f"\n=== Starting hierarchy update for territory {self.name} ===")
-       frappe.log(f"Territory Name: {self.territory_name}")
+        return filtered_territories
 
-       # Skip for phases, as their parent is explicitly set
-       if self.is_phase:
-           frappe.log(f"Skipping hierarchy update for phase territory")
-           return
+    def update_territory_hierarchy(self):
+        """Update territory hierarchy based on spatial relationships"""
+        frappe.log(f"\n=== Starting hierarchy update for territory {self.name} ===")
+        frappe.log(f"Territory Name: {self.territory_name}")
 
-       try:
-           current_geo = shape(json.loads(self.geo))
-           frappe.log(f"Current territory geometry type: {current_geo.geom_type}")
+        # Skip for phases, as their parent is explicitly set
+        if self.is_phase:
+            frappe.log(f"Skipping hierarchy update for phase territory")
+            return
 
-           potential_territories = self.get_potential_overlaps()
-           frappe.log(
+        try:
+            current_geo = shape(json.loads(self.geo))
+            frappe.log(f"Current territory geometry type: {current_geo.geom_type}")
+
+            potential_territories = self.get_potential_overlaps()
+            frappe.log(
                f"Found {len(potential_territories)} potential overlapping territories"
            )
 
-           overlap_threshold = 80
-           potential_parents = []
-           potential_children = []
+            overlap_threshold = 80
+            potential_parents = []
+            potential_children = []
 
-           # Get existing territory hierarchy
-           all_territories = frappe.get_all(
+            # Get existing territory hierarchy
+            all_territories = frappe.get_all(
                "PRP Territory", fields=["name", "parent_territory"]
            )
-           territory_hierarchy = {t.name: t.parent_territory for t in all_territories}
+            territory_hierarchy = {t.name: t.parent_territory for t in all_territories}
 
-           for territory in potential_territories:
-               frappe.log(
+            for territory in potential_territories:
+                frappe.log(
                    f"\nChecking territory: {territory.name} ({territory.territory_name})"
                )
-               try:
-                   other_geo = shape(json.loads(territory.geo))
+                try:
+                    other_geo = shape(json.loads(territory.geo))
 
-                   # Check if other territory is inside current territory
-                   overlap = calculate_overlap_percentage(other_geo, current_geo)
-                   frappe.log(f"{territory.name} is {overlap}% inside current territory")
-                   
-                   # Skip phases for assignment as children (they should stay with their project)
-                   if overlap >= overlap_threshold and not territory.is_phase:
-                       potential_children.append(
+                    # Check if other territory is inside current territory
+                    overlap = calculate_overlap_percentage(other_geo, current_geo)
+                    frappe.log(f"{territory.name} is {overlap}% inside current territory")
+
+                    # Skip phases for assignment as children (they should stay with their project)
+                    if overlap >= overlap_threshold and not territory.is_phase:
+                        potential_children.append(
                            {
                                "name": territory.name,
                                "current_parent": territory_hierarchy.get(territory.name),
                                "area": other_geo.area,
                            }
                        )
-                       frappe.log(f"Added {territory.name} as potential child")
+                        frappe.log(f"Added {territory.name} as potential child")
 
-                   # Check if current territory is inside other territory
-                   # Skip projects as parents for projects unless they're phases
-                   skip_as_parent = territory.is_project and self.is_project and not self.is_phase
-                   
-                   overlap = calculate_overlap_percentage(current_geo, other_geo)
-                   frappe.log(f"Current territory is {overlap}% inside {territory.name}")
-                   
-                   if overlap >= overlap_threshold and not skip_as_parent:
-                       potential_parents.append(
+                    # Check if current territory is inside other territory
+                    # Skip projects as parents for projects unless they're phases
+                    skip_as_parent = territory.is_project and self.is_project and not self.is_phase
+
+                    overlap = calculate_overlap_percentage(current_geo, other_geo)
+                    frappe.log(f"Current territory is {overlap}% inside {territory.name}")
+
+                    if overlap >= overlap_threshold and not skip_as_parent:
+                        potential_parents.append(
                            {
                                "name": territory.name,
                                "overlap": overlap,
                                "area": other_geo.area,
                            }
                        )
-                       frappe.log(f"Added {territory.name} as potential parent")
-               except Exception as e:
-                   frappe.log(f"Error processing territory {territory.name}: {str(e)}")
-                   continue
+                        frappe.log(f"Added {territory.name} as potential parent")
+                except Exception as e:
+                    frappe.log(f"Error processing territory {territory.name}: {str(e)}")
+                    continue
 
-           # Set parent for current territory if found
-           if potential_parents:
-               # Find the smallest area that contains this territory
-               parent = min(potential_parents, key=lambda x: x["area"])
-               frappe.log(f"Setting parent of {self.name} to {parent['name']}")
-               frappe.db.set_value(
+            # Set parent for current territory if found
+            if potential_parents:
+                # Find the smallest area that contains this territory
+                parent = min(potential_parents, key=lambda x: x["area"])
+                frappe.log(f"Setting parent of {self.name} to {parent['name']}")
+                frappe.db.set_value(
                    "PRP Territory", self.name, "parent_territory", parent['name']
                )
 
-           # Process children
-           if potential_children:
-               # Sort children by area from largest to smallest
-               potential_children.sort(key=lambda x: x["area"], reverse=True)
+            # Process children
+            if potential_children:
+                # Sort children by area from largest to smallest
+                potential_children.sort(key=lambda x: x["area"], reverse=True)
 
-               # First, identify which territories are already children of another potential child
-               child_names = {child["name"] for child in potential_children}
-               territories_to_skip = set()
+                # First, identify which territories are already children of another potential child
+                child_names = {child["name"] for child in potential_children}
+                territories_to_skip = set()
 
-               for child in potential_children:
-                   child_name = child["name"]
-                   current_parent = child["current_parent"]
+                for child in potential_children:
+                    child_name = child["name"]
+                    current_parent = child["current_parent"]
 
-                   # If current parent is also in our potential children list, skip this territory
-                   if current_parent in child_names:
-                       territories_to_skip.add(child_name)
-                       frappe.log(
+                    # If current parent is also in our potential children list, skip this territory
+                    if current_parent in child_names:
+                        territories_to_skip.add(child_name)
+                        frappe.log(
                            f"Skipping {child_name} as its parent {current_parent} is also a potential child"
                        )
 
-               # Now process only the top-level territories
-               for child in potential_children:
-                   child_name = child["name"]
+                # Now process only the top-level territories
+                for child in potential_children:
+                    child_name = child["name"]
 
-                   if child_name not in territories_to_skip:
-                       frappe.log(f"Setting parent of {child_name} to {self.name}")
-                       frappe.db.set_value(
+                    if child_name not in territories_to_skip:
+                        frappe.log(f"Setting parent of {child_name} to {self.name}")
+                        frappe.db.set_value(
                            "PRP Territory", child_name, "parent_territory", self.name
                        )
-           
-           frappe.log("\n=== Finished hierarchy update ===")
-           frappe.db.commit()
-           
-       except Exception as e:
-           frappe.log_error(f"Error in update_territory_hierarchy: {str(e)}", "Territory Hierarchy")
-   
-   def detect_potential_subprojects(self):
-       """Detect if this territory fully contains other territories that should be phases"""
-       try:
-           # Only run for projects that aren't phases
-           if not self.is_project or self.is_phase:
-               return
-               
-           # Get our geometry
-           parent_geo = shape(json.loads(self.geo))
-           
-           # Find potential territories that might be contained
-           potential_subprojects = frappe.get_all(
-               "PRP Territory",
-               filters={
-                   "name": ["!=", self.name],
-                   "is_project": 1,
-                   "is_phase": 0,  # Not already a phase
-                   "parent_territory": ["!=", self.name],  # Not already our children
-                   "spatial_index_cell": ["like", f"{self.spatial_index_cell}%"]
-               },
-               fields=["name", "geo", "territory_name"]
-           )
-           
-           contained_projects = []
-           
-           for territory in potential_subprojects:
-               try:
-                   # Check if fully contained
-                   territory_geo = shape(json.loads(territory.geo))
-                   containment_pct = calculate_overlap_percentage(territory_geo, parent_geo)
-                   
-                   # If 95%+ contained, it's a candidate phase
-                   if containment_pct >= 95:
-                       contained_projects.append({
+
+            frappe.log("\n=== Finished hierarchy update ===")
+            frappe.db.commit()
+
+        except Exception as e:
+            frappe.log_error(
+                f"Error in update_territory_hierarchy: {str(e)}", "Territory Hierarchy"
+            )
+
+    def detect_potential_subprojects(self):
+        """Detect if this territory fully contains other territories that should be phases"""
+        try:
+            # Only run for projects that aren't phases
+            if not self.is_project or self.is_phase:
+                return
+            
+
+            # Get our geometry
+            parent_geo = shape(json.loads(self.geo))
+
+            # Find potential territories that might be contained
+            potential_subprojects = frappe.get_all(
+                "PRP Territory",
+                filters={
+                    "name": ["!=", self.name],
+                    "is_project": 1,
+                    "is_phase": 0,  # Not already a phase
+                    "parent_territory": ["!=", self.name],  # Not already our children
+                    "spatial_index_cell": ["like", f"{self.spatial_index_cell}%"],
+                },
+                fields=["name", "geo", "territory_name"],
+            )
+
+            contained_projects = []
+
+            for territory in potential_subprojects:
+                try:
+                    # Check if fully contained
+                    territory_geo = shape(json.loads(territory.geo))
+                    containment_pct = calculate_overlap_percentage(territory_geo, parent_geo)
+
+                    # If 95%+ contained, it's a candidate phase
+                    if containment_pct >= 95:
+                        contained_projects.append({
                            "id": territory.name,
                            "name": territory.territory_name
                        })
-               except Exception:
-                   continue
-           
-           if contained_projects:
-               # Store for later processing
-               frappe.cache().set_value(
+                except Exception:
+                    continue
+
+            if contained_projects:
+                # Store for later processing
+                frappe.cache().set_value(
                    f"potential_phases_{self.name}", 
                    json.dumps(contained_projects),
                    expires_in_sec=86400
                )
-               
-               # Notify user about potential phases
-               frappe.msgprint(
+
+                # Notify user about potential phases
+                frappe.msgprint(
                    f"Found {len(contained_projects)} projects that appear to be phases of this project. "
                    f"Would you like to convert them to phases?",
                    title="Potential Phases Detected"
                )
-               
-       except Exception as e:
-           frappe.log_error(f"Error detecting subprojects: {str(e)}", "Project Hierarchy")
-   
-   def after_insert(self):
-       self.update_spatial_index()
-       
-       # Only run overlap detection for non-placeholder territories
-       # and don't run for territories that are explicitly phases
-       if not self.is_phase:
-           self.update_territory_hierarchy()
-           
-       # If this is a project, check for potential phases
-       if self.is_project and not self.is_phase:
-           self.detect_potential_subprojects()
-   
-   def validate(self):
-       if not self.territory_name:
-           frappe.throw("Territory Name is required")
-           
-       # Ensure we have geo data
-       if not self.geo:
-           frappe.throw("Geometry data is required")
-       
-       # Validate phase relationships
-       if self.is_phase:
-           # Check if parent is a project
-           if self.parent_territory:
-               parent = frappe.get_doc("PRP Territory", self.parent_territory)
-               if not parent.is_project:
-                   frappe.throw("Phases must have projects as their parent")
+
+        except Exception as e:
+            frappe.log_error(f"Error detecting subprojects: {str(e)}", "Project Hierarchy")
+
+    def after_insert(self):
+        self.update_spatial_index()
+
+        # Only run overlap detection for non-placeholder territories
+        # and don't run for territories that are explicitly phases
+        if not self.is_phase:
+            self.update_territory_hierarchy()
+
+        # If this is a project, check for potential phases
+        if self.is_project and not self.is_phase:
+            self.detect_potential_subprojects()
+
+    def validate(self):
+        if not self.territory_name:
+            frappe.throw("Territory Name is required")
+
+        # Ensure we have geo data
+        if not self.geo:
+            frappe.throw("Geometry data is required")
+
+        # Validate phase relationships
+        if self.is_phase:
+            # Check if parent is a project
+            if self.parent_territory:
+                parent = frappe.get_doc("PRP Territory", self.parent_territory)
+                if not parent.is_project:
+                    frappe.throw("Phases must have projects as their parent")
