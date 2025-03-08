@@ -77,10 +77,11 @@ const markerIcon = ref(
 	L.icon({
 		iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
 		iconSize: [25, 41],
-		iconAnchor: [12, 41],
+		iconAnchor: [12, 41], // Position the bottom of the icon at the LatLng point
 		popupAnchor: [1, -34],
 		shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 		shadowSize: [41, 41],
+		shadowAnchor: [13, 41], // Position the shadow properly as well
 	}),
 )
 
@@ -139,6 +140,7 @@ function initializeMap() {
 	map.value = L.map('project-map', {
 		zoomControl: false, // We'll use our custom controls
 		attributionControl: true,
+		doubleClickZoom: false, // Disable double-click zoom to prevent popup issues
 	})
 
 	// Set default view (Dubai)
@@ -244,14 +246,31 @@ function addBuildingsToMap() {
 	// Add each building as a marker
 	buildingStore.buildings.forEach((building) => {
 		if (building.lat && building.lng) {
-			const marker = L.marker([building.lat, building.lng], {
+			// Create a marker with precise coordinates
+			const latlng = L.latLng(parseFloat(building.lat), parseFloat(building.lng))
+			const marker = L.marker(latlng, {
 				icon: markerIcon.value,
 				title: building.building_name,
-			}).addTo(buildingsLayer.value).bindPopup(`
-          <b>${building.building_name}</b><br>
-          Status: ${building.status || 'Off-plan'}<br>
-          Availability: ${building.availability || 'Available'}
-        `)
+			})
+
+			// Add the marker to the layer
+			marker.addTo(buildingsLayer.value)
+
+			// Bind popup with configuration to handle open/close events properly
+			const popupContent = `
+        <b>${building.building_name}</b><br>
+        Status: ${building.status || 'Off-plan'}<br>
+        Availability: ${building.availability || 'Available'}
+      `
+
+			const popup = L.popup({
+				closeButton: true,
+				autoClose: true,
+				closeOnEscapeKey: true,
+				closeOnClick: true,
+			}).setContent(popupContent)
+
+			marker.bindPopup(popup)
 
 			// Store building reference in marker for quick access
 			marker.buildingData = building
@@ -306,6 +325,7 @@ function initLocationMap() {
 	// Create the map for location selection
 	locationMap.value = L.map('location-map', {
 		zoomControl: false,
+		doubleClickZoom: false, // Disable double-click zoom to prevent popup issues
 	})
 
 	// Add Carto Light basemap
@@ -368,7 +388,7 @@ function initLocationMap() {
 
 // Handle click on location map
 function onLocationMapClick(e) {
-	// Store selected location
+	// Store selected location with precise coordinates
 	selectedLocation.value = {
 		lat: e.latlng.lat,
 		lng: e.latlng.lng,
@@ -379,11 +399,20 @@ function onLocationMapClick(e) {
 		locationMap.value.removeLayer(tempMarker.value)
 	}
 
-	// Add new marker at clicked position
-	tempMarker.value = L.marker(e.latlng, { icon: markerIcon.value })
-		.addTo(locationMap.value)
-		.bindPopup(`New location for ${selectedBuilding.value.building_name}`)
-		.openPopup()
+	// Add new marker at clicked position with precise coordinates
+	tempMarker.value = L.marker([e.latlng.lat, e.latlng.lng], { icon: markerIcon.value }).addTo(
+		locationMap.value,
+	)
+
+	// Create a popup with safe configuration
+	const popup = L.popup({
+		closeButton: true,
+		autoClose: true,
+		closeOnEscapeKey: true,
+		closeOnClick: true,
+	}).setContent(`New location for ${selectedBuilding.value.building_name}`)
+
+	tempMarker.value.bindPopup(popup).openPopup()
 }
 
 // Save the selected location
@@ -391,19 +420,19 @@ async function saveLocation() {
 	if (!selectedLocation.value || !selectedBuilding.value) return
 
 	try {
-		// Update building location
+		// Update building location with precise coordinates
 		await buildingStore.updateLocation(
 			selectedBuilding.value.name,
-			selectedLocation.value.lat,
-			selectedLocation.value.lng,
+			selectedLocation.value.lat.toFixed(6),
+			selectedLocation.value.lng.toFixed(6),
 		)
 
 		// Close dialog
 		showLocationDialog.value = false
 
 		// Update building data locally for immediate feedback
-		selectedBuilding.value.lat = selectedLocation.value.lat
-		selectedBuilding.value.lng = selectedLocation.value.lng
+		selectedBuilding.value.lat = selectedLocation.value.lat.toFixed(6)
+		selectedBuilding.value.lng = selectedLocation.value.lng.toFixed(6)
 
 		// Refresh buildings on map
 		addBuildingsToMap()
