@@ -105,7 +105,7 @@ const menuItems = [
 	{ name: 'Dashboard', icon: 'home', path: '/' },
 	{ name: 'Leads', icon: 'users', path: '/leads' },
 	{ name: 'Deals', icon: 'briefcase', path: '/deals' },
-	{ name: 'Tasks', icon: 'check-square', path: '/tasks' },
+	{ name: 'Projects', icon: 'home', path: '/projects' },
 	{ name: 'Calendar', icon: 'calendar', path: '/calendar' },
 ]
 

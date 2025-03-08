@@ -18,6 +18,11 @@ const routes = [
 				name: 'Leads',
 				component: () => import('@/pages/Leads.vue'),
 			},
+			{
+				path: 'projects',
+				name: 'Projects',
+				component: () => import('@/pages/Projects.vue'),
+			},
 			// Add other routes that should use the layout here
 		],
 		meta: { requiresAuth: true },

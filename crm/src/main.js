@@ -20,6 +20,7 @@ import DatePicker from 'primevue/datepicker'
 import TagInput from './components/common/TagInput.vue'
 import Tab from 'primevue/tab'
 import TabList from 'primevue/tablist'
+import ToastService from 'primevue/toastservice'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -30,6 +31,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(resourcesPlugin)
+app.use(ToastService)
 
 const Noir = definePreset(Aura, {
 	semantic: {
