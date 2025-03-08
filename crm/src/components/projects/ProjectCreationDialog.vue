@@ -1,301 +1,306 @@
 <!-- components/projects/ProjectCreationDialog.vue -->
 <template>
-	<Dialog
-		:visible="visible"
-		:header="dialogTitle"
-		:style="{ width: '85vw', maxWidth: '950px' }"
-		:modal="true"
-		:closable="currentStep !== 'processing'"
-		class="project-creation-dialog"
-		@hide="closeDialog"
-		@update:visible="emit('update:visible', $event)"
-	>
-		<!-- Dialog header with steps -->
-		<template #header>
-			<div class="stepper" v-if="showStepper">
-				<div
-					v-for="(step, index) in steps"
-					:key="index"
-					class="step-item"
-					:class="{
-						active: currentStepIndex >= index,
-						current: currentStepIndex === index,
-					}"
-				>
-					<div class="step-number">{{ index + 1 }}</div>
-					<div class="step-label">{{ step.label }}</div>
-				</div>
-			</div>
-		</template>
+  <Dialog
+    :visible="visible"
+    :style="{ width: '85vw', maxWidth: '950px' }"
+    :modal="true"
+    :closable="currentStep !== 'processing'"
+    class="project-creation-dialog"
+    @hide="closeDialog"
+    @update:visible="emit('update:visible', $event)"
+  >
+    <div class="p-4">
+      <!-- Use Stepper for main workflow -->
+      <Stepper v-if="!['processing', 'success', 'phases-detected'].includes(currentStep)" :value="currentStepNumber">
+  <StepList>
+    <Step value="1">Project Type</Step>
+    <Step value="2">Scale</Step>
+    <Step value="3">Location</Step>
+    <Step value="4">Details</Step>
+  </StepList>
+        
+        <StepPanels class="mt-6">
+  <!-- Step 1: Project or Phase selection -->
+  <StepPanel value="1">
+    <div class="option-group">
+      <div
+        @click="selectProjectType('project')"
+        class="option-item"
+        :class="{ selected: projectType === 'project' }"
+      >
+        <div class="option-icon">
+          <i class="pi pi-building"></i>
+        </div>
+        <div class="option-content">
+          <h3>Project</h3>
+          <p>Create a new standalone project</p>
+        </div>
+      </div>
 
-		<!-- Dialog content -->
-		<div class="creation-dialog-content">
-			<!-- Step 1: Project or Phase selection -->
-			<div v-if="currentStep === 'type-selection'" class="step-container">
-				<div class="option-cards">
-					<Card
-						@click="selectProjectType('project')"
-						class="option-card"
-						:class="{ selected: projectType === 'project' }"
-					>
-						<template #content>
-							<div class="card-content">
-								<div class="icon-container">
-									<i class="pi pi-building"></i>
-								</div>
-								<h3>Project</h3>
-								<p>Create a new standalone project</p>
-							</div>
-						</template>
-					</Card>
+      <div
+        @click="selectProjectType('phase')"
+        class="option-item"
+        :class="{ selected: projectType === 'phase' }"
+      >
+        <div class="option-icon">
+          <i class="pi pi-sitemap"></i>
+        </div>
+        <div class="option-content">
+          <h3>Phase</h3>
+          <p>Create a phase within an existing project</p>
+        </div>
+      </div>
+    </div>
+  </StepPanel>
 
-					<Card
-						@click="selectProjectType('phase')"
-						class="option-card"
-						:class="{ selected: projectType === 'phase' }"
-					>
-						<template #content>
-							<div class="card-content">
-								<div class="icon-container">
-									<i class="pi pi-sitemap"></i>
-								</div>
-								<h3>Phase</h3>
-								<p>Create a phase within an existing project</p>
-							</div>
-						</template>
-					</Card>
-				</div>
-			</div>
+  <!-- Step 2: Scale or Parent Selection -->
+  <StepPanel value="2">
+    <!-- Project Scale (show when projectType is 'project') -->
+    <div v-if="projectType === 'project'" class="option-group">
+      <div
+        @click="selectProjectScale('building')"
+        class="option-item"
+        :class="{ selected: projectScale === 'building' }"
+      >
+        <div class="option-icon">
+          <i class="pi pi-home"></i>
+        </div>
+        <div class="option-content">
+          <h3>Single Building</h3>
+          <p>A single building or small plot</p>
+        </div>
+      </div>
 
-			<!-- Step 2a: Project Scale Selection -->
-			<div v-if="currentStep === 'project-scale'" class="step-container">
-				<div class="option-cards">
-					<Card
-						@click="selectProjectScale('building')"
-						class="option-card"
-						:class="{ selected: projectScale === 'building' }"
-					>
-						<template #content>
-							<div class="card-content">
-								<div class="icon-container">
-									<i class="pi pi-home"></i>
-								</div>
-								<h3>Single Building</h3>
-								<p>A single building or small plot</p>
-							</div>
-						</template>
-					</Card>
+      <div
+        @click="selectProjectScale('development')"
+        class="option-item"
+        :class="{ selected: projectScale === 'development' }"
+      >
+        <div class="option-icon">
+          <i class="pi pi-th-large"></i>
+        </div>
+        <div class="option-content">
+          <h3>Development Area</h3>
+          <p>A large development with multiple buildings or phases</p>
+        </div>
+      </div>
+    </div>
 
-					<Card
-						@click="selectProjectScale('development')"
-						class="option-card"
-						:class="{ selected: projectScale === 'development' }"
-					>
-						<template #content>
-							<div class="card-content">
-								<div class="icon-container">
-									<i class="pi pi-th-large"></i>
-								</div>
-								<h3>Development Area</h3>
-								<p>A large development with multiple buildings or phases</p>
-							</div>
-						</template>
-					</Card>
-				</div>
-			</div>
+    <!-- Parent Project Selection (show when projectType is 'phase') -->
+    <div v-if="projectType === 'phase'" class="form-container">
+      <FormField
+        v-model="selectedParentProject"
+        type="link"
+        label="Parent Project"
+        doctype="PRP Project"
+        validation="required"
+        placeholder="Select a project"
+        icon="pi pi-building"
+      />
+      <div class="helper-text">
+        <i class="pi pi-info-circle mr-2"></i>
+        <span>Select the project this phase will belong to</span>
+      </div>
+    </div>
+  </StepPanel>
 
-			<!-- Step 2b: Project Selection (for phase) -->
-			<div v-if="currentStep === 'parent-selection'" class="step-container">
-				<div class="form-section">
-					<FormField
-						v-model="selectedParentProject"
-						type="link"
-						label="Parent Project"
-						doctype="PRP Project"
-						validation="required"
-						placeholder="Select a project"
-						icon="pi pi-building"
-					/>
-					<div class="helper-text">
-						<i class="pi pi-info-circle mr-2"></i>
-						<span>Select the project this phase will belong to</span>
-					</div>
-				</div>
-			</div>
+  <!-- Step 3: Location -->
+  <StepPanel value="3">
+    <!-- Building Location -->
+    <div v-if="projectType === 'project' && projectScale === 'building'">
+      <div class="form-container">
+        <label class="field-label">Project Name</label>
+        <InputText
+          v-model="projectName"
+          placeholder="Enter project name"
+          class="w-full"
+        />
+      </div>
 
-			<!-- Step 3a: Building Location -->
-			<div v-if="currentStep === 'building-location'" class="step-container">
-				<div class="form-section mb-3">
-					<label class="field-label">Project Name</label>
-					<InputText
-						v-model="projectName"
-						placeholder="Enter project name"
-						class="w-full"
-					/>
-				</div>
+      <div class="helper-text mb-3">
+        <i class="pi pi-map-marker mr-2"></i>
+        <span>Click on the map to place the marker at the building location</span>
+      </div>
 
-				<div class="helper-text mb-3">
-					<i class="pi pi-map-marker mr-2"></i>
-					<span>Click on the map to place the marker at the building location</span>
-				</div>
+      <div class="map-container">
+        <PointSelectionMap 
+          v-model:selectedPoint="selectedPoint" 
+          :initialZoom="15"
+          :mapId="'point-selection-map-' + Math.random().toString(36).substring(2, 9)"
+        />
+      </div>
+    </div>
 
-				<div class="map-container">
-					<PointSelectionMap v-model:selectedPoint="selectedPoint" :initialZoom="15" />
-				</div>
-			</div>
+    <!-- Development Area -->
+    <div v-if="projectType === 'project' && projectScale === 'development'">
+      <div class="form-container">
+        <label class="field-label">Project Name</label>
+        <InputText
+          v-model="projectName"
+          placeholder="Enter project name"
+          class="w-full"
+        />
+      </div>
 
-			<!-- Step 3b: Development Area -->
-			<div v-if="currentStep === 'development-area'" class="step-container">
-				<div class="form-section mb-3">
-					<label class="field-label">Project Name</label>
-					<InputText
-						v-model="projectName"
-						placeholder="Enter project name"
-						class="w-full"
-					/>
-				</div>
+      <div class="helper-text mb-3">
+        <i class="pi pi-pencil mr-2"></i>
+        <span>Draw a polygon on the map to define the development boundaries</span>
+      </div>
 
-				<div class="helper-text mb-3">
-					<i class="pi pi-pencil mr-2"></i>
-					<span>Draw a polygon on the map to define the development boundaries</span>
-				</div>
+      <div class="map-container">
+        <PolygonDrawingMap 
+          v-model:drawnGeometry="drawnGeometry" 
+          :initialZoom="14"
+          :mapId="'polygon-map-' + Math.random().toString(36).substring(2, 9)"
+        />
+      </div>
+    </div>
 
-				<div class="map-container">
-					<PolygonDrawingMap v-model:drawnGeometry="drawnGeometry" :initialZoom="14" />
-				</div>
-			</div>
+    <!-- Phase Area -->
+    <div v-if="projectType === 'phase'">
+      <div class="form-container">
+        <label class="field-label">Phase Name</label>
+        <InputText
+          v-model="projectName"
+          placeholder="Enter phase name (e.g. Phase 1)"
+          class="w-full"
+        />
+      </div>
 
-			<!-- Step 3c: Phase Area -->
-			<div v-if="currentStep === 'phase-area'" class="step-container">
-				<div class="form-section mb-3">
-					<label class="field-label">Phase Name</label>
-					<InputText
-						v-model="projectName"
-						placeholder="Enter phase name"
-						class="w-full"
-					/>
-				</div>
+      <div class="helper-text mb-3">
+        <i class="pi pi-pencil mr-2"></i>
+        <span>Draw a polygon within the parent project boundaries</span>
+      </div>
 
-				<div class="helper-text mb-3">
-					<i class="pi pi-pencil mr-2"></i>
-					<span>Draw a polygon within the parent project boundaries</span>
-				</div>
+      <div class="map-container">
+        <PolygonDrawingMap
+          v-model:drawnGeometry="drawnGeometry"
+          :boundaryGeometry="parentProjectGeometry"
+          :restrictToParent="true"
+          :initialZoom="15"
+          :mapId="'phase-map-' + Math.random().toString(36).substring(2, 9)"
+        />
+      </div>
+    </div>
+  </StepPanel>
 
-				<div class="map-container">
-					<PolygonDrawingMap
-						v-model:drawnGeometry="drawnGeometry"
-						:boundaryGeometry="parentProjectGeometry"
-						:restrictToParent="true"
-						:initialZoom="15"
-					/>
-				</div>
-			</div>
+  <!-- Step 4: Details panel is handled outside stepper -->
+</StepPanels>
+      </Stepper>
 
-			<!-- Phases Detection Step -->
-			<div v-if="currentStep === 'phases-detected'" class="step-container">
-				<div class="info-box mb-4">
-					<i class="pi pi-info-circle text-blue-500 mr-2"></i>
-					<span
-						>We detected {{ potentialPhases.length }} existing projects that appear to
-						be phases of this project.</span
-					>
-				</div>
+      <!-- Project details step handled outside stepper -->
+      <CreateDialog
+        v-if="currentStep === 'project-details'"
+        v-model:visible="showDetailsDialog"
+        :title="projectType === 'phase' ? 'Phase Details' : 'Project Details'"
+        :fields="projectDetailFields"
+        :initialData="projectData"
+        :submitButtonLabel="projectType === 'phase' ? 'Create Phase' : 'Create Project'"
+        @submit="onProjectDetailsSubmit"
+        @cancel="goToPreviousStep"
+      />
 
-				<div class="phases-list">
-					<ul class="phase-items">
-						<li v-for="phase in potentialPhases" :key="phase.id" class="phase-item">
-							<i class="pi pi-building mr-2"></i>
-							{{ phase.name }}
-						</li>
-					</ul>
-				</div>
+      <!-- Phases Detection Step -->
+      <div v-if="currentStep === 'phases-detected'" class="phases-detected-container">
+        <div class="result-icon">
+          <i class="pi pi-sitemap"></i>
+        </div>
+        <h3 class="result-title">Phases Detected</h3>
+        
+        <div class="info-box mb-4">
+          <i class="pi pi-info-circle text-blue-500 mr-2"></i>
+          <span>We detected {{ potentialPhases.length }} existing projects that appear to
+            be phases of this project.</span>
+        </div>
 
-				<div class="question-prompt text-center mt-4">
-					<p>Would you like to convert these to phases of your new project?</p>
-				</div>
-			</div>
+        <div class="phases-list">
+          <ul class="phase-items">
+            <li v-for="phase in potentialPhases" :key="phase.id" class="phase-item">
+              <i class="pi pi-building mr-2"></i>
+              {{ phase.name }}
+            </li>
+          </ul>
+        </div>
 
-			<!-- Processing Step -->
-			<div v-if="currentStep === 'processing'" class="step-container processing-container">
-				<div class="processing-content">
-					<ProgressSpinner class="mb-4" />
-					<h3 class="mb-2">Processing</h3>
-					<p>{{ processingMessage }}</p>
-				</div>
-			</div>
+        <div class="question-prompt text-center mt-4 mb-4">
+          <p>Would you like to convert these to phases of your new project?</p>
+        </div>
 
-			<!-- Success Step -->
-			<div v-if="currentStep === 'success'" class="step-container success-container">
-				<div class="success-content">
-					<div class="success-icon">
-						<i class="pi pi-check-circle"></i>
-					</div>
-					<h3 class="mt-3 mb-2">Success!</h3>
-					<p class="mb-4">{{ successMessage }}</p>
-					<div class="action-buttons">
-						<Button
-							label="Add Another"
-							icon="pi pi-plus"
-							class="p-button-outlined mr-2"
-							@click="resetForm"
-						/>
-						<Button
-							label="View Project"
-							icon="pi pi-external-link"
-							@click="viewCreatedProject"
-						/>
-					</div>
-				</div>
-			</div>
+        <div class="flex justify-between">
+          <Button 
+            label="Skip" 
+            class="p-button-text" 
+            @click="skipPhaseConversion"
+          />
+          <Button 
+            label="Convert to Phases" 
+            icon="pi pi-sitemap"
+            @click="convertToPhases"
+          />
+        </div>
+      </div>
 
-			<!-- Using CreateDialog for the project details step -->
-			<CreateDialog
-				v-if="currentStep === 'project-details'"
-				v-model:visible="showDetailsDialog"
-				:title="projectType === 'phase' ? 'Phase Details' : 'Project Details'"
-				:fields="projectDetailFields"
-				:initialData="projectData"
-				:submitButtonLabel="projectType === 'phase' ? 'Create Phase' : 'Create Project'"
-				@submit="onProjectDetailsSubmit"
-				@cancel="goToPreviousStep"
-			/>
-		</div>
+      <!-- Processing Step -->
+      <div v-if="currentStep === 'processing'" class="processing-container">
+        <ProgressSpinner class="mb-4" />
+        <h3 class="processing-title">{{ processingTitle }}</h3>
+        <p class="processing-message">{{ processingMessage }}</p>
+        
+        <div v-if="processingResults.length > 0" class="processing-results">
+          <div v-for="(result, index) in processingResults" :key="index" class="result-item">
+            <i :class="result.icon"></i>
+            <span>{{ result.message }}</span>
+          </div>
+        </div>
+      </div>
 
-		<!-- Dialog footer with action buttons -->
-		<template #footer v-if="showFooter">
-			<Button
-				v-if="showBackButton"
-				label="Back"
-				icon="pi pi-arrow-left"
-				class="p-button-text"
-				@click="goToPreviousStep"
-			/>
-			<div class="flex-grow-1"></div>
-			<Button
-				v-if="currentStep === 'phases-detected'"
-				label="Skip"
-				class="p-button-text mr-2"
-				@click="skipPhaseConversion"
-			/>
-			<Button
-				:label="nextButtonLabel"
-				:icon="nextButtonIcon"
-				:disabled="isNextButtonDisabled"
-				:loading="processing && currentStep !== 'processing'"
-				@click="handleNextAction"
-			/>
-		</template>
-	</Dialog>
+      <!-- Success Step -->
+      <div v-if="currentStep === 'success'" class="success-container">
+        <div class="success-icon">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <h3 class="mt-3 mb-2">Success!</h3>
+        <p class="mb-4">{{ successMessage }}</p>
+        <div class="action-buttons">
+          <Button
+            label="Add Another"
+            icon="pi pi-plus"
+            class="p-button-outlined mr-2"
+            @click="resetForm"
+          />
+          <Button
+            label="View Project"
+            icon="pi pi-external-link"
+            @click="viewCreatedProject"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Dialog footer with action buttons -->
+    <template #footer v-if="showFooter">
+      <Button
+        v-if="showBackButton"
+        label="Back"
+        icon="pi pi-arrow-left"
+        class="p-button-text"
+        @click="goToPreviousStep"
+      />
+      <div class="flex-grow-1"></div>
+      <Button
+        :label="nextButtonLabel"
+        :icon="nextButtonIcon"
+        :disabled="isNextButtonDisabled"
+        :loading="processing && currentStep !== 'processing'"
+        @click="handleNextAction"
+      />
+    </template>
+  </Dialog>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import Dialog from 'primevue/dialog'
-import Card from 'primevue/card'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import ProgressSpinner from 'primevue/progressspinner'
 import { useToast } from 'primevue/usetoast'
 import { useProjectStore } from '@/stores/project'
 import { useTerritoryStore } from '@/stores/territory'
@@ -369,15 +374,6 @@ const projectDetailFields = computed(() => [
 		fullWidth: false,
 	},
 	{
-		name: 'project_amenities',
-		label: 'Project Amenities',
-		type: 'link',
-		doctype: 'PRP Preference',
-		validation: 'required',
-		icon: 'pi pi-star',
-		fullWidth: false,
-	},
-	{
 		name: 'handover_quarter',
 		label: 'Handover Quarter',
 		type: 'select',
@@ -388,16 +384,9 @@ const projectDetailFields = computed(() => [
 	{
 		name: 'handover_year',
 		label: 'Handover Year',
-		type: 'int',
-		icon: 'pi pi-calendar',
-		fullWidth: false,
-	},
-	{
-		name: 'status',
-		label: 'Status',
 		type: 'select',
-		options: statusOptions,
-		icon: 'pi pi-flag',
+		options: yearOptions,
+		icon: 'pi pi-calendar',
 		fullWidth: false,
 	},
 	{
@@ -406,72 +395,39 @@ const projectDetailFields = computed(() => [
 		type: 'select',
 		options: availabilityOptions,
 		icon: 'pi pi-tag',
-		fullWidth: true,
+		fullWidth: false,
 	},
-	// Cover image field would need special handling in the CreateDialog component
-	// or could be added afterwards
 ])
 
 // Step definitions for stepper
-const steps = [
-	{ key: 'type-selection', label: 'Type' },
-	{ key: 'project-scale', label: 'Scale' },
-	{ key: 'building-location', label: 'Location' },
-	{ key: 'project-details', label: 'Details' },
-]
+const currentStepNumber = computed(() => {
+  switch (currentStep.value) {
+    case 'type-selection':
+      return '1'
+    case 'project-scale':
+    case 'parent-selection':
+      return '2'
+    case 'building-location':
+    case 'development-area':
+    case 'phase-area':
+      return '3'
+    case 'project-details':
+      return '4'
+    default:
+      return '1'
+  }
+})
+
+const processingTitle = ref('Processing')
+const processingResults = ref([])
 
 // Options for select fields
 const statusOptions = ['Off-plan', 'Due for Handover', 'Handover Completed']
-
+const yearOptions = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i)
 const availabilityOptions = ['Available', 'Sold', 'Available for Secondhand']
 
 // Computed properties
-const dialogTitle = computed(() => {
-	switch (currentStep.value) {
-		case 'type-selection':
-			return 'Create New Project'
-		case 'project-scale':
-			return 'Select Project Type'
-		case 'parent-selection':
-			return 'Select Parent Project'
-		case 'building-location':
-			return 'Locate Building'
-		case 'development-area':
-			return 'Define Development Area'
-		case 'phase-area':
-			return 'Define Phase Area'
-		case 'project-details':
-			return 'Project Details'
-		case 'phases-detected':
-			return 'Phases Detected'
-		case 'processing':
-			return 'Processing'
-		case 'success':
-			return 'Success'
-		default:
-			return 'New Project'
-	}
-})
 
-const currentStepIndex = computed(() => {
-	if (projectType.value === 'phase') {
-		const phaseSteps = ['type-selection', 'parent-selection', 'phase-area', 'project-details']
-		return phaseSteps.indexOf(currentStep.value)
-	} else {
-		const normalSteps = [
-			'type-selection',
-			'project-scale',
-			projectScale.value === 'building' ? 'building-location' : 'development-area',
-			'project-details',
-		]
-		return normalSteps.indexOf(currentStep.value)
-	}
-})
-
-const showStepper = computed(() => {
-	// Don't show stepper for processing, success or phases-detected steps
-	return !['processing', 'success', 'phases-detected'].includes(currentStep.value)
-})
 
 const showFooter = computed(() => {
 	// Hide footer in processing, success, and project-details steps
@@ -716,45 +672,63 @@ async function createBuildingTerritory() {
 }
 
 async function createDevelopmentTerritory() {
-	if (!drawnGeometry.value || !projectName.value.trim()) {
-		return
-	}
+  if (!drawnGeometry.value || !projectName.value.trim()) {
+    return
+  }
 
-	processing.value = true
-	currentStep.value = 'processing'
-	processingMessage.value = 'Creating development territory...'
+  processing.value = true
+  currentStep.value = 'processing'
+  processingTitle.value = 'Creating Project Territory'
+  processingMessage.value = 'Drawing boundaries and analyzing location...'
+  processingResults.value = []
 
-	try {
-		// Create territory using the API
-		const result = await territoryStore.createTerritoryFromGeometry(
-			projectName.value,
-			drawnGeometry.value,
-			true,
-		)
+  try {
+    // Create territory using the API
+    const result = await territoryStore.createTerritoryFromGeometry(
+      projectName.value,
+      drawnGeometry.value,
+      true,
+    )
 
-		if (result.success) {
-            console.log(result)
-			createdTerritory.value = result.territory_id
+    if (result.success) {
+      console.log(result)
+      createdTerritory.value = result.territory_id
 
-			// Set territory in project data
-			projectData.value.territory = result.territory_id
+      // Add processing results for better UX
+      processingResults.value.push({
+        icon: 'pi pi-map-marker text-green-500',
+        message: 'Territory boundaries created successfully'
+      })
+      
+      if (result.hierarchy && result.hierarchy.length > 0) {
+        processingResults.value.push({
+          icon: 'pi pi-sitemap text-blue-500',
+          message: `Location identified: ${result.hierarchy.join(' › ')}`
+        })
+      }
 
-			// Check if potential phases were detected
-			if (result.potential_phases && result.potential_phases.length > 0) {
-				potentialPhases.value = result.potential_phases
-				currentStep.value = 'phases-detected'
-			} else {
-				// Proceed to project details step
-				currentStep.value = 'project-details'
-			}
-		} else {
-			throw new Error(result.message || 'Failed to create territory')
-		}
-	} catch (error) {
-		handleError(error, 'Failed to create development territory')
-	} finally {
-		processing.value = false
-	}
+      // Set territory in project data
+      projectData.value.territory = result.territory_id
+
+      // Pause briefly to show results before proceeding
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Check if potential phases were detected
+      if (result.potential_phases && result.potential_phases.length > 0) {
+        potentialPhases.value = result.potential_phases
+        currentStep.value = 'phases-detected'
+      } else {
+        // Proceed to project details step
+        currentStep.value = 'project-details'
+      }
+    } else {
+      throw new Error(result.message || 'Failed to create territory')
+    }
+  } catch (error) {
+    handleError(error, 'Failed to create development territory')
+  } finally {
+    processing.value = false
+  }
 }
 
 async function createPhaseTerritory() {
@@ -864,9 +838,23 @@ async function convertToPhases() {
 }
 
 // Skip phase conversion
-function skipPhaseConversion() {
-	// Just proceed to project details step
-	currentStep.value = 'project-details'
+async function skipPhaseConversion() {
+  try {
+    // Call backend to clear potential phases
+    await call(
+      'prp.prp.doctype.prp_territory.prp_territory.clear_potential_phases',
+      {
+        project_id: createdTerritory.value
+      }
+    )
+    
+    // Proceed to project details step
+    currentStep.value = 'project-details'
+  } catch (error) {
+    console.error('Error clearing potential phases:', error)
+    // Still proceed to next step even if clearing failed
+    currentStep.value = 'project-details'
+  }
 }
 
 // View created project
@@ -891,6 +879,7 @@ function handleError(error, defaultMessage) {
 	// Go back to previous step
 	goToPreviousStep()
 }
+
 
 // Reset dialog
 function resetForm() {
@@ -931,245 +920,360 @@ function closeDialog() {
 
 <style scoped>
 .project-creation-dialog :deep(.p-dialog-content) {
-	overflow: hidden;
-	border-radius: 8px;
-	padding: 0 0 1rem 0;
+  overflow: hidden;
+  border-radius: 16px;
+  padding: 0;
+  background-color: var(--pd-bg-base);
+  color: var(--pd-text-primary);
 }
 
-.stepper {
-	display: flex;
-	margin: 0.5rem 0 0;
+.project-creation-dialog :deep(.p-stepper) {
+  --stepper-border-width: 1px;
+  --stepper-border-color: var(--pd-border-light);
 }
 
-.step-item {
-	display: flex;
-	align-items: center;
-	flex: 1;
-	position: relative;
+.project-creation-dialog :deep(.p-step-header) {
+  border-radius: 10px;
+  transition: all 0.2s;
+  padding: 1rem;
+  background-color: var(--pd-bg-surface);
 }
 
-.step-item:not(:last-child):after {
-	content: '';
-	position: absolute;
-	height: 2px;
-	background-color: var(--surface-300);
-	left: 3rem;
-	right: 0;
-	top: 1.25rem;
-	z-index: 0;
+.project-creation-dialog :deep(.p-step-header:hover) {
+  background-color: var(--pd-bg-surface-hover);
 }
 
-.step-item.active:not(:last-child):after {
-	background-color: var(--primary-color);
+.project-creation-dialog :deep(.p-step-header.p-highlight) {
+  background-color: var(--pd-bg-surface-hover);
+  border-color: var(--pd-outline-color);
 }
 
-.step-number {
-	width: 2.5rem;
-	height: 2.5rem;
-	border-radius: 50%;
-	background-color: var(--surface-200);
-	color: var(--text-color-secondary);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-weight: 600;
-	margin-right: 0.75rem;
-	z-index: 1;
-	transition: all 0.2s ease;
+.project-creation-dialog :deep(.p-step-header .p-step-title) {
+  color: var(--pd-text-primary);
 }
 
-.step-item.active .step-number {
-	background-color: var(--primary-color);
-	color: var(--primary-color-text);
+.project-creation-dialog :deep(.p-step-number) {
+  background-color: var(--pd-marker-bg);
+  color: var(--pd-bg-base);
 }
 
-.step-item.current .step-number {
-	box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.2);
+.project-creation-dialog :deep(.p-step-header.p-highlight .p-step-number) {
+  background-color: var(--pd-marker-special);
 }
 
-.step-label {
-	font-weight: 500;
-	color: var(--text-color-secondary);
-	transition: all 0.2s ease;
+.project-creation-dialog :deep(.p-step-panel) {
+  padding: 1.5rem 1rem;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--pd-bg-base);
 }
 
-.step-item.current .step-label {
-	color: var(--text-900);
-	font-weight: 600;
+.project-creation-dialog :deep(.p-dialog-footer) {
+  border-top: 1px solid var(--pd-border-light);
+  padding: 1rem 1.5rem;
+  background-color: var(--pd-bg-base);
 }
 
-.creation-dialog-content {
-	min-height: 320px;
-	padding: 1.5rem;
+.option-group {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1rem auto;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.step-container {
-	min-height: 280px;
-	display: flex;
-	flex-direction: column;
+.option-item {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  width: 280px;
+  cursor: pointer;
+  border: 1px solid var(--pd-border-light);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  background-color: var(--pd-bg-surface);
+  color: var(--pd-text-primary);
 }
 
-.option-cards {
-	display: flex;
-	justify-content: center;
-	gap: 1.5rem;
-	margin: 1rem 0;
-	flex-wrap: wrap;
+.option-item:hover {
+  border-color: var(--pd-border-medium);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--pd-shadow-color);
 }
 
-.option-card {
-	width: 240px;
-	cursor: pointer;
-	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-	border: 2px solid transparent;
-	border-radius: 12px;
-	overflow: hidden;
+.option-item.selected {
+  border-color: var(--pd-marker-special);
+  background-color: var(--pd-bg-surface-hover);
+  box-shadow: 0 4px 12px var(--pd-shadow-color-strong);
 }
 
-.option-card:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.1);
+.option-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background-color: var(--pd-badge-bg);
+  color: var(--pd-badge-text);
+  margin-right: 1rem;
+  flex-shrink: 0;
 }
 
-.option-card.selected {
-	border-color: var(--primary-color);
-	background-color: rgba(var(--primary-color-rgb), 0.05);
-	transform: translateY(-4px);
+.option-icon i {
+  font-size: 1.5rem;
 }
 
-.card-content {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-	padding: 1.5rem 1rem;
+.option-content {
+  flex-grow: 1;
 }
 
-.icon-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 60px;
-	width: 60px;
-	border-radius: 50%;
-	background-color: rgba(var(--primary-color-rgb), 0.1);
-	color: var(--primary-color);
-	margin-bottom: 1rem;
+.option-content h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--pd-text-primary);
 }
 
-.icon-container i {
-	font-size: 1.5rem;
+.option-content p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--pd-text-secondary);
+  line-height: 1.4;
 }
 
-.card-content h3 {
-	margin: 0 0 0.5rem 0;
-	font-size: 1.1rem;
-	font-weight: 600;
-}
-
-.card-content p {
-	margin: 0;
-	font-size: 0.9rem;
-	color: var(--text-color-secondary);
-	line-height: 1.4;
-}
-
-.form-section {
-	margin-bottom: 1.5rem;
+.form-container {
+  margin-bottom: 1.5rem;
 }
 
 .field-label {
-	display: block;
-	margin-bottom: 0.5rem;
-	font-weight: 500;
-	color: var(--text-700);
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--pd-text-primary);
 }
 
 .helper-text {
-	display: flex;
-	align-items: center;
-	font-size: 0.875rem;
-	color: var(--text-color-secondary);
-	margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--pd-text-secondary);
+  margin: 0.5rem 0;
 }
 
 .map-container {
-	height: 380px;
-	border-radius: 8px;
-	overflow: hidden;
-	border: 1px solid var(--surface-200);
-	flex-grow: 1;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 380px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--pd-border-light);
+  flex-grow: 1;
+  box-shadow: 0 2px 8px var(--pd-shadow-color);
 }
 
-.info-box {
-	padding: 1rem;
-	background-color: rgba(var(--blue-100), 0.5);
-	border-radius: 8px;
-	display: flex;
-	align-items: center;
+.map-container {
+  position: relative;
+  height: 380px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--pd-border-light);
+  flex-grow: 1;
+  z-index: 1; /* Ensure proper z-index */
 }
 
-.phase-items {
-	list-style: none;
-	padding: 0;
-	margin: 1rem 0;
+.map {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
 }
 
-.phase-item {
-	padding: 0.75rem 1rem;
-	margin-bottom: 0.5rem;
-	background-color: var(--surface-50);
-	border-radius: 6px;
-	display: flex;
-	align-items: center;
-	border-left: 3px solid var(--primary-color);
+/* Target Leaflet's specific CSS to override any conflicts */
+.project-creation-dialog :deep(.leaflet-container) {
+  z-index: 1;
+  background: var(--pd-bg-surface) !important; /* Override leaflet's background */
 }
 
-.question-prompt {
-	font-size: 1.1rem;
-	color: var(--text-700);
-	font-weight: 500;
+.project-creation-dialog :deep(.leaflet-control-container) {
+  z-index: 2;
 }
 
-.processing-container,
+.project-creation-dialog :deep(.leaflet-pane) {
+  z-index: 1;
+}
+
+.phases-detected-container, 
+.processing-container, 
 .success-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+  min-height: 400px;
+  background-color: var(--pd-bg-base);
+  color: var(--pd-text-primary);
 }
 
-.processing-content,
-.success-content {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-	padding: 2rem;
+.result-icon,
+.success-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70px;
+  width: 70px;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.result-icon {
+  background-color: var(--pd-badge-bg);
+  color: var(--pd-badge-text);
 }
 
 .success-icon {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 80px;
-	width: 80px;
-	border-radius: 50%;
-	background-color: rgba(var(--green-500), 0.1);
-	color: var(--green-500);
+  background-color: #d1fae5; /* green-100 */
+  color: #065f46; /* green-800 */
 }
 
+.dark .success-icon {
+  background-color: #064e3b; /* green-900 */
+  color: #a7f3d0; /* green-200 */
+}
+
+.result-icon i,
 .success-icon i {
-	font-size: 2.5rem;
+  font-size: 2rem;
+}
+
+.result-title,
+.processing-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--pd-text-primary);
+}
+
+.info-box {
+  padding: 1rem;
+  background-color: var(--pd-bg-surface);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--pd-border-light);
+}
+
+.phase-items {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.phase-item {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background-color: var(--pd-bg-surface);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  border-left: 3px solid var(--pd-marker-special);
+  text-align: left;
+  color: var(--pd-text-primary);
+}
+
+.question-prompt {
+  font-size: 1.1rem;
+  color: var(--pd-text-primary);
+  font-weight: 500;
+}
+
+.processing-message {
+  margin-bottom: 1.5rem;
+  color: var(--pd-text-secondary);
+}
+
+.processing-results {
+  margin-top: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+  background-color: var(--pd-bg-surface);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid var(--pd-border-light);
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--pd-border-light);
+  text-align: left;
+  color: var(--pd-text-primary);
+}
+
+.result-item:last-child {
+  border-bottom: none;
+}
+
+.result-item i {
+  margin-right: 0.75rem;
 }
 
 .action-buttons {
-	display: flex;
-	gap: 0.5rem;
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 .flex-grow-1 {
-	flex-grow: 1;
+  flex-grow: 1;
 }
-</style>
+
+/* Fix for InputText to use our custom variables */
+.project-creation-dialog :deep(.p-inputtext) {
+  background-color: var(--pd-bg-surface);
+  color: var(--pd-text-primary);
+  border-color: var(--pd-border-medium);
+}
+
+.project-creation-dialog :deep(.p-inputtext:focus) {
+  border-color: var(--pd-marker-special);
+}
+
+/* Fix for Button to use our custom variables */
+.project-creation-dialog :deep(.p-button) {
+  background-color: var(--pd-marker-special);
+  color: var(--pd-bg-base);
+  border-color: var(--pd-marker-special);
+}
+
+.project-creation-dialog :deep(.p-button:hover) {
+  background-color: var(--pd-marker-bg);
+  border-color: var(--pd-marker-bg);
+}
+
+.project-creation-dialog :deep(.p-button.p-button-text) {
+  background-color: transparent;
+  color: var(--pd-text-secondary);
+  border-color: transparent;
+}
+
+.project-creation-dialog :deep(.p-button.p-button-text:hover) {
+  background-color: var(--pd-bg-surface-hover);
+  color: var(--pd-text-primary);
+}
+
+.project-creation-dialog :deep(.p-button.p-button-outlined) {
+  background-color: transparent;
+  color: var(--pd-marker-special);
+  border-color: var(--pd-marker-special);
+}
+
+.project-creation-dialog :deep(.p-button.p-button-outlined:hover) {
+  background-color: var(--pd-bg-surface-hover);
+}
+</style>>

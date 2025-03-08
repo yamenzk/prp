@@ -124,3 +124,42 @@ body {
 .dark {
   color-scheme: dark;
 }
+
+/* Define variables at the :root level for global access */
+:root {
+  /* Light mode variables */
+  --pd-bg-base: #ffffff;
+  --pd-bg-surface: #fafafa; /* zinc-50 */
+  --pd-bg-surface-hover: #f4f4f5; /* zinc-100 */
+  --pd-border-light: #e4e4e7; /* zinc-200 */
+  --pd-border-medium: #d4d4d8; /* zinc-300 */
+  --pd-text-primary: #27272a; /* zinc-800 */
+  --pd-text-secondary: #52525b; /* zinc-600 */
+  --pd-text-tertiary: #71717a; /* zinc-500 */
+  --pd-marker-bg: #52525b; /* zinc-600 */
+  --pd-marker-special: #3f3f46; /* zinc-700 */
+  --pd-outline-color: #d4d4d8; /* zinc-300 */
+  --pd-shadow-color: rgba(0, 0, 0, 0.05);
+  --pd-shadow-color-strong: rgba(0, 0, 0, 0.1);
+  --pd-badge-bg: #e4e4e7; /* zinc-200 */
+  --pd-badge-text: #3f3f46; /* zinc-700 */
+}
+
+/* Dark mode variables */
+.dark {
+  --pd-bg-base: #18181b; /* zinc-900 */
+  --pd-bg-surface: #27272a; /* zinc-800 */
+  --pd-bg-surface-hover: #3f3f46; /* zinc-700 */
+  --pd-border-light: #3f3f46; /* zinc-700 */
+  --pd-border-medium: #52525b; /* zinc-600 */
+  --pd-text-primary: #f4f4f5; /* zinc-100 */
+  --pd-text-secondary: #d4d4d8; /* zinc-300 */
+  --pd-text-tertiary: #a1a1aa; /* zinc-400 */
+  --pd-marker-bg: #a1a1aa; /* zinc-400 */
+  --pd-marker-special: #d4d4d8; /* zinc-300 */
+  --pd-outline-color: #52525b; /* zinc-600 */
+  --pd-shadow-color: rgba(0, 0, 0, 0.2);
+  --pd-shadow-color-strong: rgba(0, 0, 0, 0.3);
+  --pd-badge-bg: #52525b; /* zinc-600 */
+  --pd-badge-text: #e4e4e7; /* zinc-200 */
+}

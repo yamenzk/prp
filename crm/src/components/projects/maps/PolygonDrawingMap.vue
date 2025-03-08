@@ -1,7 +1,7 @@
 <!-- components/projects/maps/PolygonDrawingMap.vue -->
 <template>
   <div class="map-container">
-    <div id="polygon-drawing-map" class="map"></div>
+    <div :id="mapId" class="map"></div>
     <div v-if="loading" class="map-loading">
       <ProgressSpinner />
     </div>
@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet/dist/leaflet.css';
@@ -38,6 +38,10 @@ const props = defineProps({
   initialCenter: {
     type: Object,
     default: () => ({ lat: 25.276987, lng: 55.296249 }) // Default to Dubai
+  },
+  mapId: {
+    type: String,
+    default: () => `polygon-map-${Math.random().toString(36).substr(2, 9)}`
   }
 });
 
@@ -45,6 +49,7 @@ const emit = defineEmits(['update:drawnGeometry']);
 
 const loading = ref(true);
 const drawingError = ref('');
+const isMapInitialized = ref(false);
 let map = null;
 let drawnItems = null;
 let boundaryLayer = null;
@@ -52,19 +57,54 @@ let drawControl = null;
 
 // Initialize map
 onMounted(() => {
+  setTimeout(() => {
+    initializeMap();
+  }, 100);
+});
+// Watch for boundary geometry changes
+watch(() => props.boundaryGeometry, (newGeometry) => {
+  if (newGeometry && map && isMapInitialized.value) {
+    addBoundaryLayer();
+  }
+});
+
+// Watch for drawn geometry changes from parent
+watch(() => props.drawnGeometry, (newGeometry) => {
+  if (newGeometry && map && isMapInitialized.value && !areSameGeometries(newGeometry, getCurrentDrawnGeometry())) {
+    addGeoJSONToMap(newGeometry);
+  }
+});
+
+// Clean up
+onUnmounted(() => {
+  destroyMap();
+});
+
+function initializeMap() {
+  if (isMapInitialized.value) return;
+  
   loading.value = true;
   
   try {
+    // Check if container exists
+    const container = document.getElementById(props.mapId);
+    if (!container) {
+      console.error(`Map container with id ${props.mapId} not found`);
+      return;
+    }
+    
     // Initialize the map
-    map = L.map('polygon-drawing-map').setView(
+    map = L.map(props.mapId).setView(
       [props.initialCenter.lat, props.initialCenter.lng], 
       props.initialZoom
     );
     
     // Add OSM tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
     
     // Initialize FeatureGroup to store editable layers
     drawnItems = new L.FeatureGroup();
@@ -82,7 +122,7 @@ onMounted(() => {
         circle: false,
         circlemarker: false,
         marker: false,
-        rectangle: false, // Removed rectangle option
+        rectangle: false,
         polygon: {
           allowIntersection: false,
           showArea: false,
@@ -110,41 +150,29 @@ onMounted(() => {
       addGeoJSONToMap(props.drawnGeometry);
     }
     
+    isMapInitialized.value = true;
+    
   } catch (error) {
     console.error('Error initializing map:', error);
     drawingError.value = 'Could not initialize map. Please refresh the page.';
   } finally {
     loading.value = false;
   }
-});
+}
 
-// Watch for boundary geometry changes
-watch(() => props.boundaryGeometry, (newGeometry) => {
-  if (newGeometry && map) {
-    addBoundaryLayer();
-  }
-});
-
-// Watch for drawn geometry changes from parent
-watch(() => props.drawnGeometry, (newGeometry) => {
-  if (newGeometry && map && !areSameGeometries(newGeometry, getCurrentDrawnGeometry())) {
-    addGeoJSONToMap(newGeometry);
-  }
-});
-
-// Clean up
-onUnmounted(() => {
-  if (map) {
-    // Clean up event listeners
-    map.off(L.Draw.Event.CREATED, onDrawCreated);
-    map.off(L.Draw.Event.EDITED, onDrawEdited);
-    map.off(L.Draw.Event.DELETED, onDrawDeleted);
-    
-    // Remove map
-    map.remove();
-    map = null;
-  }
-});
+function destroyMap() {
+  if (!map) return;
+  
+  // Clean up event listeners
+  map.off(L.Draw.Event.CREATED, onDrawCreated);
+  map.off(L.Draw.Event.EDITED, onDrawEdited);
+  map.off(L.Draw.Event.DELETED, onDrawDeleted);
+  
+  // Remove map
+  map.remove();
+  map = null;
+  isMapInitialized.value = false;
+}
 
 // Add boundary layer
 function addBoundaryLayer() {
@@ -336,6 +364,29 @@ function areSameGeometries(geom1, geom2) {
   
   return JSON.stringify(geom1) === JSON.stringify(geom2);
 }
+
+watch(() => props.boundaryGeometry, (newGeometry) => {
+  if (newGeometry && map && isMapInitialized.value) {
+    // Clear existing boundary
+    if (boundaryLayer) {
+      map.removeLayer(boundaryLayer);
+      boundaryLayer = null;
+    }
+    
+    // Add the new boundary
+    addBoundaryLayer();
+    
+    // Force map refresh
+    setTimeout(() => {
+      map.invalidateSize();
+      
+      // Also fit to boundary bounds
+      if (boundaryLayer && boundaryLayer.getBounds().isValid()) {
+        map.fitBounds(boundaryLayer.getBounds());
+      }
+    }, 100);
+  }
+}, { deep: true });
 </script>
 
 <style scoped>
@@ -343,6 +394,23 @@ function areSameGeometries(geom1, geom2) {
   position: relative;
   height: 100%;
   width: 100%;
+}
+
+.map-container {
+  position: relative;
+  height: 380px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--pd-border-light);
+  flex-grow: 1;
+  z-index: 1; /* Ensure proper z-index */
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
 }
 
 .map {
@@ -374,4 +442,6 @@ function areSameGeometries(geom1, geom2) {
   border-radius: 4px;
   z-index: 1000;
 }
+
+
 </style>

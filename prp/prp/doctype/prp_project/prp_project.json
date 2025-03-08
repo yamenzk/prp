@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "field:project_name",
  "creation": "2025-02-23 19:54:41.825893",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -14,7 +14,9 @@
   "handover_quarter",
   "handover_year",
   "status",
-  "availability"
+  "availability",
+  "is_phase",
+  "parent_project"
  ],
  "fields": [
   {
@@ -38,15 +40,15 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Project Amenities",
-   "options": "PRP Preference",
-   "reqd": 1
+   "options": "PRP Preference"
   },
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Project Name",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "column_break_fxwi",
@@ -82,14 +84,27 @@
    "fieldname": "cover_image",
    "fieldtype": "Attach Image",
    "label": "Cover Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_phase",
+   "fieldtype": "Check",
+   "label": "Is Phase"
+  },
+  {
+   "fieldname": "parent_project",
+   "fieldtype": "Link",
+   "label": "Parent Project",
+   "options": "PRP Project"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-08 11:48:19.537660",
+ "modified": "2025-03-08 21:10:39.807458",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Project",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

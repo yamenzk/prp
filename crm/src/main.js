@@ -21,6 +21,10 @@ import TagInput from './components/common/TagInput.vue'
 import Tab from 'primevue/tab'
 import TabList from 'primevue/tablist'
 import ToastService from 'primevue/toastservice'
+import Step from 'primevue/step'
+import StepList from 'primevue/steplist'
+import StepPanel from 'primevue/steppanel'
+import StepPanels from 'primevue/steppanels'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -97,7 +101,10 @@ app.component('FeatherIcon', FeatherIcon)
 app.component('Select', Select)
 app.component('DatePicker', DatePicker)
 app.component('TagInput', TagInput)
-
+app.component('Step', Step)
+app.component('StepList', StepList)
+app.component('StepPanel', StepPanel)
+app.component('StepPanels', StepPanels)
 document.addEventListener('keydown', (e) => {
 	// Cmd+N or Ctrl+N to open notes
 	if ((e.metaKey || e.ctrlKey) && e.key === 'n') {

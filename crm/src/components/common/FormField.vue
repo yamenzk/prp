@@ -77,11 +77,14 @@
     <Select
       v-else-if="type === 'select' || type === 'status'" 
       v-model="modelValue" 
-      :options="options" 
+      :options="formattedOptions" 
+      optionLabel="label"
+      optionValue="value"
       :id="id" 
       class="w-full"
       :placeholder="`Select ${label}`"
       :class="{ 'p-invalid': !!error }"
+      :disabled="disabled"
     />
     
     <!-- Link Field (Dynamic Dropdown) -->
@@ -113,14 +116,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { 
-  InputText, 
-  Textarea, 
-  InputNumber, 
-  Dropdown, 
-  Checkbox,
-  DatePicker
-} from 'primevue'
 import { createListResource } from 'frappe-ui'
 
 const props = defineProps({
@@ -152,6 +147,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  displayField: {
+  type: String,
+  default: 'name' // Default to name if not specified
+},
   showLabel: {
     type: Boolean,
     default: true
@@ -196,6 +195,23 @@ const modelValue = computed({
     validateValue(value)
   }
 })
+const formattedOptions = computed(() => {
+  // If options is empty, return empty array
+  if (!props.options || props.options.length === 0) {
+    return [];
+  }
+  
+  // Check if options are already in object format
+  if (typeof props.options[0] === 'object' && props.options[0] !== null) {
+    return props.options;
+  }
+  
+  // Otherwise, convert string array to object format
+  return props.options.map(option => ({
+    label: option,
+    value: option
+  }));
+});
 
 // Fetch link options if needed
 onMounted(async () => {
@@ -223,9 +239,16 @@ async function fetchLinkOptions() {
   loading.value = true
   
   try {
+    const fieldsToFetch = ['name']
+    
+    // Add display field to the query if it's not 'name'
+    if (props.displayField !== 'name') {
+      fieldsToFetch.push(props.displayField)
+    }
+    
     const resource = createListResource({
       doctype: props.doctype,
-      fields: ['name'],
+      fields: fieldsToFetch,
       pageLength: 50,
       orderBy: 'name asc',
       auto: true
@@ -236,7 +259,7 @@ async function fetchLinkOptions() {
       if (resource.data) {
         linkOptions.value = resource.data.map(item => ({
           value: item.name,
-          label: item.full_name || item.name
+          label: item[props.displayField] || item.full_name || item.name
         }))
       } else {
         linkOptions.value = []
@@ -250,7 +273,6 @@ async function fetchLinkOptions() {
     loading.value = false
   }
 }
-
 // Validate the field
 function isEmoji(str) {
   if (!str) return false

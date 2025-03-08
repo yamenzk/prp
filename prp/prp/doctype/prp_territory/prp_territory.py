@@ -612,6 +612,7 @@ def create_territory_from_geometry():
 
         # Set geometry
         territory.geo = json.dumps(geometry)
+        frappe.log(f"After setting geometry, territory.geo: {territory.geo}")
         territory.lat = str(centroid[1])
         territory.lng = str(centroid[0])
         territory.min_lat = bounds["min_lat"]
@@ -755,6 +756,18 @@ def convert_to_phases(project_id, phase_ids=None):
     except Exception as e:
         frappe.log_error(f"Error converting phases: {str(e)}", "Phase Conversion")
         return {"success": False, "message": str(e)}
+
+
+@frappe.whitelist()
+def clear_potential_phases(project_id):
+    """Clear the potential phases for a project when user skips conversion"""
+    try:
+        frappe.cache().delete_key(f"potential_phases_{project_id}")
+        return {"success": True, "message": "Potential phases cleared"}
+    except Exception as e:
+        frappe.log_error(f"Error clearing potential phases: {str(e)}", "Phase Clearing")
+        return {"success": False, "message": str(e)}
+
 
 
 # QuadTree spatial indexing
@@ -1114,7 +1127,6 @@ class PRPTerritory(Document):
             # Only run for projects that aren't phases
             if not self.is_project or self.is_phase:
                 return
-            
 
             # Get our geometry
             parent_geo = shape(json.loads(self.geo))
@@ -1131,6 +1143,7 @@ class PRPTerritory(Document):
                 },
                 fields=["name", "geo", "territory_name"],
             )
+
 
             contained_projects = []
 
@@ -1157,12 +1170,6 @@ class PRPTerritory(Document):
                    expires_in_sec=86400
                )
 
-                # Notify user about potential phases
-                frappe.msgprint(
-                   f"Found {len(contained_projects)} projects that appear to be phases of this project. "
-                   f"Would you like to convert them to phases?",
-                   title="Potential Phases Detected"
-               )
 
         except Exception as e:
             frappe.log_error(f"Error detecting subprojects: {str(e)}", "Project Hierarchy")
