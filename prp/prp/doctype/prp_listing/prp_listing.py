@@ -8,6 +8,8 @@ from frappe.model.document import Document
 class PRPListing(Document):
    
     def validate(self):
+        if self.project:
+            self.developer = frappe.get_value("PRP Project", self.project, "developer") or None
         if self.enable_secondhand_selling or self.enable_secondhand_renting:
             self.availability = "Available for Secondhand"
         else:

@@ -1,17 +1,17 @@
 <template>
   <DataTable 
-  v-model:filters="filters" 
-  :value="filteredLeads" 
-  dataKey="name"
-  v-model:selection="selectedLead" 
-  filterDisplay="menu" 
-  scrollable 
-  scrollHeight="flex" 
-  :loading="isLoading" 
-  :globalFilterFields="['lead_name', 'first_name', 'last_name', 'lead_owner', 'status']"
-  selectionMode="single" 
-  :metaKeySelection="metaKey" 
->
+    v-model:filters="filters" 
+    :value="filteredLeads" 
+    dataKey="name"
+    v-model:selection="selectedLead" 
+    filterDisplay="menu" 
+    scrollable 
+    scrollHeight="flex" 
+    :loading="isLoading" 
+    :globalFilterFields="['lead_name', 'first_name', 'last_name', 'lead_owner', 'status']"
+    selectionMode="single" 
+    :metaKeySelection="metaKey" 
+  >
     <template #header>
       <div class="flex justify-between">
         <div class="flex gap-2">
@@ -92,13 +92,22 @@ import { useLeadStore } from '../../stores'
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
 import { getStatusConfig, LEAD_STATUSES } from '../../utils/statusConfig'
 
+// Props for receiving initial lead ID from routing
+const props = defineProps({
+  initialLeadId: {
+    type: String,
+    default: null
+  }
+})
+
 // Initialize the lead store
 const leadStore = useLeadStore()
 
 // Selected lead tracking
 const selectedLeadId = ref(null)
 const selectedLead = ref(null)
-const metaKey = ref(true);
+const metaKey = ref(true)
+
 // Create dialog state
 const createDialogVisible = ref(false)
 
@@ -197,12 +206,10 @@ watch(() => leadStore.leads, (newLeads) => {
     if (updatedLead) {
       // Update the selected lead reference if it's changed
       if (JSON.stringify(selectedLead.value) !== JSON.stringify(updatedLead)) {
-        // console.log('📝 Selected lead data has changed, updating reference')
         selectedLead.value = updatedLead
       }
     } else {
       // The lead was deleted or filtered out
-      // console.log('🔍 Selected lead no longer exists in list, clearing selection')
       selectedLead.value = null
     }
   }
@@ -217,15 +224,34 @@ const filters = ref({
 })
 
 // Initialize data
-onMounted(() => {
+onMounted(async () => {
   // Init lead list and fetch initial data
-  fetchLeads()
+  await fetchLeads()
+  
+  // If an initial lead ID was provided, select that lead
+  if (props.initialLeadId) {
+    const lead = leads.value.find(lead => lead.name === props.initialLeadId)
+    if (lead) {
+      selectedLead.value = lead
+      selectedLeadId.value = lead.name
+    } else {
+      // If the lead isn't in the current list, fetch it specifically
+      try {
+        const fetchedLead = await leadStore.fetchLead(props.initialLeadId)
+        if (fetchedLead) {
+          selectedLead.value = fetchedLead
+          selectedLeadId.value = fetchedLead.name
+        }
+      } catch (error) {
+        console.error('Failed to fetch initial lead:', error)
+      }
+    }
+  }
 })
 
-const fetchLeads = () => {
-  leadStore.updateFilters({ is_deal: 0 }).then(() => {
-    leadStore.fetchLeads()
-  })
+const fetchLeads = async () => {
+  await leadStore.updateFilters({ is_deal: 0 })
+  return leadStore.fetchLeads()
 }
 
 const loadMoreLeads = () => leadStore.loadMoreLeads()
@@ -260,7 +286,6 @@ const createLead = async (formData) => {
   try {
     createDialogVisible.value = false
     const newLead = await leadStore.createLead(formData)
-    // console.log('✅ Lead created successfully:', newLead)
     
     // Server will send realtime update that will trigger list refresh
     // Emit event to notify parent

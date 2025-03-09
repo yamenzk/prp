@@ -143,6 +143,16 @@ body {
   --pd-shadow-color-strong: rgba(0, 0, 0, 0.1);
   --pd-badge-bg: #e4e4e7; /* zinc-200 */
   --pd-badge-text: #3f3f46; /* zinc-700 */
+  --pd-info: rgb(0, 122, 255);
+  --pd-info-bg: rgba(0, 122, 255, 0.2);
+  --pd-warning: rgb(255, 149, 0);
+  --pd-warning-bg: rgba(255, 149, 0, 0.2);
+  --pd-success: rgb(52, 199, 89);
+  --pd-success-bg: rgba(52, 199, 89, 0.2);
+  --pd-error: rgb(255, 59, 48);
+  --pd-error-bg: rgba(255, 59, 48, 0.1);
+  --pd-help: rgb(88, 86, 214);
+  --pd-help-bg: rgba(88, 86, 214, 0.2);
 }
 
 /* Dark mode variables */
@@ -162,4 +172,15 @@ body {
   --pd-shadow-color-strong: rgba(0, 0, 0, 0.3);
   --pd-badge-bg: #52525b; /* zinc-600 */
   --pd-badge-text: #e4e4e7; /* zinc-200 */
+  --pd-info: rgb(10, 132, 255);
+  --pd-info-bg: rgba(10, 132, 255, 0.25);
+  --pd-warning: rgb(255, 159, 10);
+  --pd-warning-bg: rgba(255, 159, 10, 0.25);
+  --pd-success: rgb(48, 209, 88);
+  --pd-success-bg: rgba(48, 209, 88, 0.25);
+  --pd-error: rgb(255, 69, 58);
+  --pd-error-bg: rgba(255, 69, 58, 0.15);
+  --pd-help: rgb(94, 92, 230);
+  --pd-help-bg: rgba(94, 92, 230, 0.25);
 }
+

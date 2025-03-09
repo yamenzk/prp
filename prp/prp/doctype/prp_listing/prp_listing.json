@@ -9,12 +9,12 @@
   "unit_id",
   "project",
   "developer",
-  "project_name",
   "column_break_gjae",
   "availability",
   "status",
   "enable_secondhand_selling",
-  "enable_secondhand_renting"
+  "enable_secondhand_renting",
+  "listing_amenities"
  ],
  "fields": [
   {
@@ -33,11 +33,6 @@
    "fieldtype": "Link",
    "label": "Developer",
    "options": "PRP Developer"
-  },
-  {
-   "fieldname": "project_name",
-   "fieldtype": "Data",
-   "label": "Project Name"
   },
   {
    "fieldname": "project",
@@ -76,11 +71,17 @@
    "fieldname": "enable_secondhand_renting",
    "fieldtype": "Check",
    "label": "Enable Secondhand Renting"
+  },
+  {
+   "fieldname": "listing_amenities",
+   "fieldtype": "Link",
+   "label": "Listing Amenities",
+   "options": "PRP Preference"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-23 21:38:02.947241",
+ "modified": "2025-03-09 16:16:54.995737",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Listing",
@@ -100,6 +101,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

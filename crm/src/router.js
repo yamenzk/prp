@@ -19,6 +19,12 @@ const routes = [
 				component: () => import('@/pages/Leads.vue'),
 			},
 			{
+				path: 'leads/:id',
+				name: 'LeadDetails',
+				component: () => import('@/pages/Leads.vue'),
+				props: true,
+			},
+			{
 				path: 'projects',
 				name: 'Projects',
 				component: () => import('@/pages/Projects.vue'),
@@ -28,6 +34,22 @@ const routes = [
 				name: 'ProjectDetails',
 				component: () => import('@/components/projects/details/ProjectDetails.vue'),
 				props: true,
+				children: [
+					{
+						path: 'buildings/:buildingId',
+						name: 'BuildingDetails',
+						component: () =>
+							import('@/components/projects/details/ProjectDetails.vue'),
+						props: true,
+					},
+					{
+						path: 'buildings/:buildingId/listings/:listingId',
+						name: 'ListingDetails',
+						component: () =>
+							import('@/components/projects/details/ProjectDetails.vue'),
+						props: true,
+					},
+				],
 			},
 			// Add other routes that should use the layout here
 		],

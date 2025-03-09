@@ -100,6 +100,7 @@
       :loading="loading"
       :placeholder="`Select ${label}`"
       :class="{ 'p-invalid': !!error }"
+      :disabled="disabled"
     />
     
     <!-- Boolean Input -->
@@ -150,6 +151,10 @@ const props = defineProps({
   displayField: {
   type: String,
   default: 'name' // Default to name if not specified
+},
+filters: {
+  type: [Object, Function],
+  default: () => ({})
 },
   showLabel: {
     type: Boolean,
@@ -246,15 +251,24 @@ async function fetchLinkOptions() {
       fieldsToFetch.push(props.displayField)
     }
     
+    // Process filters - they can be an object or a function that returns an object
+    let activeFilters = {}
+    if (typeof props.filters === 'function') {
+      activeFilters = props.filters()
+    } else {
+      activeFilters = props.filters
+    }
+    
     const resource = createListResource({
       doctype: props.doctype,
       fields: fieldsToFetch,
+      filters: activeFilters, // Apply the filters
       pageLength: 50,
       orderBy: 'name asc',
       auto: true
     })
     
-    // Wait for resource to finish loading
+    // Rest of your function remains the same
     setTimeout(async () => {
       if (resource.data) {
         linkOptions.value = resource.data.map(item => ({

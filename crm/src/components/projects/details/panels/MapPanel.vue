@@ -358,6 +358,7 @@ function initLocationMap() {
 				fillColor: '#0071ff',
 				fillOpacity: 0.2,
 			}).addTo(locationMap.value)
+			
 
 			// Fit map to polygon bounds
 			locationMap.value.fitBounds(polygon.getBounds(), {
@@ -387,32 +388,82 @@ function initLocationMap() {
 }
 
 // Handle click on location map
+// Add this function to check if a point is inside a polygon
+function isPointInPolygon(point, polygon) {
+  // For GeoJSON Polygon format
+  if (!polygon || !point) return false;
+  
+  // Ray casting algorithm for point in polygon detection
+  let inside = false;
+  const x = point[0], y = point[1];
+  
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i][0], yi = polygon[i][1];
+    const xj = polygon[j][0], yj = polygon[j][1];
+    
+    const intersect = ((yi > y) !== (yj > y))
+        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  
+  return inside;
+}
+
+// Modify the onLocationMapClick function
 function onLocationMapClick(e) {
-	// Store selected location with precise coordinates
-	selectedLocation.value = {
-		lat: e.latlng.lat,
-		lng: e.latlng.lng,
-	}
+  // Check if we have a polygon territory and validate the click is inside it
+  if (projectTerritory.value && projectTerritory.value.geo) {
+    const geo = typeof projectTerritory.value.geo === 'string'
+      ? JSON.parse(projectTerritory.value.geo)
+      : projectTerritory.value.geo;
+    
+    if (geo.type === 'Polygon') {
+      // Convert the clicked point to [lng, lat] format for GeoJSON
+      const clickedPoint = [e.latlng.lng, e.latlng.lat];
+      
+      // Get the polygon coordinates
+      const polygonCoords = geo.coordinates[0];
+      
+      // Check if clicked point is inside the polygon
+      if (!isPointInPolygon(clickedPoint, polygonCoords)) {
+        // Show error notification or tooltip
+        emitter.emit('show-notification', {
+          severity: 'error',
+          summary: 'Invalid Location',
+          detail: 'Building location must be within the project boundaries.'
+        });
+        
+        return; // Don't proceed with marker placement
+      }
+    }
+  }
 
-	// Clear existing marker
-	if (tempMarker.value) {
-		locationMap.value.removeLayer(tempMarker.value)
-	}
+  // If validation passes or there's no polygon to validate against, proceed as normal
+  // Store selected location with precise coordinates
+  selectedLocation.value = {
+    lat: e.latlng.lat,
+    lng: e.latlng.lng,
+  }
 
-	// Add new marker at clicked position with precise coordinates
-	tempMarker.value = L.marker([e.latlng.lat, e.latlng.lng], { icon: markerIcon.value }).addTo(
-		locationMap.value,
-	)
+  // Clear existing marker
+  if (tempMarker.value) {
+    locationMap.value.removeLayer(tempMarker.value)
+  }
 
-	// Create a popup with safe configuration
-	const popup = L.popup({
-		closeButton: true,
-		autoClose: true,
-		closeOnEscapeKey: true,
-		closeOnClick: true,
-	}).setContent(`New location for ${selectedBuilding.value.building_name}`)
+  // Add new marker at clicked position with precise coordinates
+  tempMarker.value = L.marker([e.latlng.lat, e.latlng.lng], { icon: markerIcon.value }).addTo(
+    locationMap.value,
+  )
 
-	tempMarker.value.bindPopup(popup).openPopup()
+  // Create a popup with safe configuration
+  const popup = L.popup({
+    closeButton: true,
+    autoClose: true,
+    closeOnEscapeKey: true,
+    closeOnClick: true,
+  }).setContent(`New location for ${selectedBuilding.value.building_name}`)
+
+  tempMarker.value.bindPopup(popup).openPopup()
 }
 
 // Save the selected location
@@ -486,7 +537,6 @@ function resetView() {
 	width: 100%;
 	height: 100%;
 	background-color: var(--pd-bg-surface);
-	border-radius: 12px;
 	overflow: hidden;
 }
 

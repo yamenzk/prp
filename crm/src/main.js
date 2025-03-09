@@ -25,6 +25,8 @@ import Step from 'primevue/step'
 import StepList from 'primevue/steplist'
 import StepPanel from 'primevue/steppanel'
 import StepPanels from 'primevue/steppanels'
+import Popover from 'primevue/popover'
+import Tooltip from 'primevue/tooltip'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -105,6 +107,9 @@ app.component('Step', Step)
 app.component('StepList', StepList)
 app.component('StepPanel', StepPanel)
 app.component('StepPanels', StepPanels)
+app.component('Popover', Popover)
+app.directive('tooltip', Tooltip)
+
 document.addEventListener('keydown', (e) => {
 	// Cmd+N or Ctrl+N to open notes
 	if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
