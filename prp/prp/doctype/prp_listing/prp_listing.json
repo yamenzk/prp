@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "format:{building}-{unit_id}",
  "creation": "2025-02-23 18:01:26.453088",
  "doctype": "DocType",
@@ -81,7 +82,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-09 16:16:54.995737",
+ "modified": "2025-03-09 16:44:57.764984",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Listing",

@@ -220,8 +220,10 @@ const handleDialogSave = async ({ fieldName, value }) => {
     }
 
     await listingStore.updateListing(currentListing.value.name, updateData)
-  } catch (error) {
+    await listingStore.refreshCurrentListing()  
+} catch (error) {
     console.error('Error updating listing field:', error)
+    await listingStore.refreshCurrentListing()
   }
 }
 
