@@ -106,6 +106,7 @@ declare module 'vue' {
     Stepper: typeof import('primevue/stepper')['default']
     TabMenu: typeof import('primevue/tabmenu')['default']
     TabPanel: typeof import('primevue/tabpanel')['default']
+    TabView: typeof import('primevue/tabview')['default']
     Tag: typeof import('primevue/tag')['default']
     TagInput: typeof import('./src/components/common/TagInput.vue')['default']
     TaskboardHeader: typeof import('./src/components/apps/notes/components/header/TaskboardHeader.vue')['default']

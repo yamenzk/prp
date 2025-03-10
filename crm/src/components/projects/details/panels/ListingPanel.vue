@@ -309,7 +309,7 @@ const displayedListings = computed(() => {
 
 // Listing fields for create dialog
 const listingFields = computed(() => [
-		{
+	{
 		name: 'project',
 		label: 'Project',
 		type: 'link',
@@ -318,7 +318,7 @@ const listingFields = computed(() => [
 		disabled: true,
 		fullWidth: false,
 	},
-{
+	{
 		name: 'building',
 		label: 'Building',
 		type: 'link',
@@ -369,13 +369,107 @@ onMounted(() => {
 		searchQuery.value = ''
 		searchResults.value = []
 		fetchListingsForBuilding(building.name)
+
+		// If we have a listing ID in the URL, we'll need to reselect it after building change
+		if (route.params.listingId) {
+			checkAndSelectListingFromRoute()
+		}
 	})
 
 	emitter.on('show-create-listing', ({ building }) => {
 		selectedBuilding.value = building
 		showCreateListing()
 	})
+
+	// Check for listing ID in the URL and select it
+	if (route.params.listingId) {
+		checkAndSelectListingFromRoute()
+	}
 })
+
+// Function to check and select listing from route params
+async function checkAndSelectListingFromRoute() {
+	const listingId = route.params.listingId
+
+	// Find the listing in our list and select it
+	const foundListing = listings.value.find((l) => l.name === listingId)
+	if (foundListing) {
+		selectedListing.value = foundListing
+
+		// If building is not selected yet but we know the building from the listing,
+		// fetch that building's listings
+		if (!selectedBuilding.value && foundListing.building) {
+			try {
+				// We need to fetch the building details to get the building_name
+				const buildingResponse = await fetch(
+					`/api/resource/PRP Building/${foundListing.building}`,
+				)
+				const buildingData = await buildingResponse.json()
+				if (buildingData && buildingData.data) {
+					selectedBuilding.value = buildingData.data
+					fetchListingsForBuilding(foundListing.building)
+				}
+			} catch (error) {
+				console.error('Error fetching building:', error)
+			}
+		}
+	} else {
+		try {
+			const listing = await listingStore.fetchListing(listingId)
+			if (listing) {
+				selectedListing.value = listing
+
+				// If building is not selected yet but we know the building from the listing,
+				// fetch that building's listings
+				if (!selectedBuilding.value && listing.building) {
+					try {
+						// We need to fetch the building details to get the building_name
+						const buildingResponse = await fetch(
+							`/api/resource/PRP Building/${listing.building}`,
+						)
+						const buildingData = await buildingResponse.json()
+						if (buildingData && buildingData.data) {
+							selectedBuilding.value = buildingData.data
+							fetchListingsForBuilding(listing.building)
+						}
+					} catch (error) {
+						console.error('Error fetching building:', error)
+					}
+				}
+			}
+		} catch (error) {
+			console.error('Error fetching listing from URL:', error)
+		}
+	}
+}
+
+// Also watch for route changes to update selected listing
+watch(
+	() => route.params.listingId,
+	async (newListingId) => {
+		if (newListingId) {
+			checkAndSelectListingFromRoute()
+		} else {
+			// Clear selection if no listing ID in URL
+			selectedListing.value = null
+		}
+	},
+)
+
+// Watch for listings data changes to ensure selection is maintained
+watch(
+	() => listings.value,
+	(newListings) => {
+		if (route.params.listingId && selectedListing.value) {
+			// Re-verify that our selected listing is in the new listings array
+			// This helps ensure visual selection is maintained after data updates
+			const foundListing = newListings.find((l) => l.name === route.params.listingId)
+			if (foundListing) {
+				selectedListing.value = foundListing
+			}
+		}
+	},
+)
 
 // Fetch initial data
 onMounted(async () => {

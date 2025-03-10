@@ -82,7 +82,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-09 16:44:57.764984",
+ "modified": "2025-03-10 13:01:28.658963",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Listing",
@@ -105,5 +105,6 @@
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

@@ -49,6 +49,7 @@ const currentPageTitle = computed(() => {
 	const routeNames = {
 		Home: 'Dashboard',
 		Login: 'Login',
+		ListingTabDetails: route.params.id,
 		// Add more route name mappings as needed
 	}
 

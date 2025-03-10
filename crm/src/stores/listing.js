@@ -336,5 +336,11 @@ export const useListingStore = defineStore('listings', {
 				throw error
 			}
 		},
+
+		// Add a clearCurrentListing method to handle building changes
+		clearCurrentListing() {
+			// Reset the current listing to null
+			this.currentListing = null
+		},
 	},
 })

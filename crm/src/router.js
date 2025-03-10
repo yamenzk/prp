@@ -48,6 +48,15 @@ const routes = [
 						component: () =>
 							import('@/components/projects/details/ProjectDetails.vue'),
 						props: true,
+						children: [
+							{
+								path: 'tab/:tabId',
+								name: 'ListingTabDetails',
+								component: () =>
+									import('@/components/projects/details/ProjectDetails.vue'),
+								props: true,
+							},
+						],
 					},
 				],
 			},
