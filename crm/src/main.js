@@ -27,6 +27,7 @@ import StepPanel from 'primevue/steppanel'
 import StepPanels from 'primevue/steppanels'
 import Popover from 'primevue/popover'
 import Tooltip from 'primevue/tooltip'
+import ConfirmationService from 'primevue/confirmationservice'
 
 let app = createApp(App)
 setConfig('resourceFetcher', frappeRequest)
@@ -38,6 +39,7 @@ app.use(pinia)
 app.use(router)
 app.use(resourcesPlugin)
 app.use(ToastService)
+app.use(ConfirmationService)
 
 const Noir = definePreset(Aura, {
 	semantic: {

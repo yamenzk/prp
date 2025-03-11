@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { createListResource, createDocumentResource } from 'frappe-ui'
 import { globalStore } from './global'
+import { format } from 'date-fns'
 
 export const useVersionStore = defineStore('versions', {
 	state: () => ({
@@ -434,9 +435,21 @@ export const useVersionStore = defineStore('versions', {
 		},
 
 		// Format date for display
-		formatDate(date) {
+		formatDate(date, includeTime = false) {
 			if (!(date instanceof Date)) {
 				date = new Date(date)
+			}
+
+			if (includeTime) {
+				const options = {
+					weekday: 'long',
+					day: 'numeric',
+					month: 'short',
+					year: 'numeric',
+				}
+				const dateStr = date.toLocaleDateString('en-AE', options)
+				const timeStr = format(date, 'hh:mm a')
+				return `${dateStr} • ${timeStr}`
 			}
 
 			return date.toLocaleString()

@@ -299,7 +299,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, inject } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useBuildingStore } from '@/stores/building'
 import { useTerritoryStore } from '@/stores/territory'
 import { useProjectStore } from '@/stores/project'
@@ -308,6 +308,7 @@ import EditDialog from '@/components/dialogs/EditDialog.vue'
 import DeleteDialog from '@/components/dialogs/DeleteDialog.vue'
 
 // Get project ID from route
+const router = useRouter()
 const route = useRoute()
 const projectId = computed(() => route.params.id)
 
@@ -533,13 +534,19 @@ async function loadMoreBuildings() {
 
 // Select a building
 function selectBuilding(building) {
-	// Only emit if selecting a different building or nothing was selected before
-	if (!selectedBuilding.value || selectedBuilding.value.name !== building.name) {
-		selectedBuilding.value = building
+  if (!selectedBuilding.value || selectedBuilding.value.name !== building.name) {
+    selectedBuilding.value = building
 
-		// Clear current listing selection when changing buildings
-		emitter.emit('clear-current-listing')
-	}
+    router.push({
+      name: 'BuildingDetails',
+      params: {
+        id: projectId.value,
+        buildingId: building.name
+      }
+    })
+
+    emitter.emit('clear-current-listing')
+  }
 }
 
 // Right click handler for context menu

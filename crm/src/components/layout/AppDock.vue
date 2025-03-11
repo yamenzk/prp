@@ -46,20 +46,20 @@ const items = ref([
     icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_Notes_icon.svg/2048px-Apple_Notes_icon.svg.png" 
   },
   { 
-    id: 'appstore', 
-    label: "App Store", 
-    icon: "https://primefaces.org/cdn/primevue/images/dock/appstore.svg" 
+    id: 'maps', 
+    label: "Maps", 
+    icon: "https://icon-library.com/images/ios-maps-icon/ios-maps-icon-21.jpg" 
   },
   { 
-    id: 'photos', 
-    label: "Photos", 
-    icon: "https://primefaces.org/cdn/primevue/images/dock/photos.svg" 
+    id: 'messages', 
+    label: "Messages", 
+    icon: "https://th.bing.com/th/id/R.b1bf299e90702e8b40b30ec3d23f1aba?rik=7FlCDfz1qo2CQA&riu=http%3a%2f%2ffreevector.co%2fwp-content%2fuploads%2f2014%2f05%2fmessages-ios.png&ehk=gJ29GoGdmCOkbX9qk9uNzwQfN%2b%2fBdZuDVD1AQzCkpN0%3d&risl=&pid=ImgRaw&r=0" 
   },
-  { 
-    id: 'trash', 
-    label: "Trash", 
-    icon: "https://primefaces.org/cdn/primevue/images/dock/trash.png" 
-  }
+  // { 
+  //   id: 'trash', 
+  //   label: "Trash", 
+  //   icon: "https://primefaces.org/cdn/primevue/images/dock/trash.png" 
+  // }
 ]);
 
 // UI state

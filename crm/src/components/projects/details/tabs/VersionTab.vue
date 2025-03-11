@@ -250,21 +250,14 @@ function toggleChanges(id) {
 	expanded.value[id] = !expanded.value[id]
 }
 
-// Format date in the requested format
-function formatDateTime(date) {
-	const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }
-	const dateStr = date.toLocaleDateString('en-US', options)
-	const timeStr = format(date, 'hh:mm a') // 12-hour format with AM/PM
 
-	return `${dateStr} • ${timeStr}`
-}
 
 // Load the combined timeline for listing and related entities
 async function loadCombinedTimeline() {
-	if (!props.listing) return
-
-	isLoading.value = true
-	combinedTimelineEvents.value = []
+  if (!props.listing || isLoading.value) return;
+  
+  isLoading.value = true;
+  combinedTimelineEvents.value = [];
 	hasError.value = false
 
 	try {
@@ -273,6 +266,7 @@ async function loadCombinedTimeline() {
 			'PRP Listing',
 			props.listing.name,
 		)
+		console.log('Listing timeline:', listingTimeline)
 
 		// Add all listing events to the combined timeline
 		combinedTimelineEvents.value.push(
@@ -301,6 +295,7 @@ async function loadCombinedTimeline() {
 				})),
 			)
 		}
+		console.log('Combined timeline:', combinedTimelineEvents.value)
 
 		// 3. Load the project timeline if we have a project reference
 		if (props.listing.project) {
@@ -320,6 +315,7 @@ async function loadCombinedTimeline() {
 				})),
 			)
 		}
+		console.log('Combined timeline:', combinedTimelineEvents.value)
 
 		// 4. Sort all events by timestamp (newest first)
 		combinedTimelineEvents.value.sort((a, b) => b.timestamp - a.timestamp)
@@ -343,10 +339,9 @@ const processedTimelineEvents = computed(() => {
 
 		if (!versionMap.has(versionKey)) {
 			// Create a new grouped event
-			const date = new Date(event.timestamp)
 			const groupedEvent = {
 				id: idCounter++,
-				formattedDate: formatDateTime(date),
+				formattedDate: versionStore.formatDate(new Date(event.timestamp), true),
 				user: event.user,
 				icon: event.icon,
 				color: event.color,

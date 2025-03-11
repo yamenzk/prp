@@ -27,7 +27,7 @@ export function useFields() {
 		},
 		currency: {
 			component: 'InputNumber',
-			props: { mode: 'currency', currency: 'USD', locale: 'en-US', class: 'w-full' },
+			props: { mode: 'currency', currency: 'AED', locale: 'en-AE', class: 'w-full' },
 			displayFn: (value) => formatCurrency(value),
 		},
 		date: {
@@ -175,9 +175,9 @@ export function useFields() {
 	// Helper functions
 	function formatCurrency(value) {
 		if (value === null || value === undefined || value === '') return ''
-		return new Intl.NumberFormat('en-US', {
+		return new Intl.NumberFormat('en-AE', {
 			style: 'currency',
-			currency: 'USD',
+			currency: 'AED',
 			minimumFractionDigits: 2,
 		}).format(value)
 	}

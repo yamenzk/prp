@@ -102,11 +102,8 @@ const toggleSidebar = () => {
 }
 
 const menuItems = [
-	{ name: 'Dashboard', icon: 'home', path: '/' },
 	{ name: 'Leads', icon: 'users', path: '/leads' },
-	{ name: 'Deals', icon: 'briefcase', path: '/deals' },
 	{ name: 'Projects', icon: 'home', path: '/projects' },
-	{ name: 'Calendar', icon: 'calendar', path: '/calendar' },
 ]
 
 const actionItems = [

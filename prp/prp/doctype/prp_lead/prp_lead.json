@@ -113,15 +113,16 @@
    "options": "DY-LEAD-"
   },
   {
+   "default": "New",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nNew\nContacted\nInterested\nNeeds Follow-up\nSite Visit Scheduled\nSite Visit Completed\nNegotiation\nOffer Made\nUnder Review\nUnder Contract\nClosed - Won\nClosed - Lost\nCold\nNot Interested"
+   "options": "New\nContacted\nInterested\nNeeds Follow-up\nSite Visit Scheduled\nSite Visit Completed\nNegotiation\nOffer Made\nUnder Review\nUnder Contract\nClosed - Won\nClosed - Lost\nCold\nNot Interested"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-07 17:11:22.911434",
+ "modified": "2025-03-11 16:15:23.710872",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Lead",

@@ -47,12 +47,12 @@
 						v-tooltip.top="'Pricing'"
 					/>
 					<Button
-						@click="switchTab('media')"
+						@click="switchTab('files')"
 						rounded
-						icon="pi pi-camera"
+						icon="pi pi-file"
 						class="w-8 h-8 p-0"
-						:outlined="currentTab !== 'media'"
-						v-tooltip.top="'Media'"
+						:outlined="currentTab !== 'files'"
+						v-tooltip.top="'Files'"
 					/>
 					<Button
 						@click="switchTab('history')"
@@ -65,10 +65,10 @@
 					<Button
 						@click="switchTab('notes')"
 						rounded
-						icon="pi pi-file"
+						icon="pi pi-clipboard"
 						class="w-8 h-8 p-0"
 						:outlined="currentTab !== 'notes'"
-						v-tooltip.top="'Documents'"
+						v-tooltip.top="'Notes'"
 					/>
 				</div>
 			</div>
@@ -89,26 +89,18 @@
 					<TabPanel value="pricing">
 						<div class="h-full overflow-auto">
 							<div class="p-4">
-								<!-- <ListingPricingTab :listing="currentListing" @edit-field="openEditDialog" /> -->
-								<div class="p-4 bg-gray-100 dark:bg-zinc-800 rounded-lg">
-									<h2 class="text-lg font-semibold mb-2">Pricing Information</h2>
-									<p class="text-gray-500 dark:text-zinc-400">
-										Pricing information will be available soon.
-									</p>
-								</div>
+								<PricingTab
+  :listing="currentListing"
+  @edit-field="openEditDialog"
+  @update:listing="handleListingUpdate"
+/>
 							</div>
 						</div>
 					</TabPanel>
-					<TabPanel value="media">
+					<TabPanel value="files">
 						<div class="h-full overflow-auto">
-							<div class="p-4">
-								<!-- <ListingMediaTab :listing-id="currentListing.name" /> -->
-								<div class="p-4 bg-gray-100 dark:bg-zinc-800 rounded-lg">
-									<h2 class="text-lg font-semibold mb-2">Media Gallery</h2>
-									<p class="text-gray-500 dark:text-zinc-400">
-										Media gallery will be available soon.
-									</p>
-								</div>
+							<div>
+								<DocumentsTab :listing="currentListing" v-if="currentListing"></DocumentsTab>
 							</div>
 						</div>
 					</TabPanel>
@@ -119,15 +111,7 @@
 					</TabPanel>
 					<TabPanel value="notes">
 						<div class="h-full overflow-auto">
-							<div class="p-4">
-								<!-- <NotesTab :doctype="'PRP Listing'" :docname="currentListing.name" /> -->
-								<div class="p-4 bg-gray-100 dark:bg-zinc-800 rounded-lg">
-									<h2 class="text-lg font-semibold mb-2">Notes & Documents</h2>
-									<p class="text-gray-500 dark:text-zinc-400">
-										Notes and document management will be available soon.
-									</p>
-								</div>
-							</div>
+								<NoteTab :doctype="'PRP Listing'" :docname="currentListing.name" />
 						</div>
 					</TabPanel>
 				</TabPanels>
@@ -168,6 +152,9 @@ import FeatherIcon from 'frappe-ui/src/components/FeatherIcon.vue'
 import EditDialog from '@/components/dialogs/EditDialog.vue'
 import DeleteDialog from '@/components/dialogs/DeleteDialog.vue'
 import ListingInfoTab from './tabs/ListingInfoTab.vue'
+import DocumentsTab from './tabs/DocumentsTab.vue'
+import NoteTab from './tabs/NoteTab.vue'
+import PricingTab from './tabs/PricingTab.vue'
 // import ListingPricingTab from '@/components/listings/tabs/ListingPricingTab.vue'
 // import ListingMediaTab from '@/components/listings/tabs/ListingMediaTab.vue'
 import VersionTab from './tabs/VersionTab.vue'
@@ -328,7 +315,33 @@ const openEditDialog = (fieldName, currentValue, title, type) => {
 
 	dialogVisible.value = true
 }
-
+const handleListingUpdate = async (updatedListing) => {
+  if (!currentListing.value) return
+  
+  try {
+    // Determine what fields were updated by comparing the objects
+    const updateData = {}
+    
+    // Check for offers and installments arrays specifically
+    if (updatedListing.offers !== undefined) {
+      updateData.offers = updatedListing.offers
+    }
+    
+    if (updatedListing.installments !== undefined) {
+      updateData.installments = updatedListing.installments
+    }
+    
+    // Send the update to the server
+    await listingStore.updateListing(currentListing.value.name, updateData)
+    
+    // Refresh the listing data
+    await listingStore.refreshCurrentListing()
+  } catch (error) {
+    console.error('Error updating listing:', error)
+    // Refresh anyway to ensure UI is in sync with server
+    await listingStore.refreshCurrentListing()
+  }
+}
 const handleDialogSave = async ({ fieldName, value }) => {
 	if (!currentListing.value || !fieldName) return
 

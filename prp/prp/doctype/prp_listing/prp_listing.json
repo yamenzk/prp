@@ -15,7 +15,15 @@
   "status",
   "enable_secondhand_selling",
   "enable_secondhand_renting",
-  "listing_amenities"
+  "listing_amenities",
+  "column_break_ehwp",
+  "unit_price",
+  "downpayment",
+  "payment_plan",
+  "section_break_gdrr",
+  "offers",
+  "column_break_dupe",
+  "installments"
  ],
  "fields": [
   {
@@ -78,11 +86,53 @@
    "fieldtype": "Link",
    "label": "Listing Amenities",
    "options": "PRP Preference"
+  },
+  {
+   "fieldname": "column_break_ehwp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unit_price",
+   "fieldtype": "Currency",
+   "label": "Unit Price",
+   "precision": "0"
+  },
+  {
+   "fieldname": "payment_plan",
+   "fieldtype": "Select",
+   "label": "Payment Plan",
+   "options": "\n20/80\n30/70\n40/60\n50/50\n60/40\n70/30\n80/20\n100"
+  },
+  {
+   "fieldname": "section_break_gdrr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "offers",
+   "fieldtype": "Table",
+   "label": "Offers",
+   "options": "PRP Offer"
+  },
+  {
+   "fieldname": "column_break_dupe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "installments",
+   "fieldtype": "Table",
+   "label": "Installments",
+   "options": "PRP Installment"
+  },
+  {
+   "fieldname": "downpayment",
+   "fieldtype": "Currency",
+   "label": "Downpayment",
+   "precision": "0"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-10 13:01:28.658963",
+ "modified": "2025-03-11 15:50:28.948389",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Listing",
