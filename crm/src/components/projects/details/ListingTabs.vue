@@ -269,7 +269,7 @@ const getAvailabilitySeverity = (status) => {
 		case 'Sold':
 			return 'danger'
 		case 'Available for Secondhand':
-			return 'warning'
+			return 'warn'
 		default:
 			return 'success' // 'Available' is default
 	}

@@ -12,7 +12,7 @@
     @error="onFileUploadError"
     :customUpload="true"
     @select="onFileSelect"
-    chooseLabel="Upload Document"
+    chooseLabel="Upload"
     class="p-button-outlined"
     />
         </div>
@@ -225,42 +225,49 @@
         </div>
         
         <!-- Document Info Section -->
-        <div class="document-info">
-            <div class="info-row">
-            <span class="info-label">Document Number:</span>
-            <span class="info-value">{{ currentDocument?.document_number || 'N/A' }}</span>
-            </div>
-            <div class="info-row">
-            <span class="info-label">Issue Date:</span>
-            <span class="info-value">{{ formatDate(currentDocument?.issue_date) }}</span>
-            </div>
-            <div class="info-row">
-            <span class="info-label">Expiry Date:</span>
-            <span class="info-value" :class="{ 'expired-date': isExpired(currentDocument) }">
-                {{ formatDate(currentDocument?.expiry_date) }}
-                <Badge v-if="isExpired(currentDocument)" value="Expired" severity="danger" />
-            </span>
-            </div>
-            <div class="info-row">
-            <span class="info-label">Place of Issue:</span>
-            <span class="info-value">{{ currentDocument?.place_of_issue || 'N/A' }}</span>
-            </div>
-            <div class="info-row">
-            <span class="info-label">Description:</span>
-            <span class="info-value">{{ currentDocument?.description || 'No description available' }}</span>
-            </div>
-            <div class="info-row">
-            <span class="info-label">Tags:</span>
-            <span class="info-value">
-                <Chip 
-                v-for="tag in getDocumentTags(currentDocument)" 
-                :key="tag" 
-                :label="tag" 
-                class="tag-chip"
-                />
-            </span>
-            </div>
-        </div>
+        <!-- Update the document info section in the Dialog component -->
+<!-- Inside the Document Viewer Dialog -->
+<div class="document-info">
+  <div class="info-row">
+    <span class="info-label">Document Number:</span>
+    <span class="info-value">{{ currentDocument?.document_number || 'N/A' }}</span>
+  </div>
+  
+  <div v-if="props.showIssueDate" class="info-row">
+    <span class="info-label">Issue Date:</span>
+    <span class="info-value">{{ formatDate(currentDocument?.issue_date) }}</span>
+  </div>
+  
+  <div v-if="props.showExpiryDate" class="info-row">
+    <span class="info-label">Expiry Date:</span>
+    <span class="info-value" :class="{ 'expired-date': isExpired(currentDocument) }">
+      {{ formatDate(currentDocument?.expiry_date) }}
+      <Badge v-if="isExpired(currentDocument)" value="Expired" severity="danger" />
+    </span>
+  </div>
+  
+  <div v-if="props.showPlaceOfIssue" class="info-row">
+    <span class="info-label">Place of Issue:</span>
+    <span class="info-value">{{ currentDocument?.place_of_issue || 'N/A' }}</span>
+  </div>
+  
+  <div class="info-row">
+    <span class="info-label">Description:</span>
+    <span class="info-value">{{ currentDocument?.description || 'No description available' }}</span>
+  </div>
+  
+  <div class="info-row">
+    <span class="info-label">Tags:</span>
+    <span class="info-value">
+      <Chip 
+        v-for="tag in getDocumentTags(currentDocument)" 
+        :key="tag" 
+        :label="tag" 
+        class="tag-chip"
+      />
+    </span>
+  </div>
+</div>
         </Dialog>
     </div>
     </template>
@@ -289,6 +296,22 @@ const router = useRouter();
         type: String,
         required: true
     },
+    recommendedTags: {
+    type: Array,
+    default: () => []
+  },
+  showExpiryDate: {
+    type: Boolean,
+    default: true
+  },
+  showIssueDate: {
+    type: Boolean,
+    default: true
+  },
+  showPlaceOfIssue: {
+    type: Boolean,
+    default: true
+  },
     // Related doctypes to include (e.g., parent building, parent project)
     relatedRooms: {
         type: Array,
@@ -332,83 +355,103 @@ const router = useRouter();
     const selectedFile = ref(null);
 
     // Document fields for create/edit dialogs
-    const documentFields = [
+    // Modify documentFields computed property
+const documentFields = computed(() => {
+  const fields = [
     {
-        name: 'document_name',
-        label: 'Document Name',
-        type: 'text',
-        fullWidth: true,
-        validation: 'required',
-        icon: 'pi pi-file'
+      name: 'document_name',
+      label: 'Document Name',
+      type: 'text',
+      fullWidth: true,
+      validation: 'required',
+      icon: 'pi pi-file'
     },
     {
-        name: 'document_number',
-        label: 'Document Number',
-        type: 'text',
-        validation: {
+      name: 'document_number',
+      label: 'Document Number',
+      type: 'text',
+      validation: {
         required: false
-        },
-        icon: 'pi pi-id-card'
-    },
-    {
-        name: 'issue_date',
-        label: 'Issue Date',
-        type: 'date',
-        validation: {
-        required: false
-        },
-        icon: 'pi pi-calendar'
-    },
-    {
-        name: 'expiry_date',
-        label: 'Expiry Date',
-        type: 'date',
-        validation: {
-        required: false
-        },
-        icon: 'pi pi-calendar-times'
-    },
-    {
-        name: 'place_of_issue',
-        label: 'Place of Issue',
-        type: 'text',
-        validation: {
-        required: false
-        },
-        icon: 'pi pi-map-marker'
-    },
-    {
-        name: 'tags',
-        label: 'Tags (comma separated)',
-        type: 'text',
-        fullWidth: true,
-        validation: {
-        required: false
-        },
-        icon: 'pi pi-tags'
-    },
-    {
-        name: 'description',
-        label: 'Description',
-        type: 'textarea',
-        fullWidth: true,
-        validation: {
-        required: false
-        },
-        icon: 'pi pi-align-left'
-    },
-    {
-        name: 'public',
-        label: 'Public Document',
-        type: 'boolean',
-        default: true,
-        fullWidth: true,
-        icon: 'pi pi-globe'
+      },
+      icon: 'pi pi-id-card'
     }
-    ];
+  ];
+  
+  // Conditionally add fields based on props
+  if (props.showIssueDate) {
+    fields.push({
+      name: 'issue_date',
+      label: 'Issue Date',
+      type: 'date',
+      validation: {
+        required: false
+      },
+      icon: 'pi pi-calendar'
+    });
+  }
+  
+  if (props.showExpiryDate) {
+    fields.push({
+      name: 'expiry_date',
+      label: 'Expiry Date',
+      type: 'date',
+      validation: {
+        required: false
+      },
+      icon: 'pi pi-calendar-times'
+    });
+  }
+  
+  if (props.showPlaceOfIssue) {
+    fields.push({
+      name: 'place_of_issue',
+      label: 'Place of Issue',
+      type: 'text',
+      validation: {
+        required: false
+      },
+      icon: 'pi pi-map-marker'
+    });
+  }
+  
+  // Replace the tags field with chips type
+  fields.push({
+    name: 'tags',
+    label: 'Tags',
+    type: 'chips',
+    fullWidth: true,
+    validation: {
+      required: false
+    },
+    icon: 'pi pi-tags',
+    suggestions: props.recommendedTags
+  });
+  
+  fields.push({
+    name: 'description',
+    label: 'Description',
+    type: 'textarea',
+    fullWidth: true,
+    validation: {
+      required: false
+    },
+    icon: 'pi pi-align-left'
+  });
+  
+  fields.push({
+    name: 'public',
+    label: 'Public Document',
+    type: 'boolean',
+    default: true,
+    fullWidth: true,
+    icon: 'pi pi-globe'
+  });
+  
+  return fields;
+});
 
     // Edit fields (same as create fields but without attachment)
-    const documentEditFields = computed(() => documentFields);
+    const documentEditFields = computed(() => documentFields.value);
 
     // Computed properties
     const allActiveDocuments = computed(() => {
@@ -678,7 +721,9 @@ const router = useRouter();
         
         // Format dates properly for Frappe
         const formattedData = { ...data };
-        
+        if (Array.isArray(formattedData.tags)) {
+      formattedData.tags = formattedData.tags.join(', ');
+    }
         // Format issue_date if present
         if (formattedData.issue_date) {
         if (typeof formattedData.issue_date === 'string' && formattedData.issue_date.includes('T')) {
@@ -739,16 +784,28 @@ const router = useRouter();
     }
     // Open edit dialog
     function openEditDialog(document) {
-    editDocumentData.value = { ...document };
-    editDialogVisible.value = true;
-    }
+  // Create a copy of the document to avoid modifying the original
+  const docCopy = { ...document };
+  
+  // Convert tag string to array for the chips input
+  if (typeof docCopy.tags === 'string' && docCopy.tags) {
+    docCopy.tags = docCopy.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+  } else if (!docCopy.tags) {
+    docCopy.tags = [];
+  }
+  
+  editDocumentData.value = docCopy;
+  editDialogVisible.value = true;
+}
 
     // Update a document
     async function updateDocument(data) {
     try {
         // Format dates properly for Frappe
         const formattedData = { ...data };
-        
+        if (Array.isArray(formattedData.tags)) {
+      formattedData.tags = formattedData.tags.join(', ');
+    }
         // Format issue_date if present
         if (formattedData.issue_date) {
         if (typeof formattedData.issue_date === 'string' && formattedData.issue_date.includes('T')) {

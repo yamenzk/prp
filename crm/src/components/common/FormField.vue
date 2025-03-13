@@ -42,6 +42,29 @@
       autoResize
       :class="{ 'p-invalid': !!error }"
     />
+
+    <AutoComplete
+  v-else-if="type === 'chips'"
+  v-model="chipsValue"
+  :id="id"
+  class="w-full"
+  :placeholder="`Enter ${label}`"
+  :multiple="true"
+  :typeahead="false"
+  :class="{ 'p-invalid': !!error }"
+/>
+<div v-if="type === 'chips' && suggestions && suggestions.length" class="tag-suggestions mt-2">
+  <small class="block text-gray-500 mb-1">Recommended tags:</small>
+  <div class="flex flex-wrap gap-1">
+    <Button 
+      v-for="tag in suggestions" 
+      :key="tag" 
+      :label="tag" 
+      class="p-button-sm p-button-outlined p-button-rounded" 
+      @click="addSuggestedTag(tag)"
+    />
+  </div>
+</div>
     
     <!-- Number Input -->
     <InputNumber 
@@ -140,6 +163,10 @@ const props = defineProps({
     type: [Function, Object, String],
     default: null
   },
+  suggestions: {
+  type: Array,
+  default: () => []
+},
   options: {
     type: Array,
     default: () => []
@@ -294,6 +321,48 @@ function isEmoji(str) {
   return emojiRegex.test(str)
 }
 
+const chipsValue = computed({
+  get() {
+    // If modelValue is a string, convert to array for AutoComplete
+    if (typeof props.modelValue === 'string') {
+      return props.modelValue ? props.modelValue.split(',').map(item => item.trim()).filter(Boolean) : [];
+    }
+    return props.modelValue || [];
+  },
+  set(value) {
+    // Convert array back to comma-separated string for storage
+    const stringValue = Array.isArray(value) ? value.join(', ') : '';
+    emit('update:modelValue', stringValue);
+    validateValue(stringValue);
+  }
+});
+// Add this method to FormField.vue
+function addSuggestedTag(tag) {
+  // If modelValue is already an array, add to it
+  if (Array.isArray(modelValue.value)) {
+    // Only add if the tag doesn't already exist
+    if (!modelValue.value.includes(tag)) {
+      const newValue = [...modelValue.value, tag];
+      emit('update:modelValue', newValue);
+    }
+  } 
+  // If it's a string, parse it first
+  else if (typeof modelValue.value === 'string') {
+    const existingTags = modelValue.value 
+      ? modelValue.value.split(',').map(t => t.trim()).filter(Boolean) 
+      : [];
+    
+    // Only add if the tag doesn't already exist
+    if (!existingTags.includes(tag)) {
+      const newValue = [...existingTags, tag];
+      emit('update:modelValue', newValue.join(', '));
+    }
+  }
+  // If it's null or undefined, just set it directly
+  else {
+    emit('update:modelValue', tag);
+  }
+}
 function validateValue(value) {
   if (!props.validation) {
     error.value = ''

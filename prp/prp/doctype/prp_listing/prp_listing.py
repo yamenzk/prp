@@ -10,18 +10,19 @@ class PRPListing(Document):
     def validate(self):
         if self.project:
             self.developer = frappe.get_value("PRP Project", self.project, "developer") or None
-        if self.enable_secondhand_selling or self.enable_secondhand_renting:
-            self.availability = "Available for Secondhand"
-        else:
-            if self.availability == "Available for Secondhand":
-                frappe.throw("Availability cannot be set to 'Available for Secondhand' without enabling secondhand selling or renting")
-
+        if self.has_value_changed('enable_secondhand_selling') or self.has_value_changed('enable_secondhand_renting'):
+            if self.enable_secondhand_selling or self.enable_secondhand_renting:
+                self.availability = "Available for Secondhand"
+            else:
+                self.availability = "Sold"
+        
+    
     def on_update(self):
         if self.has_value_changed("availability") or self.has_value_changed("status"):
             update_hierarchies(self.building)
-        if self.has_value_changed("building") or self.has_value_changed("unit_id"):
-            new_name = f"{self.building}-{self.unit_id}"
-            frappe.rename_doc("PRP Listing", self.name, new_name)
+        # if self.has_value_changed("building") or self.has_value_changed("unit_id"):
+        #     new_name = f"{self.building}-{self.unit_id}"
+        #     frappe.rename_doc("PRP Listing", self.name, new_name)
 
 
 def get_field_stats(doctype, field, value, count_fields):

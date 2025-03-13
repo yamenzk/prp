@@ -17,3 +17,17 @@ class PRPProject(Document):
                         "PRP Project", {"territory": territory_doc.parent_territory}, "name"
                     )
                     self.parent_project = parent_project_name
+                    project_doc = frappe.get_doc("PRP Project", parent_project_name)
+                    self.town = project_doc.town
+                    self.suburb = project_doc.suburb
+                    self.city = project_doc.city
+            if territory_doc.parent_territory and not territory_doc.is_phase:
+                town_doc = frappe.get_doc("PRP Territory", territory_doc.parent_territory)
+                self.town = town_doc.name_en
+                if town_doc.parent_territory:
+                    suburb_doc = frappe.get_doc("PRP Territory", town_doc.parent_territory)
+                    self.suburb = suburb_doc.name_en
+                    if suburb_doc.parent_territory:
+                        city_doc = frappe.get_doc("PRP Territory", suburb_doc.parent_territory)
+                        self.city = city_doc.name_en
+                    

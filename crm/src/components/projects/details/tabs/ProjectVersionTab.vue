@@ -80,13 +80,10 @@
 						:class="{
 							'bg-[var(--pd-bg-base)] border-[var(--pd-border-medium)] shadow-md':
 								slotProps.item.isCreationEvent,
-							'bg-[var(--pd-info-bg)] dark:bg-opacity-15':
-								slotProps.item.sourceType === 'Building',
 							'bg-[var(--pd-success-bg)] dark:bg-opacity-15':
 								slotProps.item.sourceType === 'Project',
 						}"
 					>
-						<!-- Timeline content details here (omitted for brevity) -->
 						<div
 							class="flex items-center justify-between p-3 cursor-default transition-colors duration-200"
 							@click="toggleChanges(slotProps.item.id)"
@@ -98,14 +95,8 @@
 							<span
 								class="text-[0.8125rem] font-semibold text-[var(--pd-text-primary)]"
 							>
-								<span v-if="slotProps.item.sourceType === 'Building'" class="mr-1"
-									>🏢</span
-								>
 								<span v-if="slotProps.item.sourceType === 'Project'" class="mr-1"
 									>🏗️</span
-								>
-								<span v-if="slotProps.item.sourceType === 'Listing'" class="mr-1"
-									>🏠</span
 								>
 								{{ slotProps.item.action }}
 							</span>
@@ -165,11 +156,7 @@
 							slotProps.item.isCreationEvent ? 'w-7 h-7' : 'w-6 h-6',
 							{
 								'bg-[var(--pd-marker-special)]': slotProps.item.isCreationEvent,
-								'bg-[var(--pd-marker-bg)]':
-									!slotProps.item.isCreationEvent &&
-									slotProps.item.sourceType === 'Listing',
-								'bg-[var(--pd-info)]': slotProps.item.sourceType === 'Building',
-								'bg-[var(--pd-success)]': slotProps.item.sourceType === 'Project',
+								'bg-[var(--pd-success)]': !slotProps.item.isCreationEvent,
 							},
 						]"
 					>
@@ -231,7 +218,7 @@ import { useVersionStore } from '@/stores'
 import { format } from 'date-fns'
 
 const props = defineProps({
-	listing: {
+	project: {
 		type: Object,
 		required: true,
 	},
@@ -240,11 +227,11 @@ const props = defineProps({
 // Store references
 const versionStore = useVersionStore()
 const expanded = ref({})
-const combinedTimelineEvents = ref([])
+const timelineEvents = ref([])
 const isLoading = ref(false)
 const hasError = ref(false)
 const errorMessage = ref('')
-const lastLoadedListing = ref(null)
+const lastLoadedProject = ref(null)
 const debounceTimer = ref(null)
 
 // Toggle changes visibility
@@ -253,7 +240,7 @@ function toggleChanges(id) {
 }
 
 // Debounced function to load timeline data
-function debouncedLoadTimeline(listing) {
+function debouncedLoadTimeline(project) {
 	// Clear any existing timer
 	if (debounceTimer.value) {
 		clearTimeout(debounceTimer.value)
@@ -261,83 +248,45 @@ function debouncedLoadTimeline(listing) {
 
 	// Set a new timer
 	debounceTimer.value = setTimeout(() => {
-		loadCombinedTimeline(listing)
+		loadTimeline(project)
 	}, 300) // 300ms debounce
 }
 
-// Load the combined timeline for listing and related entities
-async function loadCombinedTimeline(listing) {
-	if (!listing || isLoading.value) return
+// Load the timeline for project
+async function loadTimeline(project) {
+	if (!project || isLoading.value) return
 
-	// If we already loaded this listing, don't reload
-	if (lastLoadedListing.value === listing.name) {
+	// If we already loaded this project, don't reload
+	if (lastLoadedProject.value === project.name) {
 		return
 	}
 
-	// Mark this listing as loaded
-	lastLoadedListing.value = listing.name
+	// Mark this project as loaded
+	lastLoadedProject.value = project.name
 
 	// Start loading
 	isLoading.value = true
-	combinedTimelineEvents.value = []
+	timelineEvents.value = []
 	hasError.value = false
 
 	try {
-		// 1. Load the listing document timeline
-		const listingTimeline = await versionStore.loadDocumentTimeline(
-			'PRP Listing',
-			listing.name,
+		// Load the project document timeline
+		const projectTimeline = await versionStore.loadDocumentTimeline(
+			'PRP Project',
+			project.name,
 		)
 
-		// Add all listing events to the combined timeline
-		combinedTimelineEvents.value.push(
-			...listingTimeline.map((event) => ({
-				...event,
-				sourceType: 'Listing',
-				sourceName: listing.name,
-			})),
-		)
+		// Add project events to the timeline
+		timelineEvents.value = projectTimeline.map((event) => ({
+			...event,
+			sourceType: 'Project',
+			sourceName: project.name,
+		}))
 
-		// 2. Load the building timeline if we have a building reference
-		if (listing.building) {
-			const buildingTimeline = await versionStore.loadDocumentTimeline(
-				'PRP Building',
-				listing.building,
-			)
-
-			// Add building events to the combined timeline
-			combinedTimelineEvents.value.push(
-				...buildingTimeline.map((event) => ({
-					...event,
-					content: `[Building: ${listing.building.substring(listing.project.length + 1)}] ${event.content}`,
-					sourceType: 'Building',
-					sourceName: listing.building,
-				})),
-			)
-		}
-
-		// 3. Load the project timeline if we have a project reference
-		if (listing.project) {
-			const projectTimeline = await versionStore.loadDocumentTimeline(
-				'PRP Project',
-				listing.project,
-			)
-
-			// Add project events to the combined timeline
-			combinedTimelineEvents.value.push(
-				...projectTimeline.map((event) => ({
-					...event,
-					content: `[Project: ${listing.project}] ${event.content}`,
-					sourceType: 'Project',
-					sourceName: listing.project,
-				})),
-			)
-		}
-
-		// 4. Sort all events by timestamp (newest first)
-		combinedTimelineEvents.value.sort((a, b) => b.timestamp - a.timestamp)
+		// Sort all events by timestamp (newest first)
+		timelineEvents.value.sort((a, b) => b.timestamp - a.timestamp)
 	} catch (error) {
-		console.error('Error loading combined timeline:', error)
+		console.error('Error loading project timeline:', error)
 		hasError.value = true
 		errorMessage.value = 'Failed to load history. Please try again.'
 	} finally {
@@ -350,7 +299,7 @@ const processedTimelineEvents = computed(() => {
 	const versionMap = new Map()
 	let idCounter = 0
 
-	combinedTimelineEvents.value.forEach((event) => {
+	timelineEvents.value.forEach((event) => {
 		// Create a unique key for this version (timestamp + user)
 		const versionKey = `${event.timestamp}-${event.user}`
 
@@ -391,43 +340,24 @@ const processedTimelineEvents = computed(() => {
 // Determine the action text based on the event
 function getActionText(event) {
 	if (event.content.includes('Created')) {
-		// Create just one clean creation message without duplicating
-		if (event.sourceType === 'Building') {
-			return 'Created building'
-		} else if (event.sourceType === 'Project') {
-			return 'Created project'
-		} else {
-			return 'Created listing'
-		}
+		return 'Created project'
 	} else if (event.icon === 'pi pi-plus') {
 		return 'Added content'
 	} else if (event.icon === 'pi pi-minus') {
 		return 'Removed content'
 	} else if (event.icon === 'pi pi-pencil') {
-		if (event.sourceType === 'Building') {
-			return 'Modified building'
-		} else if (event.sourceType === 'Project') {
-			return 'Modified project'
-		} else {
-			return 'Modified listing'
-		}
+		return 'Modified project'
 	} else {
-		if (event.sourceType === 'Building') {
-			return 'Updated building'
-		} else if (event.sourceType === 'Project') {
-			return 'Updated project'
-		} else {
-			return 'Updated listing'
-		}
+		return 'Updated project'
 	}
 }
 
-// Watch for listing changes but use deep comparison and debouncing
+// Watch for project changes but use deep comparison and debouncing
 watch(
-	() => props.listing,
-	(newListing) => {
-		if (newListing && newListing.name) {
-			debouncedLoadTimeline(newListing)
+	() => props.project,
+	(newProject) => {
+		if (newProject && newProject.name) {
+			debouncedLoadTimeline(newProject)
 		}
 	},
 	{ deep: true },
@@ -435,8 +365,8 @@ watch(
 
 // Initial load
 onMounted(() => {
-	if (props.listing && props.listing.name) {
-		debouncedLoadTimeline(props.listing)
+	if (props.project && props.project.name) {
+		debouncedLoadTimeline(props.project)
 	}
 })
 

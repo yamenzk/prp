@@ -36,6 +36,13 @@ const routes = [
 				props: true,
 				children: [
 					{
+						path: 'tab/:tabId',
+						name: 'ProjectTabDetails',
+						component: () =>
+							import('@/components/projects/details/ProjectDetails.vue'),
+						props: true,
+					},
+					{
 						path: 'buildings/:buildingId',
 						name: 'BuildingDetails',
 						component: () =>

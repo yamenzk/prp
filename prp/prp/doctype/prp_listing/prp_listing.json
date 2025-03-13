@@ -20,6 +20,8 @@
   "unit_price",
   "downpayment",
   "payment_plan",
+  "bedrooms",
+  "type",
   "section_break_gdrr",
   "offers",
   "column_break_dupe",
@@ -128,11 +130,23 @@
    "fieldtype": "Currency",
    "label": "Downpayment",
    "precision": "0"
+  },
+  {
+   "fieldname": "bedrooms",
+   "fieldtype": "Select",
+   "label": "Bedrooms",
+   "options": "\nStudio\n1-BR\n2-BR\n3-BR\n4-BR\n5-BR\n6-BR\n7-BR\n7+"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nFlat\nTownhouse\nVilla\nPenthouse"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-11 15:50:28.948389",
+ "modified": "2025-03-13 12:50:23.177941",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Listing",

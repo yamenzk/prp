@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "field:project_name",
+ "autoname": "hash",
  "creation": "2025-02-23 19:54:41.825893",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -10,6 +10,9 @@
   "project_amenities",
   "project_name",
   "cover_image",
+  "town",
+  "suburb",
+  "city",
   "column_break_fxwi",
   "handover_quarter",
   "handover_year",
@@ -96,15 +99,30 @@
    "fieldtype": "Link",
    "label": "Parent Project",
    "options": "PRP Project"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "town",
+   "fieldtype": "Data",
+   "label": "Town"
+  },
+  {
+   "fieldname": "suburb",
+   "fieldtype": "Data",
+   "label": "Suburb"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-10 13:01:45.052508",
+ "modified": "2025-03-13 14:37:21.980779",
  "modified_by": "Administrator",
  "module": "PRP",
  "name": "PRP Project",
- "naming_rule": "By fieldname",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

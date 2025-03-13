@@ -30,6 +30,19 @@ export function useFields() {
 			props: { mode: 'currency', currency: 'AED', locale: 'en-AE', class: 'w-full' },
 			displayFn: (value) => formatCurrency(value),
 		},
+		chips: {
+  component: 'AutoComplete',
+  props: { 
+    class: 'w-full',
+    multiple: true,
+    typeahead: false
+  },
+  displayFn: (value) => {
+    if (Array.isArray(value)) return value.join(', ');
+    if (typeof value === 'string') return value;
+    return '';
+  },
+},
 		date: {
 			component: 'DatePicker',
 			props: { class: 'w-full' },

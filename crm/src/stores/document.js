@@ -13,6 +13,10 @@ export const useDocumentStore = defineStore('documents', {
 
 		// Filters state
 		filters: {},
+
+		// Cache for document room queries
+		documentRoomCache: {},
+		cacheDuration: 60000, // Cache entries valid for 1 minute
 	}),
 
 	getters: {
@@ -94,6 +98,8 @@ export const useDocumentStore = defineStore('documents', {
 						// Document was added or deleted, reload full list
 						console.log('Detected list change (add/delete), reloading document list')
 						this.refetchDocuments()
+						// Clear the cache when documents are updated
+						this.clearDocumentRoomCache()
 					} else if (data.event === 'doc_update') {
 						// Single document was updated
 						console.log(`Detected document update for ${data.doc}`)
@@ -105,9 +111,16 @@ export const useDocumentStore = defineStore('documents', {
 
 						// Also refresh the list to show updated data
 						this.refetchDocuments()
+						// Clear the cache when documents are updated
+						this.clearDocumentRoomCache()
 					}
 				}
 			})
+		},
+
+		// Clear all cache entries
+		clearDocumentRoomCache() {
+			this.documentRoomCache = {}
 		},
 
 		// Refetch documents when notified of changes
@@ -242,7 +255,8 @@ export const useDocumentStore = defineStore('documents', {
 
 			try {
 				const result = await this.documentList.insert.submit(documentData)
-				// Server will send realtime update that will trigger refetch
+				// Clear cache since documents have changed
+				this.clearDocumentRoomCache()
 				return result
 			} catch (error) {
 				console.error('Error creating document:', error)
@@ -266,7 +280,8 @@ export const useDocumentStore = defineStore('documents', {
 					...data,
 				})
 
-				// Server will send realtime update that will trigger refetch
+				// Clear cache since documents have changed
+				this.clearDocumentRoomCache()
 				return result
 			} catch (error) {
 				console.error(`Error updating document ${name}:`, error)
@@ -293,6 +308,8 @@ export const useDocumentStore = defineStore('documents', {
 					this.currentDocumentResource = null
 				}
 
+				// Clear cache since documents have changed
+				this.clearDocumentRoomCache()
 				// Server will send realtime update that will trigger refetch
 			} catch (error) {
 				console.error(`Error deleting document ${name}:`, error)
@@ -330,6 +347,9 @@ export const useDocumentStore = defineStore('documents', {
 				rel_docname: docname,
 			})
 
+			// Clear the cache for this room
+			this.clearRoomCache(doctype, docname)
+
 			// Update the document
 			return this.updateDocument(documentName, { rooms })
 		},
@@ -355,6 +375,8 @@ export const useDocumentStore = defineStore('documents', {
 
 			// Only update if we actually removed something
 			if (updatedRooms.length !== rooms.length) {
+				// Clear the cache for this room
+				this.clearRoomCache(doctype, docname)
 				return this.updateDocument(documentName, { rooms: updatedRooms })
 			}
 
@@ -369,6 +391,15 @@ export const useDocumentStore = defineStore('documents', {
 			if (!doctype || !docname) {
 				console.log('Invalid parameters for findDocumentsInRoom:', { doctype, docname })
 				return []
+			}
+
+			// Create a cache key from doctype and docname
+			const cacheKey = `${doctype}/${docname}`
+
+			// Check if we have a valid cached response
+			const cachedData = this.documentRoomCache[cacheKey]
+			if (cachedData && Date.now() - cachedData.timestamp < this.cacheDuration) {
+				return cachedData.documents
 			}
 
 			console.log(`Finding documents for ${doctype}/${docname}`)
@@ -390,12 +421,19 @@ export const useDocumentStore = defineStore('documents', {
 				}
 
 				const result = await response.json()
+				const documents = result.message.documents || []
+
 				console.log(
-					`Found ${result.message.documents?.length || 0} documents for ${doctype}/${docname} using API`,
+					`Found ${documents.length} documents for ${doctype}/${docname} using API`,
 				)
 
-				// Return the documents
-				return result.message.documents || []
+				// Store in cache with timestamp
+				this.documentRoomCache[cacheKey] = {
+					documents,
+					timestamp: Date.now(),
+				}
+
+				return documents
 			} catch (error) {
 				console.error(`Error finding documents for ${doctype}/${docname}:`, error)
 
@@ -404,7 +442,7 @@ export const useDocumentStore = defineStore('documents', {
 					await this.fetchDocuments()
 
 					// Filter documents client-side
-					return this.documents.filter((doc) => {
+					const documents = this.documents.filter((doc) => {
 						if (!doc.rooms || !Array.isArray(doc.rooms)) {
 							return false
 						}
@@ -413,9 +451,25 @@ export const useDocumentStore = defineStore('documents', {
 							(room) => room.rel_doctype === doctype && room.rel_docname === docname,
 						)
 					})
+
+					// Even for fallback results, cache them
+					this.documentRoomCache[cacheKey] = {
+						documents,
+						timestamp: Date.now(),
+					}
+
+					return documents
 				}
 
 				return []
+			}
+		},
+
+		// Clear the cache for a specific room
+		clearRoomCache(doctype, docname) {
+			const cacheKey = `${doctype}/${docname}`
+			if (this.documentRoomCache[cacheKey]) {
+				delete this.documentRoomCache[cacheKey]
 			}
 		},
 

@@ -9,6 +9,8 @@
 			:note-type-to-create="noteTypeToCreate"
 			@update:context="handleContextChange"
 		/>
+		<!-- Map Dialog integration with proper two-way binding -->
+		<MapDialog v-model:visible="showMapDialog" @close="showMapDialog = false" />
 		<AppDock @open-notes="openNotesDialog" />
 	</div>
 </template>
@@ -19,6 +21,7 @@ import { useRoute } from 'vue-router'
 import { globalStore } from '@/stores/global'
 import NotesDialog from '@/apps/notes/NotesDialog.vue'
 import AppDock from '@/components/layout/AppDock.vue'
+import MapDialog from '@/apps/map/MapDialog.vue'
 const store = globalStore()
 
 // State for NotesDialog
@@ -31,6 +34,9 @@ const currentContext = ref({
 // New refs for enhanced functionality
 const noteToOpen = ref(null)
 const noteTypeToCreate = ref(null)
+
+// State for MapDialog
+const showMapDialog = ref(false)
 
 // Initialize route
 const route = useRoute()
@@ -169,6 +175,16 @@ onMounted(() => {
 		setContext: setNotesContext,
 		openNote: openSpecificNote,
 		createWithType: createNoteWithType,
+	})
+
+	// Provide map dialog API for global use
+	provide('mapDialog', {
+		open: () => {
+			showMapDialog.value = true
+		},
+		close: () => {
+			showMapDialog.value = false
+		},
 	})
 
 	// Mount the dialog after setup is complete

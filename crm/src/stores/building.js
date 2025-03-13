@@ -334,5 +334,27 @@ export const useBuildingStore = defineStore('buildings', {
 				throw error
 			}
 		},
+
+		// Fetch ALL buildings without any filters
+		async fetchAllBuildings() {
+			try {
+				if (!this.buildingList) {
+					this.initBuildingList()
+				}
+
+				// First reset any existing filters
+				this.filters = {}
+				this.buildingList.update({
+					filters: {},
+					pageLength: 100, // Increase page size to get more buildings at once
+				})
+
+				await this.buildingList.reload()
+				return this.buildings
+			} catch (error) {
+				console.error('Error fetching all buildings:', error)
+				return []
+			}
+		},
 	},
 })
